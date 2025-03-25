@@ -302,7 +302,6 @@ def server(input, output, session):
             updated_config[col]["position"] = input[f"position_{col}"]() or 100
 
         var_config.set(updated_config)  # Update stored config
-        group_var.set(input.group_variable())  # Update grouping variable
 
     # Set Grouping Variable for analysis
     @output
@@ -311,8 +310,12 @@ def server(input, output, session):
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
             return
-        return ui.input_select("grouping_var", "Select Grouping Variable", df.columns)
+        return ui.input_select("grouping_var", "Select Grouping Variable", df.columns, selected=df.columns[0])
 
+    @reactive.event(input.grouping_var)
+    def update_group_var():
+        group_var.set(input.grouping_var())
+        
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.event(input.calculate)
     def calculate_statistical_analysis():
