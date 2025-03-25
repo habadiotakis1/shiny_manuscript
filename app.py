@@ -223,8 +223,10 @@ def server(input, output, session):
         })
         decimal_places.set(input.decimals())
         output_format.set(input.output_format())
-        ui.update_select("group_var", data.get().columns.tolist())
-
+        df = data.get()
+        if df is not None or isinstance(df, pd.DataFrame) or df.empty == False:  
+            ui.update_select("group_var", df.columns.tolist())
+        
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
     def var_settings():
