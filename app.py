@@ -19,13 +19,24 @@ import pickle
 # set default and alternative statistical tests
 default_tests = {
     "Omit": "Omit",
+    "Categorical (Y/N)": "Fisher's Exact Test",
     "Categorical (Dichotomous)": "Fisher's Exact Test",
     "Categorical (Multinomial)": "Fisher's Exact Test",
     "Ratio Continuous": "T-Test",
     "Ordinal Discrete": "Wilcoxon Rank Sum Test",
 }
 
+default_aggregation = {
+    "Omit": "Omit",
+    "Categorical (Y/N)": "sum",
+    "Categorical (Dichotomous)": "sum",
+    "Categorical (Multinomial)": "sum",
+    "Ratio Continuous": "mean",
+    "Ordinal Discrete": "average",
+}
+
 alternative_tests = {
+    "Categorical (Y/N)": "Chi-Square Test",
     "Categorical (Dichotomous)": "Chi-Square Test",
     "Categorical (Multinomial)": "Chi-Square Test",
     "Ratio Continuous": "Mann-Whitney Test",
@@ -63,8 +74,42 @@ def run_statistical_test(df, group_var, test_type, var_name):
     
     return p_value
 
+# Function to perform aggregation analysis based on the variable type
+def perform_aggregate_analysis(df, var_type, column_name, decimal_places):
+    if var_type == "Omit":
+        return None
+    
+    # Default result structure
+    result = {}
+
+    if var_type == "Categorical (Y/N)" or var_type == "Categorical (Dichotomous)":
+        # Aggregate: Sum the binary outcomes (e.g., 1 for "Yes", 0 for "No")
+        result["aggregate"] = df[column_name].sum()  # Count the 'Yes' values (or 1 values)
+        result["percentage"] = round(df[column_name].mean() * 100, decimal_places)  # Percentage of 'Yes' (or 1) values
+
+    elif var_type == "Categorical (Multinomial)":
+        # Aggregate: Count occurrences of each category
+        counts = df[column_name].value_counts()
+        result["aggregate"] = counts.to_dict()
+        result["by_group"] = {category: (count, round(count / len(df) * 100,decimal_places)) for category, count in counts.items()}
+
+    elif var_type == "Ratio Continuous":
+        # Aggregate: Mean and Standard Deviation
+        result["aggregate"] = round(df[column_name].mean(),decimal_places)
+        result["standard_dev"] = round(df[column_name].std(),decimal_places)
+
+    elif var_type == "Ordinal Discrete":
+        # Aggregate: Median and Interquartile Range (IQR)
+        result["aggregate"] = df[column_name].median()
+        result["interquartile_range"] = [
+            df[column_name].quantile(0.25),  # 1st quartile (Q1)
+            df[column_name].quantile(0.75),  # 3rd quartile (Q3)
+        ]
+    
+    return result
+
 # create stylized microsoft word table
-def create_scientific_table(title, headers, data: pd.DataFrame, filename):
+def create_scientific_table(title, headers, data: pd.DataFrame, group_var, var_config):
     doc = Document()
     
     # Add title
@@ -94,8 +139,9 @@ def create_scientific_table(title, headers, data: pd.DataFrame, filename):
         for col_idx, value in enumerate(row_data):
             table.cell(row_idx, col_idx).text = str(value)
     
-    doc.save(filename)
-    print(f"Table saved as {filename}")
+    clean_title = re.sub(r'\W+', '', title)
+    doc.save(clean_title + ".docx")
+    print(f"Table saved as {clean_title}.docx")
 
 # Save configuration to a .pkl file
 def save_config(config, filename="config.pkl"):
@@ -136,22 +182,23 @@ app_ui = ui.page_fluid(
     # Variable Selection UI (dynamically generated)
     ui.output_ui("var_settings"),
     
-    # Grouping Variable
+    # Grouping Variable (dynamically generated)
     ui.output_ui("group_variable"),
     
     # Formatting Options
-    ui.input_numeric("decimals", "Decimals for values", 2, min=0, max=5),
+    ui.input_numeric("decimals", "Number of Decimal Places", 2, min=0, max=5),
     ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"]),
     
     # Calculate
     ui.input_action_button("calculate", "Calculate "),
     
+    # Download Button
+    ui.download_button("download_table", "Download Formatted Table"),
+
     # Save Configuration
     ui.input_action_button("save_config", "Save Configuration"),
     ui.input_action_button("load_config", "Load Configuration"),
     
-    # Download Button
-    ui.download_button("download_table", "Download Formatted Table")
 )
 
 ################################################################################
@@ -161,16 +208,20 @@ def server(input, output, session):
     data = reactive.Value({})  # Store uploaded data
     var_config = reactive.Value({})  # Store variable settings dynamically
     subheadings = reactive.Value({})  # Store subheadings
-    config = {}  # Store bookmarked configurations
+    group_var = reactive.Value(None)  # Store grouping variable
+    decimal_places = reactive.Value(None)
+    output_format = reactive.Value(None)
 
     @reactive.effect
-    def save_subheadings():
+    def save_configurations():
         subheadings.set({
             1: input.subheading_1(),
             2: input.subheading_2(),
             3: input.subheading_3(),
             4: input.subheading_4()
         })
+        decimal_places.set(input.decimals())
+        output_format.set(input.output_format())
 
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
@@ -199,6 +250,7 @@ def server(input, output, session):
                     "rename": col, 
                     "subheading": "None",
                     "position": default_position,
+                    "p_value": None,
                 } for col in columns})
 
             return ui.layout_column_wrap(
@@ -258,15 +310,63 @@ def server(input, output, session):
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
             return
-
         return ui.input_select("group_var", "Select Grouping Variable", df.columns)
 
+    # Perform statistical analysis when the "Calculate" button is clicked
+    @reactive.event(input.calculate)
+    def calculate_statistical_analysis():
+        df = data.get()
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+            return
+        
+        try:
+            group_var = input.group_var()  # Get the selected grouping column
+            decimal_places = input.decimals()
+            output_format = input.output_format()
+
+            # Check if grouping column is selected
+            if group_var and decimal_places and output_format:
+                updated_config = var_config.get()
+                
+                # Perform statistical analysis using the grouping variable
+                for col in df.columns:
+                    test_type = var_config.get()[col]["type"]
+                    
+                    if test_type != "Omit":
+                        p_value = run_statistical_test(df, group_var, test_type, col, decimal_places, output_format)
+                        # Store the p-value in the var_config dictionary
+                        updated_config[col]["p_value"] = p_value
+                        print(f"Column: {col}, Grouping Variable: {group_var}, p-value: {p_value}")
+
+                        # Perform aggregate analysis and update var_config with the results
+                        aggregate_result = perform_aggregate_analysis(df, test_type, col, decimal_places.get())
+                        if aggregate_result:
+                            updated_config[col].update(aggregate_result)
+
+                var_config.set(updated_config)
+                    
+        except:
+            return
+
+    # Download Button - Trigger to save table in .docx format
+    @reactive.event(input.download_table)
+    def download_table():
+        df = data.get()
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+            return
+        
+        create_scientific_table(input.table_name, subheadings.get(), data.get(), group_var.get(), var_config.get())
+        clean_title = re.sub(r'\W+', '', input.table_name)
+        df.to_csv(f"{clean_title}.csv", index=False)
+        return f"{clean_title}.csv"
+    
     # Save Configuration Button - Trigger to save settings
     @reactive.event(input.save_config)
     def save_configuration():
         config_to_save = {
             "var_config": var_config.get(),
-            "subheadings": subheadings.get()
+            "subheadings": subheadings.get(),
+            "group_var": group_var.get()
         }
         save_config(config_to_save)  # Save the config to a file
         return "Configuration saved!"
@@ -279,18 +379,8 @@ def server(input, output, session):
         if config:
             var_config.set(config["var_config"])
             subheadings.set(config["subheadings"])
+            group_var.set(config["group_var"])
             return "Configuration loaded!"
         return "No saved configuration found."
-    
-    # Download Button - Trigger to save table in .docx format
-    @reactive.event(input.download_table)
-    def download_table():
-        df = data.get()
-        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-            return
-        
-        create_scientific_table(input.table_name, input.subheadings, data['df'], input.table_name+".docx")
-        df.to_csv("formatted_table_separate.csv", index=False)
-        return "formatted_table.csv"
 
 app = App(app_ui, server)
