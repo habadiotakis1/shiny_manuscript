@@ -183,7 +183,8 @@ app_ui = ui.page_fluid(
     ui.output_ui("var_settings"),
     
     # Grouping Variable (dynamically generated)
-    ui.output_ui("group_var"),
+    # ui.output_ui("output_group_var"),
+    ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
 
     # Formatting Options
     ui.input_numeric("decimals", "Number of Decimal Places", 2, min=0, max=5),
