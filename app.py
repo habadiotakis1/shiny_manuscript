@@ -285,7 +285,7 @@ def server(input, output, session):
         return "No saved configuration found."
     
     # Download Button - Trigger to save table in .docx format
-    @session.download()
+    @render.download()
     def download_table():
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
