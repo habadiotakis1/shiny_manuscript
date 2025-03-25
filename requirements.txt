@@ -5,4 +5,4 @@ plotly
 pandas
 ridgeplot
 scipy
-docx
+python-docx
