@@ -6,4 +6,3 @@ pandas
 ridgeplot
 scipy
 docx
-exceptions
