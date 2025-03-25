@@ -4,8 +4,6 @@ shinywidgets
 plotly
 pandas
 ridgeplot
-os
-io
 re
 scipy
 docx
