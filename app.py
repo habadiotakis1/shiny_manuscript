@@ -215,7 +215,7 @@ def server(input, output, session):
     # Update variable settings dynamically when inputs change
     @reactive.effect
     def update_var_config():
-        if not input.data_file():
+        if not data.get():
             return
 
         df = data.get()
@@ -233,7 +233,7 @@ def server(input, output, session):
     @render.ui
     # @reactive.event(input.data_file)
     def group_variable():
-        if not input.data_file():
+        if not data.get():
             return
 
         df = data.get()
@@ -241,7 +241,7 @@ def server(input, output, session):
 
     @session.download()
     def download_table():
-        if "df" not in data:
+        if not data.get():
             return "No data available."
         
         df = data.get()
