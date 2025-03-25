@@ -151,8 +151,7 @@ def server(input, output, session):
         })
 
     @output
-    @render.ui
-    @reactive.event(input.data_file)
+    @reactive.effect
     def var_settings():
         if input.data_file():
             file_info = input.data_file()[0]
@@ -206,7 +205,7 @@ def server(input, output, session):
                         f"position_{col}",
                         "Assign Position under Subheading", 
                         [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-                        # selected=100,
+                        selected=100,
                     ),
                 )
                 for col in columns
@@ -225,10 +224,10 @@ def server(input, output, session):
         for col in df.columns:
             logging.debug(f"var_type_{col}")
             logging.debug(type(f"var_type_{col}"))
-            updated_config[col]["type"] = input[f"var_type_{col}"]() #input.get(f"var_type_{col}") #or "Omit"
-            updated_config[col]["rename"] = input[f"rename_{col}"]() #input.get(f"rename_{col}") #or col
-            updated_config[col]["subheading"] = input[f"subheading_{col}"]() #input.get(f"subheading_{col}") #or "None"
-            updated_config[col]["position"] = input[f"position_{col}"]() #input.get(f"position_{col}") #or 100
+            updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
+            updated_config[col]["rename"] = input[f"rename_{col}"]() or col
+            updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "None"
+            updated_config[col]["position"] = input[f"position_{col}"]() or 100
 
         var_config.set(updated_config)  # Update stored config
 
