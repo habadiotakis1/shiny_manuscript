@@ -183,7 +183,7 @@ app_ui = ui.page_fluid(
     ui.output_ui("var_settings"),
     
     # Grouping Variable (dynamically generated)
-    ui.output_ui("group_variable"),
+    ui.output_ui("group_var"),
 
     # Formatting Options
     ui.input_numeric("decimals", "Number of Decimal Places", 2, min=0, max=5),
@@ -253,6 +253,13 @@ def server(input, output, session):
                     "p_value": None,
                 } for col in columns})
 
+            # Output grouping variable selection UI dynamically
+            output_group_var = ui.input_select(
+                "group_var", 
+                "Select Grouping Variable", 
+                choices=columns
+            )
+
             return ui.layout_column_wrap(
             *[
                 ui.card(
@@ -286,6 +293,11 @@ def server(input, output, session):
             width=1 / 2, # Each card takes up half the row
         )
     
+    # Store the selected grouping variable as a reactive value
+    @reactive.effect
+    def update_group_var():
+        group_var.set(input.group_var())
+
     # Update variable settings dynamically when inputs change
     @reactive.effect
     def update_var_config():
@@ -303,14 +315,14 @@ def server(input, output, session):
 
         var_config.set(updated_config)  # Update stored config
 
-    # Set Grouping Variable for analysis
-    @output
-    @render.ui
-    def group_variable():
-        df = data.get()
-        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-            return
-        return ui.input_select("grouping_var", "Select Grouping Variable", df.columns, selected=df.columns[0])
+    # # Set Grouping Variable for analysis
+    # @output
+    # @render.ui
+    # def group_variable():
+    #     df = data.get()
+    #     if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+    #         return
+    #     return ui.input_select("grouping_var", "Select Grouping Variable", df.columns, selected=df.columns[0])
 
     @reactive.event(input.grouping_var)
     def update_group_var():
