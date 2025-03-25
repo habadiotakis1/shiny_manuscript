@@ -151,6 +151,8 @@ def server(input, output, session):
         })
 
     @output
+    @render.ui
+    @reactive.event(input.data_file)
     @reactive.effect
     def var_settings():
         if input.data_file():
@@ -209,7 +211,8 @@ def server(input, output, session):
                     ),
                 )
                 for col in columns
-            ]
+            ],
+            width=1 / 2, # Each card takes up half the row
         )
     
     # Update variable settings dynamically when inputs change
@@ -233,7 +236,7 @@ def server(input, output, session):
 
     @output
     @render.ui
-    # @reactive.event(input.data_file)
+    @reactive.effect
     def group_variable():
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
