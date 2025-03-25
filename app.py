@@ -202,7 +202,6 @@ def server(input, output, session):
                 } for col in columns})
 
             return ui.layout_column_wrap(
-            2,  # Display two cards per row
             *[
                 ui.card(
                     ui.h5(col),  # Column name title
@@ -275,7 +274,8 @@ def server(input, output, session):
     # Load Configuration Button - Trigger to load saved settings
     @reactive.event(input.load_config)
     def load_configuration():
-        config = load_config()  # Load the config from a file
+        ui.input_file("config_file", "Upload pkl file", accept=[".pkl"])
+        config = load_config(input.config_file)  # Load the config from a file
         if config:
             var_config.set(config["var_config"])
             subheadings.set(config["subheadings"])
