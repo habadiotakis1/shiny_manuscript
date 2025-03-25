@@ -140,15 +140,14 @@ def server(input, output, session):
     # data = {}  # Store uploaded data
     # config = {}  # Store bookmarked configurations
 
-    # Save subheadings
     @reactive.effect
     def save_subheadings():
-        data["subheadings"] = {
+        subheadings.set({
             1: input.subheading_1(),
             2: input.subheading_2(),
             3: input.subheading_3(),
             4: input.subheading_4()
-        }
+        })
 
     @output
     @render.ui
