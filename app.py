@@ -165,7 +165,6 @@ def server(input, output, session):
             data.set(df)  # Store data in reactive value
             columns = df.columns.tolist()  # Get column names
             columns = [re.sub(r'\W+', '', col) for col in columns]
-  
 
             subheading_options = ["None"] + [s for s in data["subheadings"].values() if s]
             default_type = "Omit"
@@ -180,20 +179,6 @@ def server(input, output, session):
                     "position": default_position,
                 } for col in columns})
 
-            # if "var_config" not in data:
-            #     data["var_config"] = {col: {
-            #         "type": default_type, 
-            #         "rename": col, 
-            #         "subheading": "None",
-            #         "position": default_position,
-                # } for col in columns}
-
-            # def update_var_config(col):
-            #     data["var_config"][col]["type"] = input.get(f"var_type_{col}", default_type)
-            #     data["var_config"][col]["rename"] = input.get(f"rename_{col}", col)
-            #     data["var_config"][col]["subheading"] = input.get(f"subheading_{col}", "None")
-            #     data["var_config"][col]["position"] = input.get(f"position_{col}", default_position)
-
             return ui.layout_column_wrap(
             2,  # Display two cards per row
             *[
@@ -203,23 +188,24 @@ def server(input, output, session):
                         f"var_type_{col}",
                         "Variable Type",
                         variable_types,
-                        selected=data["var_config"][col]["type"],
+                        selected=var_config.get()[col]["type"],
                     ),
                     ui.input_text(
                         f"rename_{col}",
                         "Rename Column",
-                        value=data["var_config"][col]["rename"],
+                        value=var_config.get()[col]["rename"],
                     ),
                     ui.input_select(
                         f"subheading_{col}",
                         "Assign Subheading", 
                         subheading_options, 
-                        selected="None",
+                        selected=var_config.get()[col]["subheading"]
                     ),
                     ui.input_select(
                         f"position_{col}",
                         "Assign Position under Subheading", 
-                        [i for i in range(20)], 
+                        [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+                        selected=100,
                     ),
                 )
                 for col in columns
