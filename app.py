@@ -215,10 +215,10 @@ def server(input, output, session):
     # Update variable settings dynamically when inputs change
     @reactive.effect
     def update_var_config():
-        if data.get() is None or data.get().empty:
-            return
-
         df = data.get()
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+            return
+        
         updated_config = var_config.get()
 
         for col in df.columns:
@@ -233,19 +233,18 @@ def server(input, output, session):
     @render.ui
     # @reactive.event(input.data_file)
     def group_variable():
-        if data.get() is None or data.get().empty:
-            return
-
         df = data.get()
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+            return
+        
         return ui.input_select("group_var", "Select Grouping Variable", df.columns)
 
     @session.download()
     def download_table():
-        if data.get() is None or data.get().empty:
-            return "No data available."
-        
         df = data.get()
-
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+            return
+        
         create_scientific_table(input.table_name, input.subheadings, data['df'], input.table_name+".docx")
         df.to_csv("formatted_table_separate.csv", index=False)
         return "formatted_table.csv"
