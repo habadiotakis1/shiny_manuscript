@@ -233,8 +233,7 @@ def server(input, output, session):
         var_config.set(updated_config)  # Update stored config
 
     @output
-    @render.ui
-    @reactive.effect
+    @render.ui #@reactive.effect
     def group_variable():
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
