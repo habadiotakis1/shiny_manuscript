@@ -166,7 +166,7 @@ def server(input, output, session):
             columns = df.columns.tolist()  # Get column names
             columns = [re.sub(r'\W+', '', col) for col in columns]
 
-            subheading_options = ["None"] + [s for s in data["subheadings"].values() if s]
+            subheading_options = ["None"] + [s for s in subheadings.get().values() if s]
             default_type = "Omit"
             default_position = 100
 
@@ -240,7 +240,8 @@ def server(input, output, session):
     def download_table():
         if "df" not in data:
             return "No data available."
-        df = data["df"]
+        
+        df = data.get()
 
         create_scientific_table(input.table_name, input.subheadings, data['df'], input.table_name+".docx")
         df.to_csv("formatted_table_separate.csv", index=False)
