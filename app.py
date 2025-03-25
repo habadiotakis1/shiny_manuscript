@@ -257,7 +257,6 @@ def server(input, output, session):
             # Output grouping variable selection UI dynamically
             ui.update_select(
                 "group_var", 
-                "Select Grouping Variable", 
                 choices=columns
             )
 
