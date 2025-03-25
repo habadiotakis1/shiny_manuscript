@@ -222,10 +222,10 @@ def server(input, output, session):
         updated_config = var_config.get()
 
         for col in df.columns:
-            updated_config[col]["type"] = input.get(f"var_type_{col}", "Omit")
-            updated_config[col]["rename"] = input.get(f"rename_{col}", col)
-            updated_config[col]["subheading"] = input.get(f"subheading_{col}", "None")
-            updated_config[col]["position"] = input.get(f"position_{col}", 100)
+            updated_config[col]["type"] = input.get(f"var_type_{col}") or "Omit"
+            updated_config[col]["rename"] = input.get(f"rename_{col}" or col
+            updated_config[col]["subheading"] = input.get(f"subheading_{col}") or "None"
+            updated_config[col]["position"] = input.get(f"position_{col}" or 100
 
         var_config.set(updated_config)  # Update stored config
 
