@@ -14,7 +14,7 @@ from docx import Document
 from docx.shared import Pt
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
-import logging 
+import pickle
 
 # set default and alternative statistical tests
 default_tests = {
@@ -97,7 +97,27 @@ def create_scientific_table(title, headers, data: pd.DataFrame, filename):
     doc.save(filename)
     print(f"Table saved as {filename}")
 
+# Save configuration to a .pkl file
+def save_config(config, filename="config.pkl"):
+    with open(filename, "wb") as f:
+        pickle.dump(config, f)
+    print(f"Configuration saved as {filename}")
 
+# Load configuration from a .pkl file
+def load_config(filename="config.pkl"):
+    try:
+        with open(filename, "rb") as f:
+            config = pickle.load(f)
+        return config
+    except FileNotFoundError:
+        print("No saved configuration found.")
+        return None
+    
+
+
+################################################################################
+######################### Shiny App Layout #####################################
+################################################################################
 app_ui = ui.page_fluid(
     ui.panel_title("✨ Shiny Manuscript Table Generator ✨"),
     
@@ -134,12 +154,14 @@ app_ui = ui.page_fluid(
     ui.download_button("download_table", "Download Formatted Table")
 )
 
+################################################################################
+######################### Shiny App Server #####################################
+################################################################################
 def server(input, output, session):
     data = reactive.Value({})  # Store uploaded data
     var_config = reactive.Value({})  # Store variable settings dynamically
     subheadings = reactive.Value({})  # Store subheadings
-    # data = {}  # Store uploaded data
-    # config = {}  # Store bookmarked configurations
+    config = {}  # Store bookmarked configurations
 
     @reactive.effect
     def save_subheadings():
@@ -223,8 +245,6 @@ def server(input, output, session):
         updated_config = var_config.get()
 
         for col in df.columns:
-            logging.debug(f"var_type_{col}")
-            logging.debug(type(f"var_type_{col}"))
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
             updated_config[col]["rename"] = input[f"rename_{col}"]() or col
             updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "None"
@@ -232,15 +252,39 @@ def server(input, output, session):
 
         var_config.set(updated_config)  # Update stored config
 
-    # @output
-    # @reactive.effect
-    # def group_variable():
-    #     df = data.get()
-    #     if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-    #         return
-        
-    #     return ui.input_select("group_var", "Select Grouping Variable", df.columns)
+    # Set Grouping Variable for analysis
+    @output
+    @render.ui
+    def group_variable():
+        df = data.get()
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+            return
 
+        return ui.input_select("group_var", "Select Grouping Variable", df.columns)
+
+    # Save Configuration Button - Trigger to save settings
+    @output
+    @reactive.event(input.save_config)
+    def save_configuration():
+        config_to_save = {
+            "var_config": var_config.get(),
+            "subheadings": subheadings.get()
+        }
+        save_config(config_to_save)  # Save the config to a file
+        return "Configuration saved!"
+
+    # Load Configuration Button - Trigger to load saved settings
+    @output
+    @reactive.event(input.load_config)
+    def load_configuration():
+        config = load_config()  # Load the config from a file
+        if config:
+            var_config.set(config["var_config"])
+            subheadings.set(config["subheadings"])
+            return "Configuration loaded!"
+        return "No saved configuration found."
+    
+    # Download Button - Trigger to save table in .docx format
     @session.download()
     def download_table():
         df = data.get()
