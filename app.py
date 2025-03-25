@@ -263,7 +263,6 @@ def server(input, output, session):
         return ui.input_select("group_var", "Select Grouping Variable", df.columns)
 
     # Save Configuration Button - Trigger to save settings
-    @output
     @reactive.event(input.save_config)
     def save_configuration():
         config_to_save = {
@@ -274,7 +273,6 @@ def server(input, output, session):
         return "Configuration saved!"
 
     # Load Configuration Button - Trigger to load saved settings
-    @output
     @reactive.event(input.load_config)
     def load_configuration():
         config = load_config()  # Load the config from a file
@@ -285,7 +283,6 @@ def server(input, output, session):
         return "No saved configuration found."
     
     # Download Button - Trigger to save table in .docx format
-    @output
     @reactive.event(input.download_table)
     def download_table():
         df = data.get()
