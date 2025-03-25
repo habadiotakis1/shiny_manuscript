@@ -233,8 +233,11 @@ def server(input, output, session):
     @render.ui
     # @reactive.event(input.data_file)
     def group_variable():
-        if "df" in data:
-            return ui.input_select("group_var", "Select Grouping Variable", data["df"].columns)
+        if not input.data_file():
+            return
+
+        df = data.get()
+        return ui.input_select("group_var", "Select Grouping Variable", df.columns)
 
     @session.download()
     def download_table():
