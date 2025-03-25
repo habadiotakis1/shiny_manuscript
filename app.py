@@ -208,7 +208,7 @@ def server(input, output, session):
     data = reactive.Value({})  # Store uploaded data
     var_config = reactive.Value({})  # Store variable settings dynamically
     subheadings = reactive.Value({})  # Store subheadings
-    group_variable = reactive.Value(None)  # Store grouping variable
+    group_var = reactive.Value(None)  # Store grouping variable
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
 
@@ -302,7 +302,7 @@ def server(input, output, session):
             updated_config[col]["position"] = input[f"position_{col}"]() or 100
 
         var_config.set(updated_config)  # Update stored config
-        group_variable.set(input.grouping_var())  # Update grouping variable
+        group_var.set(input.group_variable())  # Update grouping variable
 
     # Set Grouping Variable for analysis
     @output
