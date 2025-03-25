@@ -14,6 +14,7 @@ from docx import Document
 from docx.shared import Pt
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+import logging 
 
 # set default and alternative statistical tests
 default_tests = {
@@ -222,10 +223,12 @@ def server(input, output, session):
         updated_config = var_config.get()
 
         for col in df.columns:
-            updated_config[col]["type"] = input.get(f"var_type_{col}") #or "Omit"
-            updated_config[col]["rename"] = input.get(f"rename_{col}") #or col
-            updated_config[col]["subheading"] = input.get(f"subheading_{col}") #or "None"
-            updated_config[col]["position"] = input.get(f"position_{col}") #or 100
+            logging.debug(f"var_type_{col}")
+            logging.debug(type(f"var_type_{col}"))
+            updated_config[col]["type"] = input[f"var_type_{col}"]() #input.get(f"var_type_{col}") #or "Omit"
+            updated_config[col]["rename"] = input[f"rename_{col}"]() #input.get(f"rename_{col}") #or col
+            updated_config[col]["subheading"] = input[f"subheading_{col}"]() #input.get(f"subheading_{col}") #or "None"
+            updated_config[col]["position"] = input[f"position_{col}"]() #input.get(f"position_{col}") #or 100
 
         var_config.set(updated_config)  # Update stored config
 
