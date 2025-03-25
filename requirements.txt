@@ -6,3 +6,4 @@ pandas
 ridgeplot
 scipy
 python-docx
+docx
