@@ -188,7 +188,7 @@ def server(input, output, session):
                         f"var_type_{col}",
                         "Variable Type",
                         variable_types,
-                        selected=var_config.get()[col]["type"],
+                        # selected=var_config.get()[col]["type"],
                     ),
                     ui.input_text(
                         f"rename_{col}",
@@ -199,13 +199,13 @@ def server(input, output, session):
                         f"subheading_{col}",
                         "Assign Subheading", 
                         subheading_options, 
-                        selected=var_config.get()[col]["subheading"]
+                        # selected=var_config.get()[col]["subheading"]
                     ),
                     ui.input_select(
                         f"position_{col}",
                         "Assign Position under Subheading", 
                         [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-                        selected=100,
+                        # selected=100,
                     ),
                 )
                 for col in columns
@@ -222,10 +222,10 @@ def server(input, output, session):
         updated_config = var_config.get()
 
         for col in df.columns:
-            updated_config[col]["type"] = input.get(f"var_type_{col}") or "Omit"
-            updated_config[col]["rename"] = input.get(f"rename_{col}") or col
-            updated_config[col]["subheading"] = input.get(f"subheading_{col}") or "None"
-            updated_config[col]["position"] = input.get(f"position_{col}") or 100
+            updated_config[col]["type"] = input.get(f"var_type_{col}") #or "Omit"
+            updated_config[col]["rename"] = input.get(f"rename_{col}") #or col
+            updated_config[col]["subheading"] = input.get(f"subheading_{col}") #or "None"
+            updated_config[col]["position"] = input.get(f"position_{col}") #or 100
 
         var_config.set(updated_config)  # Update stored config
 
@@ -250,143 +250,3 @@ def server(input, output, session):
         return "formatted_table.csv"
 
 app = App(app_ui, server)
-
-
-
-
-# # define app
-# app_ui = ui.navset_tab(
-#     ui.nav("Step 1: Upload Data", 
-#         ui.input_file("data_file", "Upload CSV or Excel file", accept=[".csv", ".xlsx"]),
-#         ui.input_action_button("next_1", "Next")
-#     )
-#     # ,
-#     # ui.nav("Step 2: Define Table Name", 
-#     #     ui.input_text("table_name", "Table Name", placeholder="Enter table name"),
-#     #     ui.input_action_button("next_2", "Next")
-#     # ),
-#     # ui.nav("Step 3: Select Variables", 
-#     #     ui.output_ui("var_settings"),
-#     #     ui.input_action_button("next_3", "Next")
-#     # ),
-#     # ui.nav("Step 4: Select Grouping Variable", 
-#     #     ui.output_ui("group_variable"),
-#     #     ui.input_action_button("next_4", "Next")
-#     # ),
-#     # ui.nav("Step 5: Define Subheadings", 
-#     #     ui.output_ui("subheading_ui"),
-#     #     ui.input_action_button("next_5", "Next")
-#     # ),
-#     # ui.nav("Step 6: Formatting Options", 
-#     #     ui.input_numeric("decimals", "Decimals for values", 2, min=0, max=5),
-#     #     ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"]),
-#     #     ui.input_action_button("next_6", "Next")
-#     # ),
-#     # ui.nav("Step 7: Download & Save", 
-#     #     ui.input_action_button("save_config", "Save Configuration"),
-#     #     ui.input_action_button("load_config", "Load Configuration"),
-#     #     ui.download_button("download_table", "Download Formatted Table")
-#     # )
-# )
-
-# def server(input, output, session):
-#     data = {}  # Store uploaded data
-#     config = {}  # Store bookmarked configurations
-
-#     @output
-#     @render.ui
-#     def var_settings():
-#         if input.data_file():
-#             file_info = input.data_file()[0]
-#             ext = os.path.splitext(file_info["name"])[-1]
-#             if ext == ".csv":
-#                 df = pd.read_csv(file_info["datapath"])
-#             elif ext == ".xlsx":
-#                 df = pd.read_excel(file_info["datapath"])
-            
-#             data["df"] = df
-#             columns = df.columns
-            
-#             return ui.tag_list(
-#                 *[ui.panel_well(
-#                     ui.input_select(f"var_type_{col}", f"{col} Type", variable_types, selected="Ratio Continuous"),
-#                     ui.input_text(f"rename_{col}", f"Rename {col}", value=col)
-#                 ) for col in columns]
-#             )
-
-#     @output
-#     @render.ui
-#     def group_variable():
-#         if "df" in data:
-#             return ui.input_select("group_var", "Select Grouping Variable", data["df"].columns)
-
-#     @output
-#     @render.ui
-#     def subheading_ui():
-#         if "df" in data:
-#             return sw.dragula("subheadings", data["df"].columns.tolist())
-
-#     @session.download()
-#     def download_table():
-#         if "df" not in data:
-#             return "No data available."
-#         df = data["df"]
-#         df.to_csv("formatted_table.csv", index=False)
-#         return "formatted_table.csv"
-
-# app = App(app_ui, server)
-
-# # def server(input, output, session):
-# #     data = {}  # Store uploaded data
-
-# #     # @output
-# #     # @render.ui
-# #     # def var_settings():
-# #     #     if input.data_file():
-# #     #         file_info = input.data_file()[0]
-# #     #         ext = os.path.splitext(file_info["name"])[-1]
-# #     #         if ext == ".csv":
-# #     #             df = pd.read_csv(file_info["datapath"])
-# #     #         elif ext == ".xlsx":
-# #     #             df = pd.read_excel(file_info["datapath"])
-            
-# #     #         data["df"] = df
-# #     #         columns = df.columns
-            
-# #     #         return ui.tag_list(
-# #     #             *[ui.panel_well(
-# #     #                 ui.input_select(f"var_type_{col}", f"{col} Type", variable_types, selected="Ratio Continuous"),
-# #     #                 ui.input_text(f"rename_{col}", f"Rename {col}", value=col)
-# #     #             ) for col in columns]
-# #     #         )
-
-# #     @output
-# #     @render.ui
-# #     def group_variable():
-# #         if "df" in data:
-# #             return ui.input_select("group_var", "Select Grouping Variable", data["df"].columns)
-
-# #     @output
-# #     @render.ui
-# #     def subheading_ui():
-# #         if "df" in data:
-# #             return sw.dragula("subheadings", data["df"].columns.tolist())
-
-# #     @session.download()
-# #     def download_table():
-# #         if "df" not in data:
-# #             return "No data available."
-# #         df = data["df"]
-# #         results = {}
-        
-# #         for col in df.columns:
-# #             test_type = default_tests.get(input.get(f"var_type_{col}"), None)
-# #             if test_type and input.group_var():
-# #                 p_value = run_statistical_test(df, input.group_var(), test_type, col)
-# #                 results[col] = p_value
-        
-# #         df_pvals = pd.DataFrame.from_dict(results, orient='index', columns=['P-Value'])
-# #         df_pvals.to_csv("formatted_table.csv", index=True)
-# #         return "formatted_table.csv"
-
-# # app = App(app_ui, server)
