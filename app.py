@@ -228,7 +228,7 @@ def server(input, output, session):
             if df is not None or isinstance(df, pd.DataFrame) or df.empty == False:  
                 ui.update_select("group_var", df.columns.tolist())
         except:
-            return
+            pass
         
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
