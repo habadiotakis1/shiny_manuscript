@@ -153,7 +153,6 @@ def server(input, output, session):
     @output
     @render.ui
     @reactive.event(input.data_file)
-    @reactive.effect
     def var_settings():
         if input.data_file():
             file_info = input.data_file()[0]
