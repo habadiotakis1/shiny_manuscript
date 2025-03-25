@@ -183,8 +183,9 @@ app_ui = ui.page_fluid(
     ui.output_ui("var_settings"),
     
     # Grouping Variable (dynamically generated)
-    ui.output_ui("group_variable"),
-    
+    # ui.output_ui("group_variable"),
+    ui.input_select("group_var", "Select Grouping Variable", ["None"]),
+
     # Formatting Options
     ui.input_numeric("decimals", "Number of Decimal Places", 2, min=0, max=5),
     ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"]),
@@ -222,6 +223,7 @@ def server(input, output, session):
         })
         decimal_places.set(input.decimals())
         output_format.set(input.output_format())
+        ui.update_select("group_var", data.get().columns.tolist())
 
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
@@ -304,13 +306,13 @@ def server(input, output, session):
         var_config.set(updated_config)  # Update stored config
 
     # Set Grouping Variable for analysis
-    @output
-    @render.ui
-    def group_variable():
-        df = data.get()
-        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-            return
-        return ui.input_select("group_var", "Select Grouping Variable", df.columns)
+    # @output
+    # @render.ui
+    # def group_variable():
+    #     df = data.get()
+    #     if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+    #         return
+    #     return ui.input_select("group_var", "Select Grouping Variable", df.columns)
 
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.event(input.calculate)
