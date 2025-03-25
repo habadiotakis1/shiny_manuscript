@@ -162,7 +162,7 @@ def server(input, output, session):
             elif ext == ".xlsx":
                 df = pd.read_excel(file_info["datapath"])
 
-            data["df"] = df  # Store dataframe for later processing
+            data.set(df)  # Store data in reactive value
             columns = df.columns.tolist()  # Get column names
             columns = [re.sub(r'\W+', '', col) for col in columns]
   
