@@ -232,14 +232,14 @@ def server(input, output, session):
 
         var_config.set(updated_config)  # Update stored config
 
-    @output
-    @reactive.effect
-    def group_variable():
-        df = data.get()
-        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-            return
+    # @output
+    # @reactive.effect
+    # def group_variable():
+    #     df = data.get()
+    #     if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+    #         return
         
-        return ui.input_select("group_var", "Select Grouping Variable", df.columns)
+    #     return ui.input_select("group_var", "Select Grouping Variable", df.columns)
 
     @session.download()
     def download_table():
