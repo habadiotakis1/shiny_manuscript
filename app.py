@@ -14,6 +14,7 @@ from docx import Document
 from docx.shared import Pt
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+import exceptions
 
 # set default and alternative statistical tests
 default_tests = {
