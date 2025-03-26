@@ -320,14 +320,21 @@ app_ui = ui.page_fluid(
         
     # Table Name
     ui.input_text("table_name", "Input Table Name", placeholder="Enter table name", width = '75%'),
-        
+
+    # Grouping Variable
+    ui.output_ui("group_variable"),
+    # ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
+
     # Subheadings
     ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"),
     ui.output_ui("var_settings_1"),
+
     ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name"),
     ui.output_ui("var_settings_2"),
+    
     ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name"),
     ui.output_ui("var_settings_3"),
+    
     ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"),
     ui.output_ui("var_settings_4"),
     
@@ -335,10 +342,6 @@ app_ui = ui.page_fluid(
     # Variable Selection UI (dynamically generated)
     ui.output_ui("var_settings"),
     
-    # Grouping Variable (dynamically generated)
-    # ui.output_ui("output_group_var"),
-    ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
-
     # Formatting Options
     ui.input_numeric("decimals", "Number of Decimal Places", 2, min=0, max=5),
     ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"]),
@@ -582,11 +585,6 @@ def server(input, output, session):
         #     width=1 / 2, # Each card takes up half the row
         # )
     
-    # Store the selected grouping variable as a reactive value
-    @reactive.effect
-    def update_group_var():
-        group_var.set(input.group_var())
-
     # Update variable settings dynamically when inputs change
     @reactive.effect
     def update_var_config():
@@ -604,19 +602,23 @@ def server(input, output, session):
 
         var_config.set(updated_config)  # Update stored config
 
-    # # Set Grouping Variable for analysis
-    # @output
-    # @render.ui
-    # def group_variable():
-    #     df = data.get()
-    #     if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-    #         return
-    #     return ui.input_select("grouping_var", "Select Grouping Variable", df.columns, selected=df.columns[0])
+    # Set Grouping Variable for analysis
+    @output
+    @render.ui
+    def group_variable():
+        if selected_columns.get():
+            cols = selected_columns.get()
+            return ui.input_select("grouping_var", "Select Grouping Variable", cols, selected=cols[0])
 
     @reactive.event(input.grouping_var)
     def update_group_var():
         group_var.set(input.grouping_var())
         
+    # # Store the selected grouping variable as a reactive value
+    # @reactive.effect
+    # def update_group_var():
+    #     group_var.set(input.group_var())
+
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.event(input.calculate)
     def calculate_statistical_analysis():
