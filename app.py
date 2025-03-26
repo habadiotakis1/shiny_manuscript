@@ -323,7 +323,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name",width="100%")),
 
         # Grouping Variable
-        ui.card(ui.output_ui("group_variable")),
+        ui.card(ui.output_ui("grouping_variable")),
         # ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
         
         # Formatting Options
@@ -436,11 +436,11 @@ def server(input, output, session):
     # Set Grouping Variable for analysis
     @output
     @render.ui
-    def group_variable():
-        return ui.input_select("grouping_var", "Select Grouping Variable", choices=[])
+    def grouping_variable():
+        return ui.input_select("grouping_var", "Grouping Variable", choices=[])
 
-    @reactive.event(input.column_selectize)
-    def update_group_variable():
+    @reactive.event(output.select_columns)
+    def _():
         select_columns = input.column_selectize()
         if len(select_columns) > 0:
             ui.update_select("grouping_var", choices=select_columns, selected=select_columns[0])
