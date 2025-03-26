@@ -388,9 +388,18 @@ def server(input, output, session):
         decimal_places.set(input.decimals_table())
         output_format.set(input.output_format())
 
+    # Select columns for analysis
     @output
-    @render.ui 
+    @render.ui
     def select_columns():
+        return ui.input_selectize("column_selectize", "Select desired columns below:",  
+                {  "": {} },  
+                multiple=True,  
+                width="100%",
+            )  
+    
+    @reactive.effect
+    def _():
         if input.data_file():
             file_info = input.data_file()[0]
             ext = os.path.splitext(file_info["name"])[-1]
@@ -419,14 +428,11 @@ def server(input, output, session):
                     "position": default_position,
                 } for col in columns})
 
-            return ui.input_selectize(  
+            return ui.update_selectize(  
                 "column_selectize",  
-                "Select desired columns below:",  
                 {  
                     "": column_dict,  
-                },  
-                multiple=True,  
-                width="100%",
+                }
             )  
 
     @reactive.calc
