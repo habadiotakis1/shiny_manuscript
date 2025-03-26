@@ -437,14 +437,19 @@ def server(input, output, session):
     @output
     @render.ui
     def group_variable():
+        return ui.input_select("grouping_var", "Select Grouping Variable", choices=[])
+
+    @reactive.effect
+    def _():
         cols = selected_columns.get()
-        return ui.input_select("grouping_var", "Select Grouping Variable", choices=cols, selected=cols[0])
-        
+        df = data.get()
+
+        if df is not None and len(cols)>0:
+            ui.update_select("grouping_var", choices=cols, selected=cols[0])
+
     @reactive.effect
     def grouping_var():
-        cols = selected_columns.get()
         group_var.set(input.grouping_var())
-        return ui.update_select("grouping_var", choices=cols)
         
 
     @output
