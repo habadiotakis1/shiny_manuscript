@@ -320,7 +320,7 @@ app_ui = ui.page_fluid(
 
     ui.layout_columns(    
         # Table Name
-        ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name")),
+        ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name",width="100%")),
 
         # Grouping Variable
         ui.card(ui.output_ui("group_variable")),
@@ -330,7 +330,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Dec", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Dec", 2, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        col_widths= (4,3,2,2,2)
+        col_widths= (3.5,2.5,2,2,2)
         ),
 
     ui.h5("Step 4: Customize Table"),
@@ -616,14 +616,9 @@ def server(input, output, session):
         cols = selected_columns.get()
         return ui.input_select("grouping_var", "Select Grouping Variable", cols, selected=cols[0])
 
-    @reactive.event(input.grouping_var)
+    @reactive.effect
     def update_group_var():
         group_var.set(input.grouping_var())
-        
-    # # Store the selected grouping variable as a reactive value
-    # @reactive.effect
-    # def update_group_var():
-    #     group_var.set(input.group_var())
 
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.event(input.calculate)
