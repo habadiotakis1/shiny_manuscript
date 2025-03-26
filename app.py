@@ -327,8 +327,8 @@ app_ui = ui.page_fluid(
         # ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
         
         # Formatting Options
-        ui.card(ui.input_numeric("decimals_table", "Table - # Dec", 2, min=0, max=5)),
-        ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Dec", 2, min=0, max=5)),
+        ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
+        ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
         col_widths= (4,2,2,2,2)
         ),
@@ -376,9 +376,6 @@ def server(input, output, session):
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
 
-    @reactive.effect
-    def column_selectize():
-        selected_columns.set(input.column_selectize())
 
     @reactive.effect
     def save_configurations():
@@ -392,7 +389,7 @@ def server(input, output, session):
         output_format.set(input.output_format())
 
     @output
-    @render.ui # @reactive.event(input.data_file)
+    @render.ui 
     def select_columns():
         if input.data_file():
             file_info = input.data_file()[0]
@@ -431,7 +428,22 @@ def server(input, output, session):
                 multiple=True,  
                 width="100%",
             )  
-            
+
+    @reactive.calc
+    def column_selectize():
+        selected_columns.set(input.column_selectize())
+    
+    # Set Grouping Variable for analysis
+    @output
+    @render.ui
+    def group_variable():
+        cols = selected_columns.get()
+        return ui.input_select("grouping_var", "Select Grouping Variable", choices=cols, selected=cols[0])
+
+    @reactive.effect
+    def grouping_var():
+        group_var.set(input.grouping_var())
+
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
     @reactive.event(input.select_columns)
@@ -608,17 +620,7 @@ def server(input, output, session):
 
         var_config.set(updated_config)  # Update stored config
 
-    # Set Grouping Variable for analysis
-    @output
-    @render.ui
-    @reactive.event(input.select_columns)
-    def group_variable():
-        cols = selected_columns.get()
-        return ui.input_select("grouping_var", "Select Grouping Variable", cols, selected=cols[0])
-
-    @reactive.effect
-    def update_group_var():
-        group_var.set(input.grouping_var())
+    
 
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.event(input.calculate)
