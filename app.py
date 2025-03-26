@@ -319,7 +319,7 @@ app_ui = ui.page_fluid(
     ui.h5("Step 3: Customize Table"),
         
     # Table Name
-    ui.input_text("table_name", "Input Table Name", placeholder="Enter table name", width = 75%),
+    ui.input_text("table_name", "Input Table Name", placeholder="Enter table name", width = '75%'),
         
     # Subheadings
     ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"),
