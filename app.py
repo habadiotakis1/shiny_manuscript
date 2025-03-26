@@ -307,7 +307,7 @@ app_ui = ui.page_fluid(
         ui.layout_columns(
             ui.card(ui.input_file("data_file", "", accept=[".csv", ".xlsx"])),
             ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
-            width = 1/2,
+            col_widths=(8, 4),
             ),
         col_widths= 12,
         ),
@@ -316,7 +316,8 @@ app_ui = ui.page_fluid(
         ui.h5("Step 2: Select Columns for Table"),
         ui.layout_columns(
             ui.card(ui.output_ui('select_columns'))
-            )
+            ),
+        col_widths= 12,
         ),
 
     ui.layout_columns(
@@ -328,7 +329,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name")),
         ui.card(ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name")),
         ui.card(ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name")),
-        width = 1,
+        width = 12,
         ),
     
     # Variable Selection UI (dynamically generated)
@@ -375,7 +376,34 @@ def server(input, output, session):
         })
         decimal_places.set(input.decimals())
         output_format.set(input.output_format())
-        
+
+    @output
+    @render.ui # @reactive.event()# @reactive.event(input.data_file)
+    def select_columns():
+        if input.data_file():
+            file_info = input.data_file()[0]
+            ext = os.path.splitext(file_info["name"])[-1]
+            
+            if ext == ".csv":
+                df = pd.read_csv(file_info["datapath"])  # Reads header row by default
+            elif ext == ".xlsx":
+                df = pd.read_excel(file_info["datapath"])
+
+            data.set(df)  # Store data in reactive value
+            columns = df.columns.tolist()  # Get column names
+            columns = [re.sub(r'\W+', '', col) for col in columns]
+            column_dict = {}
+            for col in columns:
+                column_dict[col] = col
+            return ui.input_selectize(  
+                "column_selectize",  
+                "Select desired columns below:",  
+                {  
+                    "": column_dict,  
+                },  
+                multiple=True,  
+            )  
+            
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
     def var_settings():
