@@ -329,7 +329,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "# Decimals - Table", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "# Decimals - P-Value", 2, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        col_widths= (5,3,1,1,2),
+        col_widths= (5,3,1,1,2)
         ),
 
     ui.h5("Step 4: Customize Table"),
