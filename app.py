@@ -425,6 +425,7 @@ def server(input, output, session):
             
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
+    @reactive.event(input.select_columns)
     @reactive.event(input.subheading_2)
     @reactive.event(input.subheading_3)
     @reactive.event(input.subheading_4)
@@ -433,7 +434,7 @@ def server(input, output, session):
             columns = selected_columns.get()
             subheading_cols = []
             for col in columns:
-                if var_config.get()[col]["subheading"] == 1:
+                if var_config.get()[col]["subheading"] == 0:
                     subheading_cols.append(col)
                 
             return ui.layout_column_wrap(
