@@ -316,15 +316,23 @@ app_ui = ui.page_fluid(
     ui.h5("Step 2: Select Columns"),
     ui.output_ui('select_columns'),
     
-    ui.h5("Step 3: Customize Table"),
+    ui.h5("Step 3: Table Options"),
+    ui.layout_columns(    
+        # Table Name
+        ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name", width = '25%')),
+
+        # Grouping Variable
+        ui.card(ui.output_ui("group_variable")),
+        # ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
         
-    # Table Name
-    ui.input_text("table_name", "Input Table Name", placeholder="Enter table name", width = '75%'),
+        # Formatting Options
+        ui.card(ui.input_numeric("decimals_table", "# Decimals - Table", 2, min=0, max=5)),
+        ui.card(ui.input_numeric("decimals_pvalue", "# Decimals - P-Value", 2, min=0, max=5)),
+        ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
+        col_widths= (5,3,1,1,2)
+        ),
 
-    # Grouping Variable
-    ui.output_ui("group_variable"),
-    # ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
-
+    ui.h5("Step 4: Customize Table"),
     # Subheadings
     ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"),
     ui.output_ui("var_settings_1"),
@@ -342,9 +350,6 @@ app_ui = ui.page_fluid(
     # Variable Selection UI (dynamically generated)
     ui.output_ui("var_settings"),
     
-    # Formatting Options
-    ui.input_numeric("decimals", "Number of Decimal Places", 2, min=0, max=5),
-    ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"]),
     
     # Calculate
     ui.input_action_button("calculate", "Calculate"),
@@ -382,7 +387,7 @@ def server(input, output, session):
             2: input.subheading_3(),
             3: input.subheading_4()
         })
-        decimal_places.set(input.decimals())
+        decimal_places.set(input.decimals_table())
         output_format.set(input.output_format())
 
     @output
@@ -605,8 +610,9 @@ def server(input, output, session):
     # Set Grouping Variable for analysis
     @output
     @render.ui
+    @reactive.event(input.select_columns)
     def group_variable():
-        if selected_columns.get():
+        if input.data_file():
             cols = selected_columns.get()
             return ui.input_select("grouping_var", "Select Grouping Variable", cols, selected=cols[0])
 
@@ -628,7 +634,8 @@ def server(input, output, session):
         
         try:
             group_var = group_var.get()  # Get the selected grouping column
-            decimal_places = input.decimals()
+            decimals_pval = input.decimals_pvalue()
+            decimals_tab = input.decimals_table()
             output_format = input.output_format()
             
             # Check if grouping column is selected
@@ -640,14 +647,14 @@ def server(input, output, session):
                     var_type = var_config.get()[col]["type"]
                     
                     if var_type != "Omit":
-                        p_value = run_statistical_test(df, group_var, var_type, col, decimal_places)
+                        p_value = run_statistical_test(df, group_var, var_type, col, decimals_pval)
                         
                         # Store the p-value in the var_config dictionary
                         updated_config[col]["p_value"] = p_value
                         print(f"Column: {col}, Grouping Variable: {group_var}, p-value: {p_value}")
 
                         # Perform aggregate analysis and update var_config with the results
-                        aggregate_result = perform_aggregate_analysis(df, group_var, var_type, col, decimal_places, output_format, updated_config[col])
+                        aggregate_result = perform_aggregate_analysis(df, group_var, var_type, col, decimals_tab, output_format, updated_config[col])
                         if aggregate_result:
                             updated_config[col].update(aggregate_result)
 
