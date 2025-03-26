@@ -203,7 +203,7 @@ def create_word_table(df,var_config, group_var, subheadings):
         
         # Add a row for each variable under the current subheading
         for var in sorted_subheading_vars:
-            var = var_config[var]["rename"]
+            var = var_config[var]["name"]
             var_type = var_config[var]["type"]
 
             if var_type == "Omit":
@@ -305,7 +305,7 @@ app_ui = ui.page_fluid(
     ui.layout_columns(
         ui.h5("Step 1: Upload File"),
         ui.layout_columns(
-            ui.card(ui.input_file("data_file", "Upload a .csv or .xlsx file", accept=[".csv", ".xlsx"])),
+            ui.card(ui.input_file("data_file", "Only .csv or .xlsx files will be accepted", accept=[".csv", ".xlsx"])),
             ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
             col_widths=(8, 4),
             ),
@@ -317,17 +317,20 @@ app_ui = ui.page_fluid(
     ui.output_ui('select_columns'),
     
     ui.h5("Step 3: Customize Table"),
-    ui.layout_columns(
-        ui.h5("Step 3: Customize Table"),
-        ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name")),
         
-        # Subheadings
-        ui.card(ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name")),
-        ui.card(ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name")),
-        ui.card(ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name")),
-        ui.card(ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name")),
-        width = 12,
-        ),
+    # Table Name
+    ui.input_text("table_name", "Input Table Name", placeholder="Enter table name", width = 75%),
+        
+    # Subheadings
+    ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"),
+    ui.output_ui("var_settings_1"),
+    ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name"),
+    ui.output_ui("var_settings_2"),
+    ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name"),
+    ui.output_ui("var_settings_3"),
+    ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"),
+    ui.output_ui("var_settings_1"),
+    
     
     # Variable Selection UI (dynamically generated)
     ui.output_ui("var_settings"),
@@ -358,7 +361,7 @@ app_ui = ui.page_fluid(
 def server(input, output, session):
     data = reactive.Value({})  # Store uploaded data
     var_config = reactive.Value({})  # Store variable settings dynamically
-    subheadings = reactive.Value({})  # Store subheadings
+    subheadings = reactive.Value({0:"",1:None,2:None,3:None})  # Store subheadings
     group_var = reactive.Value(None)  # Store grouping variable
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
@@ -366,10 +369,10 @@ def server(input, output, session):
     @reactive.effect
     def save_configurations():
         subheadings.set({
-            1: input.subheading_1(),
-            2: input.subheading_2(),
-            3: input.subheading_3(),
-            4: input.subheading_4()
+            0: input.subheading_1(),
+            1: input.subheading_2(),
+            2: input.subheading_3(),
+            3: input.subheading_4()
         })
         decimal_places.set(input.decimals())
         output_format.set(input.output_format())
@@ -392,6 +395,19 @@ def server(input, output, session):
             column_dict = {}
             for col in columns:
                 column_dict[col] = col
+            
+            default_type = "Omit"
+            default_position = 100
+            
+            # Store variable settings in a dictionary
+            if not var_config.get():
+                var_config.set({col: {
+                    "type": default_type, 
+                    "name": col, 
+                    "subheading": 0,
+                    "position": default_position,
+                } for col in columns})
+
             return ui.input_selectize(  
                 "column_selectize",  
                 "Select desired columns below:",  
@@ -404,40 +420,11 @@ def server(input, output, session):
             
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
-    def var_settings():
-        if input.data_file():
-            file_info = input.data_file()[0]
-            ext = os.path.splitext(file_info["name"])[-1]
-            
-            if ext == ".csv":
-                df = pd.read_csv(file_info["datapath"])  # Reads header row by default
-            elif ext == ".xlsx":
-                df = pd.read_excel(file_info["datapath"])
-
-            data.set(df)  # Store data in reactive value
+    def var_settings_1():
+        if var_config.get():
+            df = data.get()
             columns = df.columns.tolist()  # Get column names
             columns = [re.sub(r'\W+', '', col) for col in columns]
-
-            subheading_options = ["None"] + [s for s in subheadings.get().values() if s]
-            default_type = "Omit"
-            default_position = 100
-
-            # Store variable settings in a dictionary
-            if not var_config.get():
-                var_config.set({col: {
-                    "type": default_type, 
-                    "rename": col, 
-                    "subheading": "None",
-                    "position": default_position,
-                    "p_value": None,
-                } for col in columns})
-
-            # Output grouping variable selection UI dynamically
-            ui.update_select(
-                "group_var", 
-                choices=columns
-            )
-
             return ui.layout_column_wrap(
             *[
                 ui.card(
@@ -446,18 +433,18 @@ def server(input, output, session):
                         f"var_type_{col}",
                         "Variable Type",
                         variable_types,
-                        # selected=var_config.get()[col]["type"],
+                        selected=var_config.get()[col]["type"],
                     ),
                     ui.input_text(
-                        f"rename_{col}",
-                        "Rename Column",
-                        value=var_config.get()[col]["rename"],
+                        f"name_{col}",
+                        "Column Name",
+                        value=var_config.get()[col]["name"],
                     ),
                     ui.input_select(
                         f"subheading_{col}",
                         "Assign Subheading", 
-                        subheading_options, 
-                        # selected=var_config.get()[col]["subheading"]
+                        subheadings.get().values(), 
+                        selected=var_config.get()[col]["subheading"]
                     ),
                     ui.input_select(
                         f"position_{col}",
@@ -465,11 +452,77 @@ def server(input, output, session):
                         [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
                         selected=100,
                     ),
+                    col_widths=(4, 3, 3, 3, 12),
+                    draggable=True,
                 )
                 for col in columns
             ],
-            width=1 / 2, # Each card takes up half the row
-        )
+            width='100%', # Each card takes up half the row
+            )
+            # file_info = input.data_file()[0]
+            # ext = os.path.splitext(file_info["name"])[-1]
+            
+            # if ext == ".csv":
+            #     df = pd.read_csv(file_info["datapath"])  # Reads header row by default
+            # elif ext == ".xlsx":
+            #     df = pd.read_excel(file_info["datapath"])
+
+            # data.set(df)  # Store data in reactive value
+            # columns = df.columns.tolist()  # Get column names
+            # columns = [re.sub(r'\W+', '', col) for col in columns]
+
+            # subheading_options = [""] + [s for s in subheadings.get().values() if s]
+            # default_type = "Omit"
+            # default_position = 100
+
+            # # Store variable settings in a dictionary
+            # if not var_config.get():
+            #     var_config.set({col: {
+            #         "type": default_type, 
+            #         "name": col, 
+            #         "subheading": "None",
+            #         "position": default_position,
+            #         "p_value": None,
+            #     } for col in columns})
+
+            # Output grouping variable selection UI dynamically
+            # ui.update_select(
+            #     "group_var", 
+            #     choices=columns
+            # )
+
+        #     return ui.layout_column_wrap(
+        #     *[
+        #         ui.card(
+        #             ui.h5(col),  # Column name title
+        #             ui.input_select(
+        #                 f"var_type_{col}",
+        #                 "Variable Type",
+        #                 variable_types,
+        #                 # selected=var_config.get()[col]["type"],
+        #             ),
+        #             ui.input_text(
+        #                 f"name_{col}",
+        #                 "Column Name",
+        #                 value=var_config.get()[col]["name"],
+        #             ),
+        #             ui.input_select(
+        #                 f"subheading_{col}",
+        #                 "Assign Subheading", 
+        #                 subheading_options, 
+        #                 # selected=var_config.get()[col]["subheading"]
+        #             ),
+        #             ui.input_select(
+        #                 f"position_{col}",
+        #                 "Assign Position under Subheading", 
+        #                 [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+        #                 selected=100,
+        #             ),
+        #         )
+        #         for col in columns
+        #     ],
+        #     width=1 / 2, # Each card takes up half the row
+        # )
     
     # Store the selected grouping variable as a reactive value
     @reactive.effect
@@ -487,7 +540,7 @@ def server(input, output, session):
 
         for col in df.columns:
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
-            updated_config[col]["rename"] = input[f"rename_{col}"]() or col
+            updated_config[col]["name"] = input[f"name_{col}"]() or col
             updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "None"
             updated_config[col]["position"] = input[f"position_{col}"]() or 100
 
