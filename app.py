@@ -439,14 +439,9 @@ def server(input, output, session):
     def grouping_variable():
         return ui.input_select("grouping_var", "Grouping Variable", choices=[])
 
-    @reactive.calc
-    def available_grouping_vars():
-        select_columns = input.column_selectize()
-        return selected_columns if selected_columns else []
-
     @reactive.effect
     def _():
-        choices = available_grouping_vars()
+        choices = input.column_selectize()
         if choices:
             ui.update_select("grouping_var", choices=choices, selected=choices[0])
 
