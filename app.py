@@ -439,7 +439,7 @@ def server(input, output, session):
     def grouping_variable():
         return ui.input_select("grouping_var", "Grouping Variable", choices=[])
 
-    @reactive.event(input.column_selectize)
+    @reactive.calc
     def _():
         select_columns = input.column_selectize()
         if len(select_columns) > 0:
