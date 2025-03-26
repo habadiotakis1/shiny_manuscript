@@ -425,9 +425,9 @@ def server(input, output, session):
             
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
-    @reactive.event('subheading_2')
-    @reactive.event('subheading_3')
-    @reactive.event('subheading_4')
+    @reactive.event(input.subheading_2)
+    @reactive.event(input.subheading_3)
+    @reactive.event(input.subheading_4)
     def var_settings_1():
         if var_config.get():
             columns = selected_columns.get()
@@ -472,9 +472,9 @@ def server(input, output, session):
             )
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
-    @reactive.event('subheading_1')
-    @reactive.event('subheading_3')
-    @reactive.event('subheading_4')
+    @reactive.event(input.subheading_1)
+    @reactive.event(input.subheading_3)
+    @reactive.event(input.subheading_4)
     def var_settings_2():
         if var_config.get():
             columns = selected_columns.get()
