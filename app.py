@@ -320,17 +320,17 @@ app_ui = ui.page_fluid(
 
     ui.layout_columns(    
         # Table Name
-        ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name", width = '25%')),
+        ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name")),
 
         # Grouping Variable
         ui.card(ui.output_ui("group_variable")),
         # ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
         
         # Formatting Options
-        ui.card(ui.input_numeric("decimals_table", "# Decimals - Table", 2, min=0, max=5)),
-        ui.card(ui.input_numeric("decimals_pvalue", "# Decimals - P-Value", 2, min=0, max=5)),
+        ui.card(ui.input_numeric("decimals_table", "Table - # Dec", 2, min=0, max=5)),
+        ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Dec", 2, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        col_widths= (5,3,1,1,2)
+        col_widths= (4,3,2,2,2)
         ),
 
     ui.h5("Step 4: Customize Table"),
@@ -392,7 +392,7 @@ def server(input, output, session):
         output_format.set(input.output_format())
 
     @output
-    @render.ui # @reactive.event()# @reactive.event(input.data_file)
+    @render.ui # @reactive.event(input.data_file)
     def select_columns():
         if input.data_file():
             file_info = input.data_file()[0]
@@ -613,9 +613,8 @@ def server(input, output, session):
     @render.ui
     @reactive.event(input.select_columns)
     def group_variable():
-        if input.data_file():
-            cols = selected_columns.get()
-            return ui.input_select("grouping_var", "Select Grouping Variable", cols, selected=cols[0])
+        cols = selected_columns.get()
+        return ui.input_select("grouping_var", "Select Grouping Variable", cols, selected=cols[0])
 
     @reactive.event(input.grouping_var)
     def update_group_var():
