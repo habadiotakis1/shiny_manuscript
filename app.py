@@ -19,28 +19,19 @@ import pickle
 # set default and alternative statistical tests
 default_tests = {
     "Omit": "Omit",
-    "Categorical (Y/N)": "Fisher's Exact Test",
-    "Categorical (Dichotomous)": "Fisher's Exact Test",
-    "Categorical (Multinomial)": "Fisher's Exact Test",
-    "Ratio Continuous": "T-Test",
-    "Ordinal Discrete": "Wilcoxon Rank Sum Test",
-}
-
-default_aggregation = {
-    "Omit": "Omit",
-    "Categorical (Y/N)": "sum",
-    "Categorical (Dichotomous)": "sum",
-    "Categorical (Multinomial)": "sum",
-    "Ratio Continuous": "mean",
-    "Ordinal Discrete": "average",
+    "Categorical (Y/N)": "fisher",
+    "Categorical (Dichotomous)": "fisher",
+    "Categorical (Multinomial)": "fisher-freeman-halton",
+    "Ratio Continuous": "ttest",
+    "Ordinal Discrete": "wilcoxon",
 }
 
 alternative_tests = {
-    "Categorical (Y/N)": "Chi-Square Test",
-    "Categorical (Dichotomous)": "Chi-Square Test",
-    "Categorical (Multinomial)": "Chi-Square Test",
-    "Ratio Continuous": "Mann-Whitney Test",
-    "Ordinal Discrete": "T-Test",
+    "Categorical (Y/N)": "chi2",
+    "Categorical (Dichotomous)": "chi2",
+    "Categorical (Multinomial)": "chi2",
+    "Ratio Continuous": "mannwhitney",
+    "Ordinal Discrete": "ttest",
 }
 
 variable_types = list(default_tests.keys())
@@ -98,7 +89,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     # print(group_var, test_type, var_name, decimal_places, output_format, col_var_config)
     
     # Check if the variable has a "Yes" option
-    yes_values = ['Yes', 'Y', 1]
+    yes_values = ['Yes', 'Y', 'y', 'yes', 1]
     yn_var = None
 
     var_options = df[var_name].unique()        
@@ -158,7 +149,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
         # Aggregate: Median and Interquartile Range (IQR)
         group1_median = group1.median()
         group2_median = group2.median()
-        group1_iqr = [round(group1.quantile(0.25),decimal_places), group1.quantile(0.75)]
+        group1_iqr = [group1.quantile(0.25), group1.quantile(0.75)]
         group2_iqr = [group2.quantile(0.25), group2.quantile(0.75)]
 
         col_var_config['group1'] = str(group1_median) + " [" + str(group1_iqr[0]) + "-" + str(group1_iqr[1]) + "]"
@@ -311,17 +302,28 @@ def load_config(filename="config.pkl"):
 app_ui = ui.page_fluid(
     ui.panel_title("✨ Shiny Manuscript Table Generator ✨"),
     
-    # File Upload
-    ui.input_file("data_file", "Step 1: Upload CSV or Excel file", accept=[".csv", ".xlsx"]),
+    ui.layout_columns(
+        ui.card(ui.input_file("data_file", "Step 1: Upload CSV or Excel file", accept=[".csv", ".xlsx"])),
+        ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
+        width=1 / 2, # Each card takes up half the row
+        ),
     
+    ui.layout_columns(
+        ui.card(ui.h5("Step 2: Select Columns for Table")),
+        ui.card(ui.output_ui('select_columns'))
+        ),
+
     # Table Name
-    ui.input_text("table_name", "Step 2: Input Table Name", placeholder="Enter table name"),
-    
-    # Subheadings
-    ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"),
-    ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name"),
-    ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name"),
-    ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"),
+    ui.layout_columns(
+        ui.card(ui.h5("Step 3: Customize Table")),
+        ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name")),
+        
+        # Subheadings
+        ui.card(ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name")),
+        ui.card(ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name")),
+        ui.card(ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name")),
+        ui.card(ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name")),
+        ),
     
     # Variable Selection UI (dynamically generated)
     ui.output_ui("var_settings"),
