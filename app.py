@@ -419,8 +419,6 @@ def server(input, output, session):
                     "position": default_position,
                 } for col in columns})
 
-            ui.input_select("grouping_var", "Select Grouping Variable", choices=columns, selected=columns[0])
-
             return ui.input_selectize(  
                 "column_selectize",  
                 "Select desired columns below:",  
@@ -436,20 +434,18 @@ def server(input, output, session):
         selected_columns.set(input.column_selectize())
     
     # Set Grouping Variable for analysis
-    # @output
-    # @render.ui
-    # def group_variable():
-    #     cols = selected_columns.get()
-    #     return ui.input_select("grouping_var", "Select Grouping Variable", choices=cols, selected=cols[0])
-        
-    @reactive.calc
-    def grouping_var():
+    @output
+    @render.ui
+    def group_variable():
         cols = selected_columns.get()
-        return ui.update_select("grouping_var", choices=cols)
-
+        return ui.input_select("grouping_var", "Select Grouping Variable", choices=cols, selected=cols[0])
+        
     @reactive.effect
     def grouping_var():
+        cols = selected_columns.get()
         group_var.set(input.grouping_var())
+        return ui.update_select("grouping_var", choices=cols)
+        
 
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
