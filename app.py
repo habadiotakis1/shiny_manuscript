@@ -317,6 +317,7 @@ app_ui = ui.page_fluid(
     ui.output_ui('select_columns'),
     
     ui.h5("Step 3: Table Options"),
+
     ui.layout_columns(    
         # Table Name
         ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name", width = '25%')),
