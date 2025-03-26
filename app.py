@@ -312,13 +312,10 @@ app_ui = ui.page_fluid(
         col_widths= 12,
         ),
     
-    ui.layout_columns(
-        ui.h5("Step 2: Select Columns for Table"),
-        ui.layout_columns(
-            ui.card(ui.output_ui('select_columns'))
-            ),
-        col_widths= 12,
-        ),
+    
+    ui.h5("Step 2: Select Columns for Table"),
+    ui.output_ui('select_columns'),
+    
 
     ui.layout_columns(
         ui.h5("Step 3: Customize Table"),
