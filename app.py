@@ -11,7 +11,7 @@ from io import StringIO
 import re
 from scipy import stats
 from docx import Document
-from docx.shared import Pt
+from docx.shared import Pt, Cm, Inches
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 import pickle
@@ -49,7 +49,7 @@ variable_types = list(default_tests.keys())
 ################################################################################
 ### ONLY SUPPORTS 2 GROUPS AT THE MOMENT, NEED TO UPDATE TO MULTIPLE GROUPS ####
 ################################################################################
-def run_statistical_test(df, group_var, test_type, var_name):
+def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
     groups = df[group_var].unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
@@ -57,91 +57,235 @@ def run_statistical_test(df, group_var, test_type, var_name):
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
     
+    test_type = default_tests[var_type]
+
     if test_type == "fisher":
         contingency_table = pd.crosstab(df[var_name], df[group_var])
         _, p_value = stats.fisher_exact(contingency_table)
+    elif test_type == 'fisher-freeman-halton': # UPDATE
+        contingency_table = pd.crosstab(df[var_name], df[group_var])
+        _, p_value, _, _ = stats.chi2_contingency(contingency_table, lambda_="log-likelihood")        
+        # rpy2.robjects.numpy2ri.activate()
+        # stats = importr('stats')
+        # m = np.array([[4,4],[4,5],[10,6]])
+        # res = stats.fisher_test(m)
+        # print 'p-value: {}'.format(res[0][0])
     elif test_type == "chi2":
         contingency_table = pd.crosstab(df[var_name], df[group_var])
         _, p_value, _, _ = stats.chi2_contingency(contingency_table)
-    elif test_type == "t-test":
+    elif test_type == "ttest":
         _, p_value = stats.ttest_ind(group1, group2, equal_var=False)
     elif test_type == "mannwhitney":
         _, p_value = stats.mannwhitneyu(group1, group2)
     elif test_type == "wilcoxon":
         _, p_value = stats.ranksums(group1, group2)
     else:
+        print("Invalid test type:", test_type, " for variable:", var_name)
         p_value = None
     
+    try:
+        p_value = round(p_value, decimal_places)
+    except:
+        pass
+
     return p_value
 
 # Function to perform aggregation analysis based on the variable type
-def perform_aggregate_analysis(df, var_type, column_name, decimal_places):
+def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
+    groups = df[group_var].unique()
+    if len(groups) != 2:
+        return None  # Only supports two-group comparisons
+    # print(group_var, test_type, var_name, decimal_places, output_format, col_var_config)
+    
+    # Check if the variable has a "Yes" option
+    yes_values = ['Yes', 'Y', 1]
+    yn_var = None
+
+    var_options = df[var_name].unique()        
+    for val in yes_values:
+        if val in var_options:
+            yn_var=val
+
+    group1 = df[df[group_var] == groups[0]][var_name].dropna()
+    group2 = df[df[group_var] == groups[1]][var_name].dropna()
+
+    group1_total = len(group1)
+    group2_total = len(group2)
+
+    # Default result structure
+    result = {}
+    
     if var_type == "Omit":
         return None
     
-    # Default result structure
-    result = {}
+    elif var_type == "Categorical (Y/N)":
+        # count occurrences of yn_var in group 1 and group 2
+        group1_sum = (group1 == yn_var).sum()
+        group2_sum = (group2 == yn_var).sum()
 
-    if var_type == "Categorical (Y/N)" or var_type == "Categorical (Dichotomous)":
-        # Aggregate: Sum the binary outcomes (e.g., 1 for "Yes", 0 for "No")
-        result["aggregate"] = df[column_name].sum()  # Count the 'Yes' values (or 1 values)
-        result["percentage"] = round(df[column_name].mean() * 100, decimal_places)  # Percentage of 'Yes' (or 1) values
+        # Store the aggregate values in var_config
+        if output_format == "n (%)":
+            col_var_config['group1'] = str(group2_sum)  + " (" + str(round(group2_sum / group2_total * 100, decimal_places)) + "%)"
+            col_var_config['group2'] = str(group1_sum) + " (" + str(round(group1_sum / group1_total * 100, decimal_places)) + "%)"
+        else:
+            col_var_config['group1'] = str(round(group1_sum / group1_total * 100, decimal_places)) + "% (" + str(group1_sum) + ")"
+            col_var_config['group2'] = str(round(group2_sum / group2_total * 100, decimal_places)) + "% (" + str(group2_sum) + ")"
+        
+    elif var_type == "Categorical (Dichotomous)" or var_type == "Categorical (Multinomial)":
+        for i in range(len(var_options)):
+            group1_sum = (group1 == var_options[i]).sum()
+            group2_sum = (group2 == var_options[i]).sum()
 
-    elif var_type == "Categorical (Multinomial)":
-        # Aggregate: Count occurrences of each category
-        counts = df[column_name].value_counts()
-        result["aggregate"] = counts.to_dict()
-        result["by_group"] = {category: (count, round(count / len(df) * 100,decimal_places)) for category, count in counts.items()}
+            if output_format == "n (%)":
+                col_var_config[f'group1_subgroup{i}'] = str(group1_sum) + " (" + str(round(group1_sum / group1_total * 100, decimal_places)) + "%)"
+                col_var_config[f'group2_subgroup{i}'] = str(group2_sum)  + " (" + str(round(group2_sum / group2_total * 100, decimal_places)) + "%)"
+            else:
+                col_var_config[f'group1_subgroup{i}'] = str(round(group1_sum / group1_total * 100, decimal_places)) + "% (" + str(group1_sum) + ")"
+                col_var_config[f'group2_subgroup{i}'] = str(round(group2_sum / group2_total * 100, decimal_places)) + "% (" + str(group2_sum) + ")"
 
     elif var_type == "Ratio Continuous":
         # Aggregate: Mean and Standard Deviation
-        result["aggregate"] = round(df[column_name].mean(),decimal_places)
-        result["standard_dev"] = round(df[column_name].std(),decimal_places)
+        group1_mean = round(group1.mean(), decimal_places)
+        group2_mean = round(group2.mean(), decimal_places)
+
+        group1_std = round(group1.std(), decimal_places)
+        group2_std = round(group2.std(), decimal_places)
+
+        col_var_config['group1'] = str(group1_mean) + " \u00B1 " + str(group1_std)
+        col_var_config['group2'] = str(group2_mean) + " \u00B1 " + str(group2_std)
 
     elif var_type == "Ordinal Discrete":
         # Aggregate: Median and Interquartile Range (IQR)
-        result["aggregate"] = df[column_name].median()
-        result["interquartile_range"] = [
-            df[column_name].quantile(0.25),  # 1st quartile (Q1)
-            df[column_name].quantile(0.75),  # 3rd quartile (Q3)
-        ]
-    
-    return result
+        group1_median = group1.median()
+        group2_median = group2.median()
+        group1_iqr = [round(group1.quantile(0.25),decimal_places), group1.quantile(0.75)]
+        group2_iqr = [group2.quantile(0.25), group2.quantile(0.75)]
 
-# create stylized microsoft word table
-def create_scientific_table(title, headers, data: pd.DataFrame, group_var, var_config):
+        col_var_config['group1'] = str(group1_median) + " [" + str(group1_iqr[0]) + "-" + str(group1_iqr[1]) + "]"
+        col_var_config['group2'] = str(group2_median) + " [" + str(group2_iqr[0]) + "-" + str(group2_iqr[1]) + "]"
+    
+    return col_var_config
+
+# Function to create Word table from var_config
+def create_word_table(df,var_config, group_var, subheadings):
+    # Create a new Word Document
     doc = Document()
+
+    # Create the table with columns for Variable, Group 1, Group 2, P-Value
+    table = doc.add_table(rows=1, cols=4)
+    table.columns[0].width=Inches(3.5)
+    table.columns[1].width=Inches(1.5)
+    table.columns[2].width=Inches(1.5)
+    table.columns[3].width=Inches(.5)
+
+    hdr_cells = table.rows[0].cells
+    hdr_cells[0].text = 'Variable'
+    hdr_cells[1].text = 'Group 1'
+    hdr_cells[2].text = 'Group 2'
+    hdr_cells[3].text = 'P-Value'
     
-    # Add title
-    title_paragraph = doc.add_paragraph()
-    title_run = title_paragraph.add_run(title)
-    title_run.bold = True
-    title_run.font.size = Pt(12)
-    title_paragraph.alignment = 0  # Left alignment, 1=center, 2=right
-    
-    doc.add_paragraph()  # Add space
-    
-    # Create table
-    num_rows = len(data) + 1  # Headers + data rows
-    num_cols = len(headers)
-    table = doc.add_table(rows=num_rows, cols=num_cols)
-    table.style = 'Plain Table 3' #'Table Grid'
-    
-    # Format headers
-    for col_idx, header in enumerate(headers):
-        cell = table.cell(0, col_idx)
-        cell.text = header
-        run = cell.paragraphs[0].runs[0]
-        run.bold = True
-    
-    # Add data rows
-    for row_idx, row_data in enumerate(data.itertuples(index=False), start=1):
-        for col_idx, value in enumerate(row_data):
-            table.cell(row_idx, col_idx).text = str(value)
-    
-    clean_title = re.sub(r'\W+', '', title)
-    doc.save(clean_title + ".docx")
-    print(f"Table saved as {clean_title}.docx")
+    for row in hdr_cells:
+        row.paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
+        
+    group1_size = len(df[df[group_var] == df[group_var].unique()[0]])
+    group2_size = len(df[df[group_var] == df[group_var].unique()[1]])
+    grp_cells = table.add_row().cells
+    grp_cells[0].text = ''
+    grp_cells[1].text = '(n= ' + str(group1_size) + ")"
+    grp_cells[2].text = '(n= ' + str(group2_size) + ")"
+    grp_cells[3].text = ''
+
+    # Loop through subheadings
+    for subheading_name in subheadings:
+        # Add a row for the subheading (this is the row header)
+        row_cells = table.add_row().cells
+        row_cells[0].text = f"{subheading_name}"  # Subheading name in the first column
+        row_cells[1].text = ''  # Leave empty for Group 1
+        row_cells[2].text = ''  # Leave empty for Group 2
+        row_cells[3].text = ''  # Leave empty for P-Value
+
+        row_cells[0].paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
+        
+        # Get and sort all variables for the current subheading
+        subheading_vars = [col for col, config in var_config.items() if config['subheading'] == subheading_name]
+        sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
+        
+        # Add a row for each variable under the current subheading
+        for var in sorted_subheading_vars:
+            var = var_config[var]["rename"]
+            var_type = var_config[var]["type"]
+
+            if var_type == "Omit":
+                continue
+            elif var_type == "Categorical (Y/N)":
+                row_cells = table.add_row().cells
+                row_cells[0].text = f"{var}"  
+                row_cells[1].text = str(var_config[var]["group1"])
+                row_cells[2].text = str(var_config[var]["group2"])
+                row_cells[3].text = str(var_config[var]["p_value"])
+
+            elif var_type == "Categorical (Dichotomous)":
+                row_cells = table.add_row().cells
+                row_cells[0].text = f"{var}"  
+                row_cells[1].text = ""
+                row_cells[2].text = ""
+                row_cells[3].text = ""
+
+                row_cells[0].paragraphs[0].runs[0].font.underline = True
+
+                var_options = df[var].unique()        
+                for i in range(len(var_options)):
+                    row_cells = table.add_row().cells
+                    row_cells[0].text = f"   {var_options[i]}"  
+                    row_cells[1].text = str(var_config[var][f"group1_subgroup{i}"])
+                    row_cells[2].text = str(var_config[var][f"group2_subgroup{i}"])
+                    if i == 0:
+                        row_cells[3].text = str(var_config[var]["p_value"])
+                    else:
+                        row_cells[3].text = "-"
+
+                    row_cells[0].paragraphs[0].runs[0].font.italic = True
+
+            elif var_type == "Categorical (Multinomial)":
+                row_cells = table.add_row().cells
+                row_cells[0].text = f"{var}"  
+                row_cells[1].text = ""
+                row_cells[2].text = ""
+                row_cells[3].text = ""
+
+                row_cells[0].paragraphs[0].runs[0].font.underline = True
+
+                var_options = df[var].unique()        
+                for i in range(len(var_options)):
+                    row_cells = table.add_row().cells
+                    row_cells[0].text = f"   {var_options[i]}"  
+                    row_cells[1].text = str(var_config[var][f"group1_subgroup{i}"])
+                    row_cells[2].text = str(var_config[var][f"group2_subgroup{i}"])
+                    if i == 0:
+                        row_cells[3].text = str(var_config[var]["p_value"])
+                    else:
+                        row_cells[3].text = "-"
+
+                    row_cells[0].paragraphs[0].runs[0].font.italic = True
+
+            elif var_type == "Ratio Continuous" or var_type == "Ordinal Discrete":
+                row_cells = table.add_row().cells
+                row_cells[0].text = f"{var}"  
+                row_cells[1].text = str(var_config[var]["group1"])
+                row_cells[2].text = str(var_config[var]["group2"])
+                row_cells[3].text = str(var_config[var]["p_value"])
+                
+                # Apply formatting to the variable name cell (indentation and smaller font)
+                # para = row_cells[0].paragraphs[0]
+                # run = para.add_run(row_cells[0].text)
+                # run.font.size = Pt(8)  # Smaller font size
+                # para.paragraph_format.left_indent = Pt(12)  # Indentation for the variable name            
+
+    # Save the document to a file
+    doc_filename = "statistical_analysis_results.docx"
+    doc.save(doc_filename)
+    return doc_filename
+
 
 # Save configuration to a .pkl file
 def save_config(config, filename="config.pkl"):
@@ -191,10 +335,10 @@ app_ui = ui.page_fluid(
     ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"]),
     
     # Calculate
-    ui.input_action_button("calculate", "Calculate "),
+    ui.input_action_button("calculate", "Calculate"),
     
     # Download Button
-    ui.download_button("download_table", "Download Formatted Table"),
+    ui.download_button("download_table", "Download Table"),
 
     # Save Configuration
     ui.input_action_button("save_config", "Save Configuration"),
@@ -336,26 +480,27 @@ def server(input, output, session):
             return
         
         try:
-            group_var = input.group_var()  # Get the selected grouping column
+            group_var = group_var.get()  # Get the selected grouping column
             decimal_places = input.decimals()
             output_format = input.output_format()
-
+            
             # Check if grouping column is selected
             if group_var and decimal_places and output_format:
                 updated_config = var_config.get()
                 
                 # Perform statistical analysis using the grouping variable
                 for col in df.columns:
-                    test_type = var_config.get()[col]["type"]
+                    var_type = var_config.get()[col]["type"]
                     
-                    if test_type != "Omit":
-                        p_value = run_statistical_test(df, group_var, test_type, col, decimal_places, output_format)
+                    if var_type != "Omit":
+                        p_value = run_statistical_test(df, group_var, var_type, col, decimal_places)
+                        
                         # Store the p-value in the var_config dictionary
                         updated_config[col]["p_value"] = p_value
                         print(f"Column: {col}, Grouping Variable: {group_var}, p-value: {p_value}")
 
                         # Perform aggregate analysis and update var_config with the results
-                        aggregate_result = perform_aggregate_analysis(df, test_type, col, decimal_places.get())
+                        aggregate_result = perform_aggregate_analysis(df, group_var, var_type, col, decimal_places, output_format, updated_config[col])
                         if aggregate_result:
                             updated_config[col].update(aggregate_result)
 
@@ -365,11 +510,26 @@ def server(input, output, session):
             return
 
     # Download Button - Trigger to save table in .docx format
-    @reactive.event(input.download_table)
+    # Updated download_table function
+    @session.download()
     def download_table():
+        # Retrieve the data and var_config
         df = data.get()
+        updated_config = var_config.get()
+        
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-            return
+            return None  # Return None if no data is available
+        
+        # Generate the Word table document
+        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings.get())
+        
+        return doc_filename  # Return the Word document file for download
+
+    # @reactive.event(input.download_table)
+    # def download_table():
+    #     df = data.get()
+    #     if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+    #         return
         
         create_scientific_table(input.table_name, subheadings.get(), data.get(), group_var.get(), var_config.get())
         clean_title = re.sub(r'\W+', '', input.table_name)
