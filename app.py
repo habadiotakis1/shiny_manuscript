@@ -436,9 +436,13 @@ def server(input, output, session):
     # Set Grouping Variable for analysis
     @output
     @render.ui
+    @reactive.event(input.select_columns)
     def group_variable():
         cols = selected_columns.get()
-        return ui.input_select("grouping_var", "Select Grouping Variable", choices=cols, selected=cols[0])
+        if len(cols) == 0:
+            return
+        else:
+            return ui.input_select("grouping_var", "Select Grouping Variable", choices=cols, selected=cols[0])
 
     @reactive.effect
     def grouping_var():
