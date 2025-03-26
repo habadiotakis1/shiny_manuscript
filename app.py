@@ -316,7 +316,7 @@ app_ui = ui.page_fluid(
     ui.h5("Step 2: Select Columns"),
     ui.output_ui('select_columns'),
     
-    ui.h5("Step 3: Customize Table"),
+    ui.h5("Step 3: Table Options"),
         
     # Table Name
     ui.input_text("table_name", "Input Table Name", placeholder="Enter table name", width = '75%'),
@@ -324,7 +324,12 @@ app_ui = ui.page_fluid(
     # Grouping Variable
     ui.output_ui("group_variable"),
     # ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
-
+    
+    # Formatting Options
+    ui.input_numeric("decimals", "Number of Decimal Places", 2, min=0, max=5),
+    ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"]),
+    
+    ui.h5("Step 4: Customize Table"),
     # Subheadings
     ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"),
     ui.output_ui("var_settings_1"),
@@ -342,9 +347,6 @@ app_ui = ui.page_fluid(
     # Variable Selection UI (dynamically generated)
     ui.output_ui("var_settings"),
     
-    # Formatting Options
-    ui.input_numeric("decimals", "Number of Decimal Places", 2, min=0, max=5),
-    ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"]),
     
     # Calculate
     ui.input_action_button("calculate", "Calculate"),
@@ -605,8 +607,9 @@ def server(input, output, session):
     # Set Grouping Variable for analysis
     @output
     @render.ui
+    @reactive.event(input.select_columns)
     def group_variable():
-        if selected_columns.get():
+        if input.data_file():
             cols = selected_columns.get()
             return ui.input_select("grouping_var", "Select Grouping Variable", cols, selected=cols[0])
 
