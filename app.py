@@ -303,23 +303,23 @@ app_ui = ui.page_fluid(
     ui.panel_title("✨ Shiny Manuscript Table Generator ✨"),
     
     ui.layout_columns(
-        "Step 1: Upload CSV or Excel file",
+        ui.h2("Step 1: Upload CSV or Excel file"),
         ui.layout_columns(
             ui.card(ui.input_file("data_file", "", accept=[".csv", ".xlsx"])),
             ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
-            col_widths=(8, 4)
+            width= 1 / 2,
             )
         ),
     
     ui.layout_columns(
-        "Step 2: Select Columns for Table",
+        ui.h2("Step 2: Select Columns for Table"),
         ui.layout_columns(
             ui.card(ui.output_ui('select_columns'))
             )
         ),
 
     ui.layout_columns(
-        "Step 3: Customize Table",
+        ui.h2("Step 3: Customize Table"),
         ui.card(ui.input_text("table_name", "Input Table Name", placeholder="Enter table name")),
         
         # Subheadings
@@ -327,6 +327,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name")),
         ui.card(ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name")),
         ui.card(ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name")),
+        width = 1,
         ),
     
     # Variable Selection UI (dynamically generated)
