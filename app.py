@@ -309,7 +309,7 @@ app_ui = ui.page_fluid(
             ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
             width = 1/2,
             ),
-        width= 1,
+        col_widths= 12,
         ),
     
     ui.layout_columns(
