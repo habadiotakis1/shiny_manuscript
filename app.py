@@ -307,8 +307,8 @@ app_ui = ui.page_fluid(
         ui.layout_columns(
             ui.card(ui.input_file("data_file", "", accept=[".csv", ".xlsx"])),
             ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
-            width= 1 / 2,
-            )
+            ),
+        width= 1 / 2,
         ),
     
     ui.layout_columns(
