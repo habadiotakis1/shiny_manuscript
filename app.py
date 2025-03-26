@@ -329,7 +329,7 @@ app_ui = ui.page_fluid(
     ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name"),
     ui.output_ui("var_settings_3"),
     ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"),
-    ui.output_ui("var_settings_1"),
+    ui.output_ui("var_settings_4"),
     
     
     # Variable Selection UI (dynamically generated)
@@ -360,11 +360,16 @@ app_ui = ui.page_fluid(
 ################################################################################
 def server(input, output, session):
     data = reactive.Value({})  # Store uploaded data
+    selected_columns = reactive.Value([])  # Store selected columns
     var_config = reactive.Value({})  # Store variable settings dynamically
     subheadings = reactive.Value({0:"",1:None,2:None,3:None})  # Store subheadings
     group_var = reactive.Value(None)  # Store grouping variable
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
+
+    @reactive.effect
+    def column_selectize():
+        selected_columns.set(input.column_selectize())
 
     @reactive.effect
     def save_configurations():
@@ -420,11 +425,17 @@ def server(input, output, session):
             
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
+    @reactive.event('subheading_2')
+    @reactive.event('subheading_3')
+    @reactive.event('subheading_4')
     def var_settings_1():
         if var_config.get():
-            df = data.get()
-            columns = df.columns.tolist()  # Get column names
-            columns = [re.sub(r'\W+', '', col) for col in columns]
+            columns = selected_columns.get()
+            subheading_cols = []
+            for col in columns:
+                if var_config.get()[col]["subheading"] == 1:
+                    subheading_cols.append(col)
+                
             return ui.layout_column_wrap(
             *[
                 ui.card(
@@ -452,10 +463,56 @@ def server(input, output, session):
                         [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
                         selected=100,
                     ),
-                    col_widths=(4, 3, 3, 3, 12),
+                    # col_widths=(4, 3, 3, 3, 12),
                     draggable=True,
                 )
-                for col in columns
+                for col in subheading_cols
+            ],
+            width='100%', # Each card takes up half the row
+            )
+    @output
+    @render.ui # @reactive.event()# @reactive.event(input.data_file)
+    @reactive.event('subheading_1')
+    @reactive.event('subheading_3')
+    @reactive.event('subheading_4')
+    def var_settings_2():
+        if var_config.get():
+            columns = selected_columns.get()
+            subheading_cols = []
+            for col in columns:
+                if var_config.get()[col]["subheading"] == 1:
+                    subheading_cols.append(col)
+            return ui.layout_column_wrap(
+            *[
+                ui.card(
+                    ui.h5(col),  # Column name title
+                    ui.input_select(
+                        f"var_type_{col}",
+                        "Variable Type",
+                        variable_types,
+                        selected=var_config.get()[col]["type"],
+                    ),
+                    ui.input_text(
+                        f"name_{col}",
+                        "Column Name",
+                        value=var_config.get()[col]["name"],
+                    ),
+                    ui.input_select(
+                        f"subheading_{col}",
+                        "Assign Subheading", 
+                        subheadings.get().values(), 
+                        selected=var_config.get()[col]["subheading"]
+                    ),
+                    ui.input_select(
+                        f"position_{col}",
+                        "Assign Position under Subheading", 
+                        [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+                        selected=100,
+                    ),
+                    # col_widths=(4, 3, 3, 3, 12),
+                    draggable=True,
+                )
+                for col in subheading_cols
             ],
             width='100%', # Each card takes up half the row
             )
