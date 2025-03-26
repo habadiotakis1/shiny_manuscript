@@ -393,7 +393,7 @@ def server(input, output, session):
     @render.ui
     def select_columns():
         return ui.input_selectize("column_selectize", "Select desired columns below:",  
-                {  "": {} },  
+                {  "": {"":""} },  
                 multiple=True,  
                 width="100%",
             )  
