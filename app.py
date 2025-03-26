@@ -440,15 +440,19 @@ def server(input, output, session):
         return ui.input_select("grouping_var", "Grouping Variable", choices=[])
 
     @reactive.calc
-    def _():
+    def available_grouping_vars():
         select_columns = input.column_selectize()
-        if len(select_columns) > 0:
-            ui.update_select("grouping_var", choices=select_columns, selected=select_columns[0])
+        return selected_columns if selected_columns else []
 
     @reactive.effect
-    def grouping_var():
+    def _():
+        choices = available_grouping_vars()
+        if choices:
+            ui.update_select("grouping_var", choices=choices, selected=choices[0])
+
+    @reactive.effect
+    def update_group_var():
         group_var.set(input.grouping_var())
-        
 
     @output
     @render.ui # @reactive.event()# @reactive.event(input.data_file)
