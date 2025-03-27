@@ -328,7 +328,7 @@ app_ui = ui.page_fluid(
         
         # Formatting Options
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
-        ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 2, min=0, max=5)),
+        ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
         col_widths= (4,2,2,2,2)
         ),
@@ -371,11 +371,18 @@ def server(input, output, session):
     data = reactive.Value({})  # Store uploaded data
     selected_columns = reactive.Value([])  # Store selected columns
     var_config = reactive.Value({})  # Store variable settings dynamically
-    subheadings = reactive.Value({0:"",1:None,2:None,3:None})  # Store subheadings
+    # subheadings = reactive.Value({0:"",1:None,2:None,3:None})  # Store subheadings
     group_var = reactive.Value(None)  # Store grouping variable
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
 
+        # Reactive values to track column assignments per subheading
+    subheadings = {
+        "subheading_1": reactive.Value([]),
+        "subheading_2": reactive.Value([]),
+        "subheading_3": reactive.Value([]),
+        "subheading_4": reactive.Value([])
+    }
 
     @reactive.effect
     def save_configurations():
@@ -453,100 +460,175 @@ def server(input, output, session):
     def update_group_var():
         group_var.set(input.grouping_var())
 
-    @output
-    @render.ui # @reactive.event()# @reactive.event(input.data_file)
-    @reactive.event(input.select_columns)
-    @reactive.event(input.subheading_2)
-    @reactive.event(input.subheading_3)
-    @reactive.event(input.subheading_4)
-    def var_settings_1():
-        if var_config.get():
-            columns = selected_columns.get()
-            subheading_cols = []
-            for col in columns:
-                if var_config.get()[col]["subheading"] == 0:
-                    subheading_cols.append(col)
+    # Available columns from file selection
+    @reactive.calc
+    def available_columns():
+        return input.column_selectize() if input.column_selectize() else []
+
+    # Assign all selected columns initially to Subheading 1
+    @reactive.effect
+    def initialize_columns():
+        if available_columns() and not any(subheadings.get()[key]() for key in subheadings):
+            subheadings["subheading_1"].set(available_columns())
+
+    # Function to generate UI for a given subheading
+    def generate_subheading_ui(subheading_key):
+        def render():
+            columns = subheadings[subheading_key]()
+            if not columns:
+                return ui.p("No variables assigned yet.")
+
+            return ui.card(
+                ui.div(
+                    *[
+                        ui.div(column, class_="draggable-item", id=f"{subheading_key}_{column}")
+                        for column in columns
+                    ],
+                    class_="sortable-list", id=subheading_key
+                ),
+                class_="droppable-area"
+            )
+
+        return render
+
+    # Create dynamic UI outputs for each subheading
+    for key in subheadings:
+        output[key.replace("subheading", "var_settings")] = render.ui(generate_subheading_ui(key))
+
+    # JavaScript-based drag-and-drop event handling (requires external JS)
+    ui.include_script("https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js")
+    ui.script(
+        """
+        document.addEventListener("DOMContentLoaded", function () {
+            const subheadings = ["subheading_1", "subheading_2", "subheading_3", "subheading_4"];
+            subheadings.forEach(subheading => {
+                new Sortable(document.getElementById(subheading), {
+                    group: "shared",
+                    animation: 150,
+                    onEnd: function (evt) {
+                        const movedItem = evt.item.textContent;
+                        const from = evt.from.id;
+                        const to = evt.to.id;
+                        Shiny.setInputValue("move_variable", {variable: movedItem, from: from, to: to}, {priority: "event"});
+                    }
+                });
+            });
+        });
+        """
+    )
+
+    # Reactively handle moving variables between subheadings
+    @reactive.effect
+    def handle_move():
+        move_data = input.move_variable()
+        if not move_data:
+            return
+
+        variable, from_section, to_section = move_data["variable"], move_data["from"], move_data["to"]
+
+        if from_section in subheadings and to_section in subheadings:
+            # Remove from old list
+            old_list = subheadings[from_section]()
+            if variable in old_list:
+                old_list.remove(variable)
+                subheadings[from_section].set(old_list)
+
+            # Add to new list
+            new_list = subheadings[to_section]()
+            new_list.append(variable)
+            subheadings[to_section].set(new_list)
+
+    # @output
+    # @render.ui 
+    # def var_settings_1():
+    #     if var_config.get():
+    #         columns = selected_columns.get()
+    #         subheading_cols = []
+    #         for col in columns:
+    #             if var_config.get()[col]["subheading"] == 0:
+    #                 subheading_cols.append(col)
                 
-            return ui.layout_column_wrap(
-            *[
-                ui.card(
-                    ui.h5(col),  # Column name title
-                    ui.input_select(
-                        f"var_type_{col}",
-                        "Variable Type",
-                        variable_types,
-                        selected=var_config.get()[col]["type"],
-                    ),
-                    ui.input_text(
-                        f"name_{col}",
-                        "Column Name",
-                        value=var_config.get()[col]["name"],
-                    ),
-                    ui.input_select(
-                        f"subheading_{col}",
-                        "Assign Subheading", 
-                        subheadings.get().values(), 
-                        selected=var_config.get()[col]["subheading"]
-                    ),
-                    ui.input_select(
-                        f"position_{col}",
-                        "Assign Position under Subheading", 
-                        [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-                        selected=100,
-                    ),
-                    # col_widths=(4, 3, 3, 3, 12),
-                    draggable=True,
-                )
-                for col in subheading_cols
-            ],
-            width='100%', # Each card takes up half the row
-            )
-    @output
-    @render.ui # @reactive.event()# @reactive.event(input.data_file)
-    @reactive.event(input.subheading_1)
-    @reactive.event(input.subheading_3)
-    @reactive.event(input.subheading_4)
-    def var_settings_2():
-        if var_config.get():
-            columns = selected_columns.get()
-            subheading_cols = []
-            for col in columns:
-                if var_config.get()[col]["subheading"] == 1:
-                    subheading_cols.append(col)
-            return ui.layout_column_wrap(
-            *[
-                ui.card(
-                    ui.h5(col),  # Column name title
-                    ui.input_select(
-                        f"var_type_{col}",
-                        "Variable Type",
-                        variable_types,
-                        selected=var_config.get()[col]["type"],
-                    ),
-                    ui.input_text(
-                        f"name_{col}",
-                        "Column Name",
-                        value=var_config.get()[col]["name"],
-                    ),
-                    ui.input_select(
-                        f"subheading_{col}",
-                        "Assign Subheading", 
-                        subheadings.get().values(), 
-                        selected=var_config.get()[col]["subheading"]
-                    ),
-                    ui.input_select(
-                        f"position_{col}",
-                        "Assign Position under Subheading", 
-                        [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-                        selected=100,
-                    ),
-                    # col_widths=(4, 3, 3, 3, 12),
-                    draggable=True,
-                )
-                for col in subheading_cols
-            ],
-            width='100%', # Each card takes up half the row
-            )
+    #         return ui.layout_column_wrap(
+    #         *[
+    #             ui.card(
+    #                 ui.h5(col),  # Column name title
+    #                 ui.input_text(
+    #                     f"name_{col}",
+    #                     "Column Name",
+    #                     value=var_config.get()[col]["name"],
+    #                 ),
+    #                 ui.input_select(
+    #                     f"var_type_{col}",
+    #                     "Variable Type",
+    #                     variable_types,
+    #                     selected=var_config.get()[col]["type"],
+    #                 ),
+    #                 ui.input_select(
+    #                     f"subheading_{col}",
+    #                     "Subheading", 
+    #                     subheadings.get().values(), 
+    #                     selected=var_config.get()[col]["subheading"]
+    #                 ),
+    #                 ui.input_select(
+    #                     f"position_{col}",
+    #                     "Position", 
+    #                     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+    #                     selected=100,
+    #                 ),
+    #                 col_widths=(3, 3, 2, 2, 2),
+    #                 draggable=True,
+    #             )
+    #             for col in subheading_cols
+    #         ],
+    #         width='100%', # Each card takes up half the row
+    #         )
+        
+    # @output
+    # @render.ui # @reactive.event()# @reactive.event(input.data_file)
+    # @reactive.event(input.subheading_1)
+    # @reactive.event(input.subheading_3)
+    # @reactive.event(input.subheading_4)
+    # def var_settings_2():
+    #     if var_config.get():
+    #         columns = selected_columns.get()
+    #         subheading_cols = []
+    #         for col in columns:
+    #             if var_config.get()[col]["subheading"] == 1:
+    #                 subheading_cols.append(col)
+    #         return ui.layout_column_wrap(
+    #         *[
+    #             ui.card(
+    #                 ui.h5(col),  # Column name title
+    #                 ui.input_select(
+    #                     f"var_type_{col}",
+    #                     "Variable Type",
+    #                     variable_types,
+    #                     selected=var_config.get()[col]["type"],
+    #                 ),
+    #                 ui.input_text(
+    #                     f"name_{col}",
+    #                     "Column Name",
+    #                     value=var_config.get()[col]["name"],
+    #                 ),
+    #                 ui.input_select(
+    #                     f"subheading_{col}",
+    #                     "Assign Subheading", 
+    #                     subheadings.get().values(), 
+    #                     selected=var_config.get()[col]["subheading"]
+    #                 ),
+    #                 ui.input_select(
+    #                     f"position_{col}",
+    #                     "Assign Position under Subheading", 
+    #                     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+    #                     selected=100,
+    #                 ),
+    #                 # col_widths=(4, 3, 3, 3, 12),
+    #                 draggable=True,
+    #             )
+    #             for col in subheading_cols
+    #         ],
+    #         width='100%', # Each card takes up half the row
+    #         )
             # file_info = input.data_file()[0]
             # ext = os.path.splitext(file_info["name"])[-1]
             
