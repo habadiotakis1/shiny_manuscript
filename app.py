@@ -508,7 +508,7 @@ def server(input, output, session):
     # Assign all selected columns initially to Subheading 1
     @reactive.effect
     def initialize_columns():
-        if available_columns() and not any(subheadings.get()[key]() for key in subheadings):
+        if available_columns() and not any(subheadings[key]() for key in subheadings):
             subheadings["subheading_1"].set(available_columns())
 
     # # Function to generate UI for a given subheading
