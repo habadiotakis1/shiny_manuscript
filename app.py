@@ -428,7 +428,7 @@ def server(input, output, session):
                     "position": default_position,
                 } for col in columns})
 
-            return ui.update_selectize(  
+            ui.update_selectize(  
                 "column_selectize",  
                 {  
                     "": column_dict,  
@@ -451,7 +451,7 @@ def server(input, output, session):
         if choices:
             ui.update_select("grouping_var", choices=choices, selected=choices[0])
 
-    @reactive.effect
+    @reactive.calc
     def update_group_var():
         group_var.set(input.grouping_var())
 
