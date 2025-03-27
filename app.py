@@ -430,7 +430,7 @@ def server(input, output, session):
 
             ui.update_selectize(  
                 "column_selectize",  
-                column_dict
+                choices={"":column_dict}
             )  
 
     @reactive.calc
