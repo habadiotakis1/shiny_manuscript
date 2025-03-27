@@ -436,6 +436,9 @@ def server(input, output, session):
                     "position": default_position,
                 } for col in columns})
 
+            if not subheadings["subheading_1"].get():
+                subheadings["subheading_1"].set(columns)
+
             ui.update_selectize(  
                 "column_selectize",  
                 choices={"":column_dict}
@@ -467,7 +470,7 @@ def server(input, output, session):
         if not columns:
             return ui.p("No variables assigned yet.")
 
-        return ui.layout_column_wrap(
+        return ui.layout_columns(
             *[
                 ui.card(
                     ui.h5(col),
@@ -482,7 +485,7 @@ def server(input, output, session):
                         variable_types,
                         # selected=var_config.get()[col]["type"],
                     ),
-                    # col_widths=(4, 4, 4),
+                    col_widths=(4, 4, 4),
                     class_="draggable-list",
                     id=f"{subheading_key}_{col}"
                 )
@@ -524,11 +527,11 @@ def server(input, output, session):
 
     
     # Assign all selected columns initially to Subheading 1
-    @reactive.effect
-    def initialize_columns():
-        available_columns = input.column_selectize()
-        if available_columns and not any(subheadings[key]() for key in subheadings):
-            subheadings["subheading_1"].set(available_columns)
+    # @reactive.effect
+    # def initialize_columns():
+    #     available_columns = input.column_selectize()
+    #     if available_columns and not any(subheadings[key]() for key in subheadings):
+    #         subheadings["subheading_1"].set(available_columns)
 
     # # Create dynamic UI outputs for each subheading
     # for key in subheadings:
