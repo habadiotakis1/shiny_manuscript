@@ -384,16 +384,16 @@ def server(input, output, session):
         "subheading_4": reactive.Value([])
     }
 
-    @reactive.effect
-    def save_configurations():
-        subheadings.set({
-            0: input.subheading_1(),
-            1: input.subheading_2(),
-            2: input.subheading_3(),
-            3: input.subheading_4()
-        })
-        decimal_places.set(input.decimals_table())
-        output_format.set(input.output_format())
+    # @reactive.effect
+    # def save_configurations():
+    #     subheadings.set({
+    #         0: input.subheading_1(),
+    #         1: input.subheading_2(),
+    #         2: input.subheading_3(),
+    #         3: input.subheading_4()
+    #     })
+    #     decimal_places.set(input.decimals_table())
+    #     output_format.set(input.output_format())
 
     # Select columns for analysis
     @output
@@ -827,15 +827,15 @@ def server(input, output, session):
         return "Configuration saved!"
 
     # Load Configuration Button - Trigger to load saved settings
-    @reactive.event(input.load_config)
-    def load_configuration():
-        ui.input_file("config_file", "Upload pkl file", accept=[".pkl"])
-        config = load_config(input.config_file)  # Load the config from a file
-        if config:
-            var_config.set(config["var_config"])
-            subheadings.set(config["subheadings"])
-            group_var.set(config["group_var"])
-            return "Configuration loaded!"
-        return "No saved configuration found."
+    # @reactive.event(input.load_config)
+    # def load_configuration():
+    #     ui.input_file("config_file", "Upload pkl file", accept=[".pkl"])
+    #     config = load_config(input.config_file)  # Load the config from a file
+    #     if config:
+    #         var_config.set(config["var_config"])
+    #         subheadings.set(config["subheadings"])
+    #         group_var.set(config["group_var"])
+    #         return "Configuration loaded!"
+    #     return "No saved configuration found."
 
 app = App(app_ui, server)
