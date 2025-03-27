@@ -471,28 +471,28 @@ def server(input, output, session):
             return ui.p("No variables assigned yet.")
 
         return ui.layout_columns(
-            *[
-                ui.card(
-                    ui.h5(col),
-                    ui.input_text(
-                        f"name_{col}",
-                        "Column Name",
-                        value=var_config.get()[col]["name"],
-                    ),
-                    ui.input_select(
-                        f"var_type_{col}",
-                        "Variable Type",
-                        variable_types,
-                        # selected=var_config.get()[col]["type"],
-                    ),
-                    col_widths=(4, 4, 4),
-                    class_="draggable-list",
-                    id=f"{subheading_key}_{col}"
-                )
-                for col in columns
-            ],
-            width=1, # Each card takes up half the row
-            class_="droppable-area",
+        *[
+            ui.card(
+                ui.h5(col),
+            #     ui.input_text(
+            #         f"name_{col}",
+            #         "Column Name",
+            #         value=var_config.get()[col]["name"],
+            #     ),
+            #     ui.input_select(
+            #         f"var_type_{col}",
+            #         "Variable Type",
+            #         variable_types,
+            #         # selected=var_config.get()[col]["type"],
+            #     ),
+            #     col_widths=(4, 4, 4),
+            #     class_="draggable-list",
+            #     id=f"{subheading_key}_{col}"
+            )
+            for col in columns
+        ],
+        width=1, # Each card takes up half the row
+        class_="droppable-area",
         )
         # return ui.card(
         #     ui.div(
