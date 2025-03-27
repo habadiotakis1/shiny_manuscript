@@ -15,6 +15,7 @@ from docx.shared import Pt, Cm, Inches
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 import pickle
+import json
 
 # set default and alternative statistical tests
 default_tests = {
@@ -508,26 +509,6 @@ def server(input, output, session):
         if available_columns and not any(subheadings[key]() for key in subheadings):
             subheadings["subheading_1"].set(available_columns)
 
-    # # Function to generate UI for a given subheading
-    # def generate_subheading_ui(subheading_key):
-    #     def render():
-    #         columns = subheadings[subheading_key]()
-    #         if not columns:
-    #             return ui.p("No variables assigned yet.")
-
-    #         return ui.card(
-    #             ui.div(
-    #                 *[
-    #                     ui.div(column, class_="draggable-item", id=f"{subheading_key}_{column}")
-    #                     for column in columns
-    #                 ],
-    #                 class_="sortable-list", id=subheading_key
-    #             ),
-    #             class_="droppable-area"
-    #         )
-
-    #     return render
-
     # # Create dynamic UI outputs for each subheading
     # for key in subheadings:
     #     output[key.replace("subheading", "var_settings")] = render.ui(generate_subheading_ui(key))
@@ -553,7 +534,49 @@ def server(input, output, session):
     #     });
     #     """
     # )
+    # Render dynamic UI for each subheading
+    for key in subheadings:
+        output[key.replace("subheading", "var_settings")] = render.ui(
+            lambda key=key: generate_subheading_ui(key)
+        )
 
+    # JavaScript to enable drag-and-drop using SortableJS
+    ui.tags.script(
+        """
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll('.draggable-list').forEach(list => {
+                new Sortable(list, {
+                    group: 'shared',
+                    animation: 150,
+                    onEnd: function(evt) {
+                        let movedVar = evt.item.dataset.var;
+                        let newGroup = evt.to.id.replace('list-', '');
+                        
+                        // Update the server-side reactive variable
+                        Shiny.setInputValue("dragged_var", JSON.stringify({movedVar, newGroup}));
+                    }
+                });
+            });
+        });
+        """
+    )
+    # Handle drag-and-drop updates in the server
+    @reactive.effect
+    def update_subheadings():
+        drag_event = input.dragged_var()
+        if drag_event:
+            drag_data = json.loads(drag_event)
+            moved_var = drag_data["movedVar"]
+            new_group = drag_data["newGroup"]
+
+            # Remove from old subheading
+            for key in subheadings:
+                if moved_var in subheadings[key]():
+                    subheadings[key].set([v for v in subheadings[key]() if v != moved_var])
+
+            # Add to new subheading
+            subheadings[new_group].set(subheadings[new_group]() + [moved_var])
+            
     # # Reactively handle moving variables between subheadings
     # @reactive.effect
     # def handle_move():
@@ -808,13 +831,8 @@ def server(input, output, session):
     # def download_table():
     #     df = data.get()
     #     if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-    #         return
+    #         return    
         
-        create_scientific_table(input.table_name, subheadings.get(), data.get(), group_var.get(), var_config.get())
-        clean_title = re.sub(r'\W+', '', input.table_name)
-        df.to_csv(f"{clean_title}.csv", index=False)
-        return f"{clean_title}.csv"
-    
     # Save Configuration Button - Trigger to save settings
     @reactive.event(input.save_config)
     def save_configuration():
