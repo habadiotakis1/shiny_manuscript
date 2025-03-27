@@ -376,7 +376,7 @@ def server(input, output, session):
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
 
-        # Reactive values to track column assignments per subheading
+    # Reactive values to track column assignments per subheading
     subheadings = {
         "subheading_1": reactive.Value([]),
         "subheading_2": reactive.Value([]),
@@ -500,16 +500,13 @@ def server(input, output, session):
     def var_settings_4():
         return generate_subheading_ui("subheading_4")()
 
-    # Available columns from file selection
-    @reactive.calc
-    def available_columns():
-        return input.column_selectize() if input.column_selectize() else []
-
+    
     # Assign all selected columns initially to Subheading 1
     @reactive.effect
     def initialize_columns():
-        if available_columns() and not any(subheadings[key]() for key in subheadings):
-            subheadings["subheading_1"].set(available_columns())
+        available_columns = input.column_selectize()
+        if available_columns and not any(subheadings[key]() for key in subheadings):
+            subheadings["subheading_1"].set(available_columns)
 
     # # Function to generate UI for a given subheading
     # def generate_subheading_ui(subheading_key):
