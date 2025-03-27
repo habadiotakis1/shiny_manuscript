@@ -534,11 +534,12 @@ def server(input, output, session):
     #     });
     #     """
     # )
+
     # Render dynamic UI for each subheading
-    for key in subheadings:
-        output[key.replace("subheading", "var_settings")] = render.ui(
-            lambda key=key: generate_subheading_ui(key)
-        )
+    @reactive.effect
+    def _():
+        for subheading in subheadings:
+            generate_subheading_ui(subheading)
 
     # JavaScript to enable drag-and-drop using SortableJS
     ui.tags.script(
