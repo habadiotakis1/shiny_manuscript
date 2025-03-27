@@ -460,18 +460,7 @@ def server(input, output, session):
     def update_group_var():
         group_var.set(input.grouping_var())
 
-    # Available columns from file selection
-    @reactive.calc
-    def available_columns():
-        return input.column_selectize() if input.column_selectize() else []
-
-    # Assign all selected columns initially to Subheading 1
-    @reactive.effect
-    def initialize_columns():
-        if available_columns() and not any(subheadings.get()[key]() for key in subheadings):
-            subheadings["subheading_1"].set(available_columns())
-
-    # Function to generate UI for a given subheading
+    # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
         def render():
             columns = subheadings[subheading_key]()
@@ -490,53 +479,104 @@ def server(input, output, session):
             )
 
         return render
+        
+    @output
+    @render.ui
+    def var_settings_1():
+        return generate_subheading_ui("subheading_1")()
 
-    # Create dynamic UI outputs for each subheading
-    for key in subheadings:
-        output[key.replace("subheading", "var_settings")] = render.ui(generate_subheading_ui(key))
+    @output
+    @render.ui
+    def var_settings_2():
+        return generate_subheading_ui("subheading_2")()
 
-    # JavaScript-based drag-and-drop event handling (requires external JS)
-    ui.include_script("https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js")
-    ui.script(
-        """
-        document.addEventListener("DOMContentLoaded", function () {
-            const subheadings = ["subheading_1", "subheading_2", "subheading_3", "subheading_4"];
-            subheadings.forEach(subheading => {
-                new Sortable(document.getElementById(subheading), {
-                    group: "shared",
-                    animation: 150,
-                    onEnd: function (evt) {
-                        const movedItem = evt.item.textContent;
-                        const from = evt.from.id;
-                        const to = evt.to.id;
-                        Shiny.setInputValue("move_variable", {variable: movedItem, from: from, to: to}, {priority: "event"});
-                    }
-                });
-            });
-        });
-        """
-    )
+    @output
+    @render.ui
+    def var_settings_3():
+        return generate_subheading_ui("subheading_3")()
 
-    # Reactively handle moving variables between subheadings
+    @output
+    @render.ui
+    def var_settings_4():
+        return generate_subheading_ui("subheading_4")()
+
+    # Available columns from file selection
+    @reactive.calc
+    def available_columns():
+        return input.column_selectize() if input.column_selectize() else []
+
+    # Assign all selected columns initially to Subheading 1
     @reactive.effect
-    def handle_move():
-        move_data = input.move_variable()
-        if not move_data:
-            return
+    def initialize_columns():
+        if available_columns() and not any(subheadings.get()[key]() for key in subheadings):
+            subheadings["subheading_1"].set(available_columns())
 
-        variable, from_section, to_section = move_data["variable"], move_data["from"], move_data["to"]
+    # # Function to generate UI for a given subheading
+    # def generate_subheading_ui(subheading_key):
+    #     def render():
+    #         columns = subheadings[subheading_key]()
+    #         if not columns:
+    #             return ui.p("No variables assigned yet.")
 
-        if from_section in subheadings and to_section in subheadings:
-            # Remove from old list
-            old_list = subheadings[from_section]()
-            if variable in old_list:
-                old_list.remove(variable)
-                subheadings[from_section].set(old_list)
+    #         return ui.card(
+    #             ui.div(
+    #                 *[
+    #                     ui.div(column, class_="draggable-item", id=f"{subheading_key}_{column}")
+    #                     for column in columns
+    #                 ],
+    #                 class_="sortable-list", id=subheading_key
+    #             ),
+    #             class_="droppable-area"
+    #         )
 
-            # Add to new list
-            new_list = subheadings[to_section]()
-            new_list.append(variable)
-            subheadings[to_section].set(new_list)
+    #     return render
+
+    # # Create dynamic UI outputs for each subheading
+    # for key in subheadings:
+    #     output[key.replace("subheading", "var_settings")] = render.ui(generate_subheading_ui(key))
+
+    # # JavaScript-based drag-and-drop event handling (requires external JS)
+    # ui.include_script("https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js")
+    # ui.script(
+    #     """
+    #     document.addEventListener("DOMContentLoaded", function () {
+    #         const subheadings = ["subheading_1", "subheading_2", "subheading_3", "subheading_4"];
+    #         subheadings.forEach(subheading => {
+    #             new Sortable(document.getElementById(subheading), {
+    #                 group: "shared",
+    #                 animation: 150,
+    #                 onEnd: function (evt) {
+    #                     const movedItem = evt.item.textContent;
+    #                     const from = evt.from.id;
+    #                     const to = evt.to.id;
+    #                     Shiny.setInputValue("move_variable", {variable: movedItem, from: from, to: to}, {priority: "event"});
+    #                 }
+    #             });
+    #         });
+    #     });
+    #     """
+    # )
+
+    # # Reactively handle moving variables between subheadings
+    # @reactive.effect
+    # def handle_move():
+    #     move_data = input.move_variable()
+    #     if not move_data:
+    #         return
+
+    #     variable, from_section, to_section = move_data["variable"], move_data["from"], move_data["to"]
+
+    #     if from_section in subheadings and to_section in subheadings:
+    #         # Remove from old list
+    #         old_list = subheadings[from_section]()
+    #         if variable in old_list:
+    #             old_list.remove(variable)
+    #             subheadings[from_section].set(old_list)
+
+    #         # Add to new list
+    #         new_list = subheadings[to_section]()
+    #         new_list.append(variable)
+    #         subheadings[to_section].set(new_list)
 
     # @output
     # @render.ui 
