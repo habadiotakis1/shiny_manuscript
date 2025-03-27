@@ -463,24 +463,56 @@ def server(input, output, session):
 
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
-        def render():
-            columns = subheadings[subheading_key]()
-            if not columns:
-                return ui.p("No variables assigned yet.")
+        columns = subheadings[subheading_key]()
+        if not columns:
+            return ui.p("No variables assigned yet.")
 
-            return ui.card(
-                ui.div(
-                    *[
-                        ui.div(column, class_="draggable-item", id=f"{subheading_key}_{column}")
-                        for column in columns
-                    ],
-                    class_="sortable-list", id=subheading_key
-                ),
-                class_="droppable-area"
-            )
+        return ui.layout_column_wrap(
+            *[
+                ui.card(
+                    ui.h5(col),
+                    ui.input_text(
+                        f"name_{col}",
+                        "Column Name",
+                        value=var_config.get()[col]["name"],
+                    ),
+                    ui.input_select(
+                        f"var_type_{col}",
+                        "Variable Type",
+                        variable_types,
+                        # selected=var_config.get()[col]["type"],
+                    ),
+                    # ui.input_select(
+                    #     f"subheading_{col}",
+                    #     "Assign Subheading", 
+                    #     subheading_options, 
+                    #     # selected=var_config.get()[col]["subheading"]
+                    # ),
+                    # ui.input_select(
+                    #     f"position_{col}",
+                    #     "Assign Position under Subheading", 
+                    #     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+                    #     selected=100,
+                    # ),
+                    col_widths=(4, 4, 4),
+                    class_="draggable-list",
+                    id=f"{subheading_key}_{col}"
+                )
+                for col in columns
+            ],
+            width=1, # Each card takes up half the row
+        )
+        # return ui.card(
+        #     ui.div(
+        #         *[
+        #             ui.div(column, class_="draggable-item", id=f"{subheading_key}_{column}")
+        #             for column in columns
+        #         ],
+        #         class_="sortable-list", id=subheading_key
+        #     ),
+        #     class_="droppable-area"
+        # )
 
-        return render
-        
     @output
     @render.ui
     def var_settings_1():
