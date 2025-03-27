@@ -516,22 +516,22 @@ def server(input, output, session):
     @output
     @render.ui
     def var_settings_1():
-        return generate_subheading_ui("subheading_1")()
+        return generate_subheading_ui("subheading_1")
 
     @output
     @render.ui
     def var_settings_2():
-        return generate_subheading_ui("subheading_2")()
+        return generate_subheading_ui("subheading_2")
 
     @output
     @render.ui
     def var_settings_3():
-        return generate_subheading_ui("subheading_3")()
+        return generate_subheading_ui("subheading_3")
 
     @output
     @render.ui
     def var_settings_4():
-        return generate_subheading_ui("subheading_4")()
+        return generate_subheading_ui("subheading_4")
 
     
     # Assign all selected columns initially to Subheading 1
