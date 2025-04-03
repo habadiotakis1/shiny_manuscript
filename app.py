@@ -374,6 +374,7 @@ def server(input, output, session):
     var_config = reactive.Value({})  # Store variable settings dynamically
     # subheadings = reactive.Value({0:"",1:None,2:None,3:None})  # Store subheadings
     group_var = reactive.Value(None)  # Store grouping variable
+    previous_group_var = reactive.Value(None)
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
 
@@ -431,8 +432,10 @@ def server(input, output, session):
 
     @reactive.calc
     def column_selectize():
-        selected_columns.set(input.column_selectize())
-        subheadings["subheading_1"].set(selected_columns.get())
+        available_columns = input.column_selectize()
+        selected_columns.set(available_columns)
+        if available_columns:
+            subheadings["subheading_1"].set(available_columns)
     
     # Set Grouping Variable for analysis
     @output
@@ -446,9 +449,60 @@ def server(input, output, session):
         if choices:
             ui.update_select("grouping_var", choices=choices, selected=choices[0])
 
-    @reactive.calc
+    @reactive.effect
     def update_group_var():
-        group_var.set(input.grouping_var())
+        new_group = input.grouping_var()
+        old_group = group_var()
+        
+        if not new_group or new_group == old_group:
+            return
+
+        # If there's a previous group_var, ask the user where to put it
+        if old_group:
+            ui.modal_show(
+                ui.modal(
+                    ui.h5("Move Previous Grouping Variable"),
+                    ui.p(f"Where should '{old_group}' be moved?"),
+                    ui.input_select(
+                        "subheading_choice",
+                        "Select Subheading",
+                        choices=list(subheadings.keys()),
+                    ),
+                    ui.input_action_button("confirm_subheading", "Confirm"),
+                    easy_close=False,
+                )
+            )
+
+            # Define an observer for when the user confirms their choice
+            @reactive.effect
+            def move_old_group_var():
+                if input.confirm_subheading() > 0:  # Button clicked
+                    chosen_subheading = input.subheading_choice()
+                    if chosen_subheading:
+                        subheadings[chosen_subheading].set(
+                            subheadings[chosen_subheading]() + [old_group]
+                        )
+                    ui.modal_remove()  # Close modal after selection
+
+        # Update tracking variables
+        previous_group_var.set(old_group)
+        group_var.set(new_group)
+        # # 1. Remove new group var from subheadings
+        # for key in subheadings:
+        #     updated_cols = [col for col in subheadings[key]() if col != new_group]
+        #     subheadings[key].set(updated_cols)
+
+        # # 2. Add previous group var back into first available subheading
+        # if old_group:
+        #     for key in subheadings:
+        #         cols = subheadings[key]()
+        #         if old_group not in cols:
+        #             subheadings[key].set(cols + [old_group])
+        #             break
+
+        # # 3. Save the new group_var
+        # previous_group_var.set(old_group)
+        # group_var.set(new_group)
 
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
@@ -588,182 +642,6 @@ def server(input, output, session):
             # Add to new subheading
             subheadings[new_group].set(subheadings[new_group]() + [moved_var])
             
-    # # Reactively handle moving variables between subheadings
-    # @reactive.effect
-    # def handle_move():
-    #     move_data = input.move_variable()
-    #     if not move_data:
-    #         return
-
-    #     variable, from_section, to_section = move_data["variable"], move_data["from"], move_data["to"]
-
-    #     if from_section in subheadings and to_section in subheadings:
-    #         # Remove from old list
-    #         old_list = subheadings[from_section]()
-    #         if variable in old_list:
-    #             old_list.remove(variable)
-    #             subheadings[from_section].set(old_list)
-
-    #         # Add to new list
-    #         new_list = subheadings[to_section]()
-    #         new_list.append(variable)
-    #         subheadings[to_section].set(new_list)
-
-    # @output
-    # @render.ui 
-    # def var_settings_1():
-    #     if var_config.get():
-    #         columns = selected_columns.get()
-    #         subheading_cols = []
-    #         for col in columns:
-    #             if var_config.get()[col]["subheading"] == 0:
-    #                 subheading_cols.append(col)
-                
-    #         return ui.layout_column_wrap(
-    #         *[
-    #             ui.card(
-    #                 ui.h5(col),  # Column name title
-    #                 ui.input_text(
-    #                     f"name_{col}",
-    #                     "Column Name",
-    #                     value=var_config.get()[col]["name"],
-    #                 ),
-    #                 ui.input_select(
-    #                     f"var_type_{col}",
-    #                     "Variable Type",
-    #                     variable_types,
-    #                     selected=var_config.get()[col]["type"],
-    #                 ),
-    #                 ui.input_select(
-    #                     f"subheading_{col}",
-    #                     "Subheading", 
-    #                     subheadings.get().values(), 
-    #                     selected=var_config.get()[col]["subheading"]
-    #                 ),
-    #                 ui.input_select(
-    #                     f"position_{col}",
-    #                     "Position", 
-    #                     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-    #                     selected=100,
-    #                 ),
-    #                 col_widths=(3, 3, 2, 2, 2),
-    #                 draggable=True,
-    #             )
-    #             for col in subheading_cols
-    #         ],
-    #         width='100%', # Each card takes up half the row
-    #         )
-        
-    # @output
-    # @render.ui # @reactive.event()# @reactive.event(input.data_file)
-    # @reactive.event(input.subheading_1)
-    # @reactive.event(input.subheading_3)
-    # @reactive.event(input.subheading_4)
-    # def var_settings_2():
-    #     if var_config.get():
-    #         columns = selected_columns.get()
-    #         subheading_cols = []
-    #         for col in columns:
-    #             if var_config.get()[col]["subheading"] == 1:
-    #                 subheading_cols.append(col)
-    #         return ui.layout_column_wrap(
-    #         *[
-    #             ui.card(
-    #                 ui.h5(col),  # Column name title
-    #                 ui.input_select(
-    #                     f"var_type_{col}",
-    #                     "Variable Type",
-    #                     variable_types,
-    #                     selected=var_config.get()[col]["type"],
-    #                 ),
-    #                 ui.input_text(
-    #                     f"name_{col}",
-    #                     "Column Name",
-    #                     value=var_config.get()[col]["name"],
-    #                 ),
-    #                 ui.input_select(
-    #                     f"subheading_{col}",
-    #                     "Assign Subheading", 
-    #                     subheadings.get().values(), 
-    #                     selected=var_config.get()[col]["subheading"]
-    #                 ),
-    #                 ui.input_select(
-    #                     f"position_{col}",
-    #                     "Assign Position under Subheading", 
-    #                     [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-    #                     selected=100,
-    #                 ),
-    #                 # col_widths=(4, 3, 3, 3, 12),
-    #                 draggable=True,
-    #             )
-    #             for col in subheading_cols
-    #         ],
-    #         width='100%', # Each card takes up half the row
-    #         )
-            # file_info = input.data_file()[0]
-            # ext = os.path.splitext(file_info["name"])[-1]
-            
-            # if ext == ".csv":
-            #     df = pd.read_csv(file_info["datapath"])  # Reads header row by default
-            # elif ext == ".xlsx":
-            #     df = pd.read_excel(file_info["datapath"])
-
-            # data.set(df)  # Store data in reactive value
-            # columns = df.columns.tolist()  # Get column names
-            # columns = [re.sub(r'\W+', '', col) for col in columns]
-
-            # subheading_options = [""] + [s for s in subheadings.get().values() if s]
-            # default_type = "Omit"
-            # default_position = 100
-
-            # # Store variable settings in a dictionary
-            # if not var_config.get():
-            #     var_config.set({col: {
-            #         "type": default_type, 
-            #         "name": col, 
-            #         "subheading": "None",
-            #         "position": default_position,
-            #         "p_value": None,
-            #     } for col in columns})
-
-            # Output grouping variable selection UI dynamically
-            # ui.update_select(
-            #     "group_var", 
-            #     choices=columns
-            # )
-
-        #     return ui.layout_column_wrap(
-        #     *[
-        #         ui.card(
-        #             ui.h5(col),  # Column name title
-        #             ui.input_select(
-        #                 f"var_type_{col}",
-        #                 "Variable Type",
-        #                 variable_types,
-        #                 # selected=var_config.get()[col]["type"],
-        #             ),
-        #             ui.input_text(
-        #                 f"name_{col}",
-        #                 "Column Name",
-        #                 value=var_config.get()[col]["name"],
-        #             ),
-        #             ui.input_select(
-        #                 f"subheading_{col}",
-        #                 "Assign Subheading", 
-        #                 subheading_options, 
-        #                 # selected=var_config.get()[col]["subheading"]
-        #             ),
-        #             ui.input_select(
-        #                 f"position_{col}",
-        #                 "Assign Position under Subheading", 
-        #                 [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-        #                 selected=100,
-        #             ),
-        #         )
-        #         for col in columns
-        #     ],
-        #     width=1 / 2, # Each card takes up half the row
-        # )
     
     # Update variable settings dynamically when inputs change
     @reactive.effect
@@ -837,34 +715,5 @@ def server(input, output, session):
         doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings.get())
         
         return doc_filename  # Return the Word document file for download
-
-    # @reactive.event(input.download_table)
-    # def download_table():
-    #     df = data.get()
-    #     if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-    #         return    
-        
-    # # Save Configuration Button - Trigger to save settings
-    # @reactive.event(input.save_config)
-    # def save_configuration():
-    #     config_to_save = {
-    #         "var_config": var_config.get(),
-    #         "subheadings": subheadings.get(),
-    #         "group_var": group_var.get()
-    #     }
-    #     save_config(config_to_save)  # Save the config to a file
-    #     return "Configuration saved!"
-
-    # Load Configuration Button - Trigger to load saved settings
-    # @reactive.event(input.load_config)
-    # def load_configuration():
-    #     ui.input_file("config_file", "Upload pkl file", accept=[".pkl"])
-    #     config = load_config(input.config_file)  # Load the config from a file
-    #     if config:
-    #         var_config.set(config["var_config"])
-    #         subheadings.set(config["subheadings"])
-    #         group_var.set(config["group_var"])
-    #         return "Configuration loaded!"
-    #     return "No saved configuration found."
 
 app = App(app_ui, server)
