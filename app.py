@@ -385,18 +385,6 @@ def server(input, output, session):
         "subheading_4": reactive.Value([])
     }
 
-    # @reactive.effect
-    # def save_configurations():
-    #     subheadings.set({
-    #         0: input.subheading_1(),
-    #         1: input.subheading_2(),
-    #         2: input.subheading_3(),
-    #         3: input.subheading_4()
-    #     })
-    #     decimal_places.set(input.decimals_table())
-    #     output_format.set(input.output_format())
-
-    # Select columns for analysis
     @output
     @render.ui
     def select_columns():
@@ -436,9 +424,6 @@ def server(input, output, session):
                     "position": default_position,
                 } for col in columns})
 
-            if not subheadings["subheading_1"].get():
-                subheadings["subheading_1"].set(columns)
-
             ui.update_selectize(  
                 "column_selectize",  
                 choices={"":column_dict}
@@ -447,6 +432,7 @@ def server(input, output, session):
     @reactive.calc
     def column_selectize():
         selected_columns.set(input.column_selectize())
+        subheadings["subheading_1"].set(selected_columns.get())
     
     # Set Grouping Variable for analysis
     @output
@@ -858,16 +844,16 @@ def server(input, output, session):
     #     if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
     #         return    
         
-    # Save Configuration Button - Trigger to save settings
-    @reactive.event(input.save_config)
-    def save_configuration():
-        config_to_save = {
-            "var_config": var_config.get(),
-            "subheadings": subheadings.get(),
-            "group_var": group_var.get()
-        }
-        save_config(config_to_save)  # Save the config to a file
-        return "Configuration saved!"
+    # # Save Configuration Button - Trigger to save settings
+    # @reactive.event(input.save_config)
+    # def save_configuration():
+    #     config_to_save = {
+    #         "var_config": var_config.get(),
+    #         "subheadings": subheadings.get(),
+    #         "group_var": group_var.get()
+    #     }
+    #     save_config(config_to_save)  # Save the config to a file
+    #     return "Configuration saved!"
 
     # Load Configuration Button - Trigger to load saved settings
     # @reactive.event(input.load_config)
