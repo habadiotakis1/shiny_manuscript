@@ -438,7 +438,7 @@ def server(input, output, session):
 
         all_subheading_values = set()
         for subheading in subheadings:
-            all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
+            all_subheading_values = set(all_subheading_values + set(subheadings[subheading]()))
             
         for col in available_columns:
             if col not in all_subheading_values:
@@ -462,11 +462,6 @@ def server(input, output, session):
                 #     subheadings[subheading].set(updated)
                 
                 generate_subheading_ui(subheading)
-        
-        # @reactive.effect
-        # def _():
-        #     for subheading in subheadings:
-        #         generate_subheading_ui(subheading)
 
     # Set Grouping Variable for analysis
     @output
@@ -546,24 +541,24 @@ def server(input, output, session):
         *[
             ui.card(
                 ui.h5(col),
-            #     ui.input_text(
-            #         f"name_{col}",
-            #         "Column Name",
-            #         value=var_config.get()[col]["name"],
-            #     ),
-            #     ui.input_select(
-            #         f"var_type_{col}",
-            #         "Variable Type",
-            #         variable_types,
-            #         # selected=var_config.get()[col]["type"],
-            #     ),
-            #     col_widths=(4, 4, 4),
-            #     class_="draggable-list",
-            #     id=f"{subheading_key}_{col}"
+                ui.input_text(
+                    f"name_{col}",
+                    "Column Name",
+                    value=var_config.get()[col]["name"],
+                ),
+                ui.input_select(
+                    f"var_type_{col}",
+                    "Variable Type",
+                    variable_types,
+                    # selected=var_config.get()[col]["type"],
+                ),
+                col_widths=(4, 4, 4),
+                class_="draggable-list",
+                id=f"{subheading_key}_{col}"
             )
             for col in columns
         ],
-        width=1, # Each card takes up half the row
+        width="100%", 
         class_="droppable-area",
         )
         # return ui.card(
