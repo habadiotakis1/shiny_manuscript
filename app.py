@@ -515,16 +515,18 @@ def server(input, output, session):
         # group_var.set(new_group)
         
         # 1. Remove new group var from subheadings
-        for key in subheadings:
-            updated_cols = [col for col in subheadings[key]() if col != new_group]
-            subheadings[key].set(updated_cols)
+        for subheading in subheadings:
+            updated_cols = [col for col in subheadings[subheading]() if col != new_group]
+            subheadings[subheading].set(updated_cols)
+            generate_subheading_ui(subheading)
 
         # 2. Add previous group var back into first available subheading
         if old_group:
-            for key in subheadings:
-                cols = subheadings[key]()
+            for subheading in subheadings:
+                cols = subheadings[subheading]()
                 if old_group not in cols:
-                    subheadings[key].set(cols + [old_group])
+                    subheadings[subheading].set(cols + [old_group])
+                    generate_subheading_ui(subheading)
                     break
 
         # 3. Save the new group_var
