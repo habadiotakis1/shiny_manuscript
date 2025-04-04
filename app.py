@@ -550,10 +550,10 @@ def server(input, output, session):
                     f"var_type_{col}",
                     "Variable Type",
                     variable_types,
-                    # selected=var_config.get()[col]["type"],
+                    selected=var_config.get()[col]["type"],
                 ),
-                col_widths=(4, 4, 4),
-                class_="draggable-list",
+                # col_widths=(4, 4, 4),
+                class_="draggable-item",
                 id=f"{subheading_key}_{col}"
             )
             for col in columns
@@ -561,6 +561,28 @@ def server(input, output, session):
         width=1, 
         class_="droppable-area",
         )
+        #     ui.div(
+        #     *[
+        #         ui.card(
+        #             ui.h5(col),  # Column name as card title
+        #             ui.input_text(
+        #                 f"name_{col}",
+        #                 "Variable Name",
+        #                 value=var_config.get()[col]["name"],
+        #             ),
+        #             ui.input_select(
+        #                 f"var_type_{col}",
+        #                 "Variable Type",
+        #                 variable_types,
+        #                 selected=var_config.get().get(col, {}).get("type", "Omit"),
+        #             ),
+        #             class_="draggable-item",
+        #             id=f"{subheading_key}_{col}"
+        #         )
+        #         for col in columns
+        #     ],
+        #     class_="droppable-area"
+        # )
         # return ui.card(
         #     ui.div(
         #         *[
