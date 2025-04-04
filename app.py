@@ -632,21 +632,20 @@ def server(input, output, session):
             
     
     # Update variable settings dynamically when inputs change
-    # @reactive.effect
-    @output
-    @render.ui
+    @reactive.effect
     def update_var_config():
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
             return
         
-        updated_config = var_config.get()
-
+        updated_config = var_config.get().copy()
+        
         for col in df.columns:
+            print("Updating variable configurations...", updated_config[col])
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
             updated_config[col]["name"] = input[f"name_{col}"]() or col
-            updated_config[col]["position"] = input[f"position_{col}"]() or 100
-
+            updated_config[col]["position"] = input[f"position_{col}"]() or 15
+            print("to...", updated_config[col])
         var_config.set(updated_config)  # Update stored config
 
     # Perform statistical analysis when the "Calculate" button is clicked
