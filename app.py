@@ -413,7 +413,7 @@ def server(input, output, session):
             for col in columns:
                 column_dict[col] = col
             
-            default_type = "Omit"
+            default_type = "Categorical (Y/N)"
             default_position = 100
             
             # Store variable settings in a dictionary
@@ -558,7 +558,7 @@ def server(input, output, session):
             )
             for col in columns
         ],
-        width="100%", 
+        width=1, 
         class_="droppable-area",
         )
         # return ui.card(
