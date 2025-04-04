@@ -643,20 +643,14 @@ def server(input, output, session):
         # all_subheading_values = set()
         # for subheading in subheadings:
         #     all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
-        try:
-            selected_variables = set(input.column_selectize())
-
-            if selected_variables:
-                for col in selected_variables: #df.columns:
-                    print("Updating variable configurations...", updated_config[col])
-                    updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
-                    updated_config[col]["name"] = input[f"name_{col}"]() or col
-                    updated_config[col]["position"] = input[f"position_{col}"]() or 15
-                    print("to...", updated_config[col])
-                var_config.set(updated_config)  # Update stored config
-        
-        except:
-            pass
+            
+        for col in df.columns:
+            print("Updating variable configurations...", updated_config[col])
+            updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
+            updated_config[col]["name"] = input[f"name_{col}"]() or col
+            updated_config[col]["position"] = input[f"position_{col}"]() or 15
+            print("to...", updated_config[col])
+        var_config.set(updated_config)  # Update stored config
 
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.effect
@@ -682,10 +676,11 @@ def server(input, output, session):
             selected_variables = set(input.column_selectize())
             
             # Perform statistical analysis using the grouping variable
-            for col in selected_variables:
+            for col in df.columns: #selected_variables:
                 
-                if col != curr_group_var:
+                if col != curr_group_var and col in selected_variables:
                     print(f"\n📂 Processing Variable: {col}", updated_config[col])
+                    
                     var_type = updated_config[col]["type"]
                     
                     if var_type != "Omit":
