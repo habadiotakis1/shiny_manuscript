@@ -474,7 +474,8 @@ def server(input, output, session):
     def _():
         choices = input.column_selectize()
         if choices:
-            ui.update_select("grouping_var", choices=choices) #, selected=choices[0])
+            ui.update_select("grouping_var", choices=choices, selected=choices[0])
+            group_var.set(choices[0])  # Set the initial grouping variable
 
     @reactive.effect
     def update_group_var():
