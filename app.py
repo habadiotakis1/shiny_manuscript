@@ -521,13 +521,13 @@ def server(input, output, session):
             generate_subheading_ui(subheading)
 
         # 2. Add previous group var back into first available subheading
-        if old_group:
-            for subheading in subheadings:
-                cols = subheadings[subheading]()
-                if old_group not in cols:
-                    subheadings[subheading].set(cols + [old_group])
-                    generate_subheading_ui(subheading)
-                    break
+        # if old_group:
+        #     for subheading in subheadings:
+        #         cols = subheadings[subheading]()
+        #         if old_group not in cols:
+        #             subheadings[subheading].set(cols + [old_group])
+        #             generate_subheading_ui(subheading)
+        #             break
 
         # 3. Save the new group_var
         previous_group_var.set(old_group)
@@ -554,12 +554,12 @@ def server(input, output, session):
                     variable_types,
                     selected=var_config.get()[col]["type"],
                 ),
-                # ui.input_text(
-                #     f"position_{col}",
-                #     "Position",
-                #     [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-                #     selected=var_config.get()[col]["position"],
-                # ),
+                ui.input_text(
+                    f"position_{col}",
+                    "Position",
+                    [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+                    selected=var_config.get()[col]["position"],
+                ),
                 # col_widths=(3, 3, 3, 3),
                 class_="draggable-item",
                 id=f"{subheading_key}_{col}"
@@ -589,46 +589,6 @@ def server(input, output, session):
     @render.ui
     def var_settings_4():
         return generate_subheading_ui("subheading_4")
-
-    
-    # Assign all selected columns initially to Subheading 1
-    # @reactive.effect
-    # def initialize_columns():
-    #     available_columns = input.column_selectize()
-    #     if available_columns and not any(subheadings[key]() for key in subheadings):
-    #         subheadings["subheading_1"].set(available_columns)
-
-    # # Create dynamic UI outputs for each subheading
-    # for key in subheadings:
-    #     output[key.replace("subheading", "var_settings")] = render.ui(generate_subheading_ui(key))
-
-    # # JavaScript-based drag-and-drop event handling (requires external JS)
-    # ui.include_script("https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js")
-    # ui.script(
-    #     """
-    #     document.addEventListener("DOMContentLoaded", function () {
-    #         const subheadings = ["subheading_1", "subheading_2", "subheading_3", "subheading_4"];
-    #         subheadings.forEach(subheading => {
-    #             new Sortable(document.getElementById(subheading), {
-    #                 group: "shared",
-    #                 animation: 150,
-    #                 onEnd: function (evt) {
-    #                     const movedItem = evt.item.textContent;
-    #                     const from = evt.from.id;
-    #                     const to = evt.to.id;
-    #                     Shiny.setInputValue("move_variable", {variable: movedItem, from: from, to: to}, {priority: "event"});
-    #                 }
-    #             });
-    #         });
-    #     });
-    #     """
-    # )
-
-    # Render dynamic UI for each subheading
-    @reactive.effect
-    def _():
-        for subheading in subheadings:
-            generate_subheading_ui(subheading)
 
     # JavaScript to enable drag-and-drop using SortableJS
     ui.tags.script(
@@ -684,8 +644,6 @@ def server(input, output, session):
             updated_config[col]["position"] = input[f"position_{col}"]() or 100
 
         var_config.set(updated_config)  # Update stored config
-
-    
 
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.event(input.calculate)
