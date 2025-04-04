@@ -643,8 +643,12 @@ def server(input, output, session):
         # all_subheading_values = set()
         # for subheading in subheadings:
         #     all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
-            
-        selected_variables = set(input.column_selectize())
+        
+        
+        try:
+            selected_variables = set(input.column_selectize())
+        except:
+            selected_variables = set()
 
         for col in df.columns:
             if col in selected_variables:
@@ -676,7 +680,10 @@ def server(input, output, session):
             
             updated_config = var_config.get()
             
-            selected_variables = set(input.column_selectize())
+            try:
+                selected_variables = set(input.column_selectize())
+            except:
+                selected_variables = set()
             
             # Perform statistical analysis using the grouping variable
             for col in df.columns:
