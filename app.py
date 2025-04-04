@@ -645,12 +645,12 @@ def server(input, output, session):
         
         print('Trying to update var config')
         for col in df.columns:
-            if col in set(selected_columns.get()):
-                print("❗️ Updating variable configurations...", updated_config[col])
-                updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
-                updated_config[col]["name"] = input[f"name_{col}"]() or col
-                updated_config[col]["position"] = input[f"position_{col}"]() or 15
-                print("to...", updated_config[col])
+            # if col in set(selected_columns.get()):
+            print("❗️ Updating variable configurations...", updated_config[col])
+            updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
+            updated_config[col]["name"] = input[f"name_{col}"]() or col
+            updated_config[col]["position"] = input[f"position_{col}"]() or 15
+            print("to...", updated_config[col])
         var_config.set(updated_config)  # Update stored config
 
     # Perform statistical analysis when the "Calculate" button is clicked
