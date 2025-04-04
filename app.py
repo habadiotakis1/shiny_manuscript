@@ -436,8 +436,12 @@ def server(input, output, session):
 
         selected_columns.set(available_columns)
 
+        all_subheading_values = set()
+        for subheading in subheadings:
+            all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
+            
         for col in available_columns:
-            if col not in [value for values in subheadings.values() for value in values]: 
+            if col not in all_subheading_values:
                 subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
         
         @reactive.effect
