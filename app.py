@@ -473,7 +473,7 @@ def server(input, output, session):
     def _():
         choices = input.column_selectize()
         if choices:
-            ui.update_select("grouping_var", choices=choices)#, selected=choices[0])
+            ui.update_select("grouping_var", choices=choices) #, selected=choices[0])
 
     @reactive.effect
     def update_group_var():
@@ -482,27 +482,8 @@ def server(input, output, session):
         
         if not new_group or new_group == old_group:
             return
-      
-        # 1. Remove new group var from subheadings
-        for subheading in subheadings:
-            updated_cols = [col for col in subheadings[subheading]() if col != new_group]
-            subheadings[subheading].set(updated_cols)
-            generate_subheading_ui(subheading)
 
-        # 2. Add previous group var back into first available subheading
-        if old_group:
-            for subheading in subheadings:
-                cols = subheadings[subheading]()
-                if old_group not in cols:
-                    subheadings[subheading].set(cols + [old_group])
-                    generate_subheading_ui(subheading)
-                    break
-
-        # 3. Save the new group_var
-        previous_group_var.set(old_group)
-        group_var.set(new_group)
-
-          # # If there's a previous group_var, ask the user where to put it
+        # # If there's a previous group_var, ask the user where to put it
         # if old_group:
         #     ui.modal_show(
         #         ui.modal(
@@ -533,6 +514,25 @@ def server(input, output, session):
         # previous_group_var.set(old_group)
         # group_var.set(new_group)
         
+        # 1. Remove new group var from subheadings
+        for subheading in subheadings:
+            updated_cols = [col for col in subheadings[subheading]() if col != new_group]
+            subheadings[subheading].set(updated_cols)
+            generate_subheading_ui(subheading)
+
+        # 2. Add previous group var back into first available subheading
+        if old_group:
+            for subheading in subheadings:
+                cols = subheadings[subheading]()
+                if old_group not in cols:
+                    subheadings[subheading].set(cols + [old_group])
+                    generate_subheading_ui(subheading)
+                    break
+
+        # 3. Save the new group_var
+        previous_group_var.set(old_group)
+        group_var.set(new_group)
+
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
         columns = subheadings[subheading_key]()
