@@ -672,7 +672,7 @@ def server(input, output, session):
             for col in df.columns:
                 print(f"\n📂 Processing Subheading: {col}")
                 if col != curr_group_var:
-                    var_type = var_config.get()[col]["type"]
+                    var_type = updated_config[col]["type"]
                     
                     if var_type != "Omit":
                         p_value = run_statistical_test(df, curr_group_var, var_type, col, decimals_pval)
@@ -685,6 +685,8 @@ def server(input, output, session):
                         aggregate_result = perform_aggregate_analysis(df, curr_group_var, var_type, col, decimals_tab, output_format, updated_config[col])
                         if aggregate_result:
                             updated_config[col].update(aggregate_result)
+                        
+                        print(updated_config[col])
 
             var_config.set(updated_config)
         except:
