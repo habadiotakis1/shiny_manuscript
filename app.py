@@ -422,7 +422,6 @@ def server(input, output, session):
                 var_config.set({col: {
                     "type": default_type, 
                     "name": col, 
-                    "subheading": 0,
                     "position": default_position,
                 } for col in columns})
 
@@ -633,7 +632,9 @@ def server(input, output, session):
             
     
     # Update variable settings dynamically when inputs change
-    @reactive.effect
+    # @reactive.effect
+    @output
+    @render.ui
     def update_var_config():
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
@@ -644,7 +645,6 @@ def server(input, output, session):
         for col in df.columns:
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
             updated_config[col]["name"] = input[f"name_{col}"]() or col
-            updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "None"
             updated_config[col]["position"] = input[f"position_{col}"]() or 100
 
         var_config.set(updated_config)  # Update stored config
