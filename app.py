@@ -200,6 +200,7 @@ def create_word_table(df,var_config, group_var, subheadings):
         
         # Get and sort all variables for the current subheading
         subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[subheading_name]()]
+        subheading_vars = [col for col in subheading_vars if col != group_var]
         sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
         
         # Add a row for each variable under the current subheading
@@ -664,19 +665,20 @@ def server(input, output, session):
                 
                 # Perform statistical analysis using the grouping variable
                 for col in df.columns:
-                    var_type = var_config.get()[col]["type"]
-                    
-                    if var_type != "Omit":
-                        p_value = run_statistical_test(df, group_var, var_type, col, decimals_pval)
+                    if col != group_var:
+                        var_type = var_config.get()[col]["type"]
                         
-                        # Store the p-value in the var_config dictionary
-                        updated_config[col]["p_value"] = p_value
-                        print(f"Column: {col}, Grouping Variable: {group_var}, p-value: {p_value}")
+                        if var_type != "Omit":
+                            p_value = run_statistical_test(df, group_var, var_type, col, decimals_pval)
+                            
+                            # Store the p-value in the var_config dictionary
+                            updated_config[col]["p_value"] = p_value
+                            print(f"Column: {col}, Grouping Variable: {group_var}, p-value: {p_value}")
 
-                        # Perform aggregate analysis and update var_config with the results
-                        aggregate_result = perform_aggregate_analysis(df, group_var, var_type, col, decimals_tab, output_format, updated_config[col])
-                        if aggregate_result:
-                            updated_config[col].update(aggregate_result)
+                            # Perform aggregate analysis and update var_config with the results
+                            aggregate_result = perform_aggregate_analysis(df, group_var, var_type, col, decimals_tab, output_format, updated_config[col])
+                            if aggregate_result:
+                                updated_config[col].update(aggregate_result)
 
                 var_config.set(updated_config)
                     
