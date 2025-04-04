@@ -414,7 +414,7 @@ def server(input, output, session):
             for col in columns:
                 column_dict[col] = col
             
-            default_type = "Categorical (Y/N)"
+            default_type = "Omit"
             default_position = 15
             
             # Store variable settings in a dictionary
@@ -653,6 +653,7 @@ def server(input, output, session):
         print("🔄 Calculate button pressed. Updating variable configurations...")
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+            print(df)
             return
         
         try:
