@@ -473,7 +473,7 @@ def server(input, output, session):
     def _():
         choices = input.column_selectize()
         if choices:
-            ui.update_select("grouping_var", choices=choices, selected=choices[0])
+            ui.update_select("grouping_var", choices=[""].append(choices), selected=choices[0])
 
     @reactive.effect
     def update_group_var():
@@ -482,8 +482,27 @@ def server(input, output, session):
         
         if not new_group or new_group == old_group:
             return
+      
+        # 1. Remove new group var from subheadings
+        for subheading in subheadings:
+            updated_cols = [col for col in subheadings[subheading]() if col != new_group]
+            subheadings[subheading].set(updated_cols)
+            generate_subheading_ui(subheading)
 
-        # # If there's a previous group_var, ask the user where to put it
+        # 2. Add previous group var back into first available subheading
+        if old_group:
+            for subheading in subheadings:
+                cols = subheadings[subheading]()
+                if old_group not in cols:
+                    subheadings[subheading].set(cols + [old_group])
+                    generate_subheading_ui(subheading)
+                    break
+
+        # 3. Save the new group_var
+        previous_group_var.set(old_group)
+        group_var.set(new_group)
+
+          # # If there's a previous group_var, ask the user where to put it
         # if old_group:
         #     ui.modal_show(
         #         ui.modal(
@@ -513,25 +532,6 @@ def server(input, output, session):
         # # Update tracking variables
         # previous_group_var.set(old_group)
         # group_var.set(new_group)
-        
-        # 1. Remove new group var from subheadings
-        for subheading in subheadings:
-            updated_cols = [col for col in subheadings[subheading]() if col != new_group]
-            subheadings[subheading].set(updated_cols)
-            generate_subheading_ui(subheading)
-
-        # 2. Add previous group var back into first available subheading
-        if old_group:
-            for subheading in subheadings:
-                cols = subheadings[subheading]()
-                if old_group not in cols:
-                    subheadings[subheading].set(cols + [old_group])
-                    generate_subheading_ui(subheading)
-                    break
-
-        # 3. Save the new group_var
-        previous_group_var.set(old_group)
-        group_var.set(new_group)
 
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
@@ -554,7 +554,13 @@ def server(input, output, session):
                     variable_types,
                     selected=var_config.get()[col]["type"],
                 ),
-                # col_widths=(4, 4, 4),
+                ui.input_text(
+                    f"position_{col}",
+                    "Position",
+                    [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+                    selected=var_config.get()[col]["position"],
+                ),
+                # col_widths=(3, 3, 3, 3),
                 class_="draggable-item",
                 id=f"{subheading_key}_{col}"
             )
@@ -563,39 +569,7 @@ def server(input, output, session):
         width=1, 
         class_="droppable-area",
         )
-        #     ui.div(
-        #     *[
-        #         ui.card(
-        #             ui.h5(col),  # Column name as card title
-        #             ui.input_text(
-        #                 f"name_{col}",
-        #                 "Variable Name",
-        #                 value=var_config.get()[col]["name"],
-        #             ),
-        #             ui.input_select(
-        #                 f"var_type_{col}",
-        #                 "Variable Type",
-        #                 variable_types,
-        #                 selected=var_config.get().get(col, {}).get("type", "Omit"),
-        #             ),
-        #             class_="draggable-item",
-        #             id=f"{subheading_key}_{col}"
-        #         )
-        #         for col in columns
-        #     ],
-        #     class_="droppable-area"
-        # )
-        # return ui.card(
-        #     ui.div(
-        #         *[
-        #             ui.div(column, class_="draggable-item", id=f"{subheading_key}_{column}")
-        #             for column in columns
-        #         ],
-        #         class_="sortable-list", id=subheading_key
-        #     ),
-        #     class_="droppable-area"
-        # )
-
+        
     @output
     @render.ui
     def var_settings_1():
