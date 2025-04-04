@@ -473,7 +473,7 @@ def server(input, output, session):
     def _():
         choices = input.column_selectize()
         if choices:
-            ui.update_select("grouping_var", choices=[""].append(choices), selected=choices[0])
+            ui.update_select("grouping_var", choices=choices)#, selected=choices[0])
 
     @reactive.effect
     def update_group_var():
@@ -532,7 +532,7 @@ def server(input, output, session):
         # # Update tracking variables
         # previous_group_var.set(old_group)
         # group_var.set(new_group)
-
+        
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
         columns = subheadings[subheading_key]()
