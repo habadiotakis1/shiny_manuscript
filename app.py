@@ -476,8 +476,7 @@ def server(input, output, session):
         if choices:
             ui.update_select("grouping_var", choices=choices, selected=choices[0])
             group_var.set(choices[0])  # Set the initial grouping variable
-            print("First group var: ", choices[0])
-            print("Set group var: ", group_var.get())
+            print("First group var: ", group_var.get())
 
     @reactive.effect
     def update_group_var():
@@ -673,8 +672,9 @@ def server(input, output, session):
             
             # Perform statistical analysis using the grouping variable
             for col in df.columns:
-                print(f"\n📂 Processing Subheading: {col}")
+                print(f"\n📂 Processing Variable: {col}")
                 if col != curr_group_var:
+                    print("Before: ", updated_config[col])
                     var_type = updated_config[col]["type"]
                     
                     if var_type != "Omit":
@@ -689,7 +689,7 @@ def server(input, output, session):
                         if aggregate_result:
                             updated_config[col].update(aggregate_result)
                         
-                        print(updated_config[col])
+                        print("After: ", updated_config[col])
 
             var_config.set(updated_config)
         except:
