@@ -414,7 +414,7 @@ def server(input, output, session):
                 column_dict[col] = col
             
             default_type = "Categorical (Y/N)"
-            default_position = 100
+            default_position = 15
             
             # Store variable settings in a dictionary
             if not var_config.get():
