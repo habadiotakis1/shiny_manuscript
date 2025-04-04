@@ -432,7 +432,7 @@ def server(input, output, session):
 
     @reactive.effect
     def column_selectize():
-        available_columns = input.column_selectize()
+        available_columns = set(input.column_selectize())
 
         selected_columns.set(available_columns)
 
