@@ -644,14 +644,9 @@ def server(input, output, session):
         # for subheading in subheadings:
         #     all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
         
-        
-        try:
-            selected_variables = set(input.column_selectize())
-        except:
-            selected_variables = set()
-
+                
         for col in df.columns:
-            if col in selected_variables:
+            if col in set(selected_columns()):
                 print("❗️ Updating variable configurations...", updated_config[col])
                 updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
                 updated_config[col]["name"] = input[f"name_{col}"]() or col
@@ -680,15 +675,10 @@ def server(input, output, session):
             
             updated_config = var_config.get()
             
-            try:
-                selected_variables = set(input.column_selectize())
-            except:
-                selected_variables = set()
-            
             # Perform statistical analysis using the grouping variable
             for col in df.columns:
                 
-                if col != curr_group_var and col in selected_variables:
+                if col != curr_group_var and col in set(selected_columns()):
                     print(f"\n📂 Processing Variable: {col}", updated_config[col])
                     
                     var_type = updated_config[col]["type"]
