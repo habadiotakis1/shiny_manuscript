@@ -640,14 +640,15 @@ def server(input, output, session):
         
         updated_config = var_config.get().copy()
         
-        for col in df.columns:
-            if col in set(selected_columns.get()):
-                print("❗️ Updating variable configurations...", updated_config[col])
-                updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
-                updated_config[col]["name"] = input[f"name_{col}"]() or col
-                updated_config[col]["position"] = input[f"position_{col}"]() or 15
-                print("to...", updated_config[col])
-        var_config.set(updated_config)  # Update stored config
+        if len(selected_columns.get()) > 0:
+            for col in df.columns:
+                if col in set(selected_columns.get()):
+                    print("❗️ Updating variable configurations...", updated_config[col])
+                    updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
+                    updated_config[col]["name"] = input[f"name_{col}"]() or col
+                    updated_config[col]["position"] = input[f"position_{col}"]() or 15
+                    print("to...", updated_config[col])
+            var_config.set(updated_config)  # Update stored config
 
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.effect
@@ -668,28 +669,28 @@ def server(input, output, session):
             updated_config = var_config.get()
             
             # Perform statistical analysis using the grouping variable
-            for col in df.columns:
-                
-                if col != curr_group_var and col in selected_columns.get():
-                    print(f"\n📂 Processing Variable: {col}", updated_config[col])
-                    
-                    var_type = updated_config[col]["type"]
-                    
-                    if var_type != "Omit":
-                        p_value = run_statistical_test(df, curr_group_var, var_type, col, decimals_pval)
+            if len(selected_columns.get()) > 0:
+                for col in df.columns:
+                    if col != curr_group_var and col in selected_columns.get():
+                        print(f"\n📂 Processing Variable: {col}", updated_config[col])
                         
-                        # Store the p-value in the var_config dictionary
-                        updated_config[col]["p_value"] = p_value
-                        print(f"Column: {col}, Grouping Variable: {curr_group_var}, p-value: {p_value}")
-
-                        # Perform aggregate analysis and update var_config with the results
-                        aggregate_result = perform_aggregate_analysis(df, curr_group_var, var_type, col, decimals_tab, output_format, updated_config[col])
-                        if aggregate_result:
-                            updated_config[col].update(aggregate_result)
+                        var_type = updated_config[col]["type"]
                         
-                        print("After: ", updated_config[col])
+                        if var_type != "Omit":
+                            p_value = run_statistical_test(df, curr_group_var, var_type, col, decimals_pval)
+                            
+                            # Store the p-value in the var_config dictionary
+                            updated_config[col]["p_value"] = p_value
+                            print(f"Column: {col}, Grouping Variable: {curr_group_var}, p-value: {p_value}")
 
-            var_config.set(updated_config)
+                            # Perform aggregate analysis and update var_config with the results
+                            aggregate_result = perform_aggregate_analysis(df, curr_group_var, var_type, col, decimals_tab, output_format, updated_config[col])
+                            if aggregate_result:
+                                updated_config[col].update(aggregate_result)
+                            
+                            print("After: ", updated_config[col])
+
+                var_config.set(updated_config)
         except:
             return
 
