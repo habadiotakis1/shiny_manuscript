@@ -643,7 +643,7 @@ def server(input, output, session):
         
         updated_config = var_config.get().copy()
         
-        print("SELECTED COLUMNS", selected_columns.get())
+        print("SELECTED COLUMNS", type(selected_columns.get()), selected_columns.get())
         for col in df.columns:
             # if col in set(selected_columns.get()):
             print("❗️ Updating variable configurations...", updated_config[col])
