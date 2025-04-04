@@ -199,7 +199,7 @@ def create_word_table(df,var_config, group_var, subheadings):
         row_cells[0].paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
         
         # Get and sort all variables for the current subheading
-        subheading_vars = [col for col, config in var_config.items() if config['subheading'] == subheading_name]
+        subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[subheading_name]()]
         sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
         
         # Add a row for each variable under the current subheading
@@ -695,7 +695,7 @@ def server(input, output, session):
             return None  # Return None if no data is available
         
         # Generate the Word table document
-        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings.get())
+        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings)
         
         return doc_filename  # Return the Word document file for download
 
