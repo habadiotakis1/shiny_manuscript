@@ -657,35 +657,37 @@ def server(input, output, session):
             print(df)
             return
         
-        group_var = group_var.get()  # Get the selected grouping column
-        decimals_pval = input.decimals_pvalue()
-        decimals_tab = input.decimals_table()
-        output_format = input.output_format()
-        
-        # Check if grouping column is selected
-        if group_var and decimals_pval and decimals_tab and output_format:
-            updated_config = var_config.get()
+        try:
+            group_var = group_var.get()  # Get the selected grouping column
+            decimals_pval = input.decimals_pvalue()
+            decimals_tab = input.decimals_table()
+            output_format = input.output_format()
             
-            # Perform statistical analysis using the grouping variable
-            for col in df.columns:
-                print(f"\n📂 Processing Subheading: {col}")
-                if col != group_var:
-                    var_type = var_config.get()[col]["type"]
-                    
-                    if var_type != "Omit":
-                        p_value = run_statistical_test(df, group_var, var_type, col, decimals_pval)
+            # Check if grouping column is selected
+            if group_var and decimals_pval and decimals_tab and output_format:
+                updated_config = var_config.get()
+                
+                # Perform statistical analysis using the grouping variable
+                for col in df.columns:
+                    print(f"\n📂 Processing Subheading: {col}")
+                    if col != group_var:
+                        var_type = var_config.get()[col]["type"]
                         
-                        # Store the p-value in the var_config dictionary
-                        updated_config[col]["p_value"] = p_value
-                        print(f"Column: {col}, Grouping Variable: {group_var}, p-value: {p_value}")
+                        if var_type != "Omit":
+                            p_value = run_statistical_test(df, group_var, var_type, col, decimals_pval)
+                            
+                            # Store the p-value in the var_config dictionary
+                            updated_config[col]["p_value"] = p_value
+                            print(f"Column: {col}, Grouping Variable: {group_var}, p-value: {p_value}")
 
-                        # Perform aggregate analysis and update var_config with the results
-                        aggregate_result = perform_aggregate_analysis(df, group_var, var_type, col, decimals_tab, output_format, updated_config[col])
-                        if aggregate_result:
-                            updated_config[col].update(aggregate_result)
+                            # Perform aggregate analysis and update var_config with the results
+                            aggregate_result = perform_aggregate_analysis(df, group_var, var_type, col, decimals_tab, output_format, updated_config[col])
+                            if aggregate_result:
+                                updated_config[col].update(aggregate_result)
 
-            var_config.set(updated_config)
-     
+                var_config.set(updated_config)
+        except:
+            return
 
     # Download Button - Trigger to save table in .docx format
     # Updated download_table function
