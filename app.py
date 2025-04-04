@@ -437,7 +437,7 @@ def server(input, output, session):
         selected_columns.set(available_columns)
 
         for col in available_columns:
-            if col not in  sum(subheadings.values(), []):
+            if col not in [value for values in subheadings.values() for value in values]: 
                 subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
         
         @reactive.effect
