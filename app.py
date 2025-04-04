@@ -638,17 +638,20 @@ def server(input, output, session):
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
             return
         
+        if selected_columns.get() is None or len(selected_columns.get()) == 0:
+            return
+        
         updated_config = var_config.get().copy()
         
-        if len(selected_columns.get()) > 0:
-            for col in df.columns:
-                if col in set(selected_columns.get()):
-                    print("❗️ Updating variable configurations...", updated_config[col])
-                    updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
-                    updated_config[col]["name"] = input[f"name_{col}"]() or col
-                    updated_config[col]["position"] = input[f"position_{col}"]() or 15
-                    print("to...", updated_config[col])
-            var_config.set(updated_config)  # Update stored config
+        print('Trying to update var config')
+        for col in df.columns:
+            if col in set(selected_columns.get()):
+                print("❗️ Updating variable configurations...", updated_config[col])
+                updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
+                updated_config[col]["name"] = input[f"name_{col}"]() or col
+                updated_config[col]["position"] = input[f"position_{col}"]() or 15
+                print("to...", updated_config[col])
+        var_config.set(updated_config)  # Update stored config
 
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.effect
