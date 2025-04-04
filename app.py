@@ -554,7 +554,7 @@ def server(input, output, session):
                     variable_types,
                     selected=var_config.get()[col]["type"],
                 ),
-                ui.input_text(
+                ui.input_select(
                     f"position_{col}",
                     "Position",
                     [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
