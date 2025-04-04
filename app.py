@@ -643,16 +643,19 @@ def server(input, output, session):
         # all_subheading_values = set()
         # for subheading in subheadings:
         #     all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
-            
-        selected_variables = set(input.column_selectize())
+        try:
+            selected_variables = set(input.column_selectize())
 
-        for col in selected_variables: #df.columns:
-            print("Updating variable configurations...", updated_config[col])
-            updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
-            updated_config[col]["name"] = input[f"name_{col}"]() or col
-            updated_config[col]["position"] = input[f"position_{col}"]() or 15
-            print("to...", updated_config[col])
-        var_config.set(updated_config)  # Update stored config
+            for col in selected_variables: #df.columns:
+                print("Updating variable configurations...", updated_config[col])
+                updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
+                updated_config[col]["name"] = input[f"name_{col}"]() or col
+                updated_config[col]["position"] = input[f"position_{col}"]() or 15
+                print("to...", updated_config[col])
+            var_config.set(updated_config)  # Update stored config
+        
+        except:
+            pass
 
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.effect
