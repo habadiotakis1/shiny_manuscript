@@ -647,8 +647,10 @@ def server(input, output, session):
         var_config.set(updated_config)  # Update stored config
 
     # Perform statistical analysis when the "Calculate" button is clicked
+    @reactive.effect
     @reactive.event(input.calculate)
     def calculate_statistical_analysis():
+        print("🔄 Calculate button pressed. Updating variable configurations...")
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
             return
@@ -665,6 +667,7 @@ def server(input, output, session):
                 
                 # Perform statistical analysis using the grouping variable
                 for col in df.columns:
+                    print(f"\n📂 Processing Subheading: {col}")
                     if col != group_var:
                         var_type = var_config.get()[col]["type"]
                         
