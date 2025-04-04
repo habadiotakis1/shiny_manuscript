@@ -640,11 +640,11 @@ def server(input, output, session):
         
         updated_config = var_config.get().copy()
         
-        all_subheading_values = set()
-        for subheading in subheadings:
-            all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
-
-        for col in all_subheading_values:
+        # all_subheading_values = set()
+        # for subheading in subheadings:
+        #     all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
+            
+        for col in df.columns:
             print("Updating variable configurations...", updated_config[col])
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
             updated_config[col]["name"] = input[f"name_{col}"]() or col
