@@ -430,17 +430,40 @@ def server(input, output, session):
                 choices={"":column_dict}
             )  
 
-    @reactive.calc
+    @reactive.effect
     def column_selectize():
         available_columns = input.column_selectize()
+
         selected_columns.set(available_columns)
-        if available_columns:
-            subheadings["subheading_1"].set(available_columns)
+
+        for col in available_columns:
+            if col not in  sum(subheadings.values(), []):
+                subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
+        
         @reactive.effect
-        def _():
+        def sync_column_selection_with_subheadings():
             for subheading in subheadings:
+                current_cols = set(subheadings[subheading]())
+
+                # Add new columns to subheading
+                new_cols = available_columns - current_cols
+                if new_cols:
+                    updated = list(current_cols.union(new_cols))
+                    subheadings[subheading].set(updated)
+
+                # Remove deselected columns from subheading_1
+                removed_cols = current_cols - available_columns
+                if removed_cols:
+                    updated = [col for col in subheadings[subheading]() if col not in removed_cols]
+                    subheadings[subheading].set(updated)
+                
                 generate_subheading_ui(subheading)
         
+        # @reactive.effect
+        # def _():
+        #     for subheading in subheadings:
+        #         generate_subheading_ui(subheading)
+
     # Set Grouping Variable for analysis
     @output
     @render.ui
