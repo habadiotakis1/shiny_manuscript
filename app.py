@@ -554,12 +554,12 @@ def server(input, output, session):
                     variable_types,
                     selected=var_config.get()[col]["type"],
                 ),
-                ui.input_text(
-                    f"position_{col}",
-                    "Position",
-                    [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
-                    selected=var_config.get()[col]["position"],
-                ),
+                # ui.input_text(
+                #     f"position_{col}",
+                #     "Position",
+                #     [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15],
+                #     selected=var_config.get()[col]["position"],
+                # ),
                 # col_widths=(3, 3, 3, 3),
                 class_="draggable-item",
                 id=f"{subheading_key}_{col}"
