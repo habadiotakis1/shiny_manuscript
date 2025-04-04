@@ -476,7 +476,7 @@ def server(input, output, session):
         if choices:
             ui.update_select("grouping_var", choices=choices, selected=choices[0])
             group_var.set(choices[0])  # Set the initial grouping variable
-            print(group_var.get())
+            print("First group var: ", choices[0])
 
     @reactive.effect
     def update_group_var():
