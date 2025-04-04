@@ -646,13 +646,14 @@ def server(input, output, session):
         try:
             selected_variables = set(input.column_selectize())
 
-            for col in selected_variables: #df.columns:
-                print("Updating variable configurations...", updated_config[col])
-                updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
-                updated_config[col]["name"] = input[f"name_{col}"]() or col
-                updated_config[col]["position"] = input[f"position_{col}"]() or 15
-                print("to...", updated_config[col])
-            var_config.set(updated_config)  # Update stored config
+            if selected_variables:
+                for col in selected_variables: #df.columns:
+                    print("Updating variable configurations...", updated_config[col])
+                    updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
+                    updated_config[col]["name"] = input[f"name_{col}"]() or col
+                    updated_config[col]["position"] = input[f"position_{col}"]() or 15
+                    print("to...", updated_config[col])
+                var_config.set(updated_config)  # Update stored config
         
         except:
             pass
