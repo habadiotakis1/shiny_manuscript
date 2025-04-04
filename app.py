@@ -438,7 +438,7 @@ def server(input, output, session):
 
         all_subheading_values = set()
         for subheading in subheadings:
-            all_subheading_values = set(all_subheading_values + set(subheadings[subheading]()))
+            all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
             
         for col in available_columns:
             if col not in all_subheading_values:
