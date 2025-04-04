@@ -447,19 +447,19 @@ def server(input, output, session):
         @reactive.effect
         def sync_column_selection_with_subheadings():
             for subheading in subheadings:
-                current_cols = set(subheadings[subheading]())
+                # current_cols = set(subheadings[subheading]())
 
-                # Add new columns to subheading
-                new_cols = available_columns - current_cols
-                if new_cols:
-                    updated = list(current_cols.union(new_cols))
-                    subheadings[subheading].set(updated)
+                # # Add new columns to subheading
+                # new_cols = available_columns - current_cols
+                # if new_cols:
+                #     updated = list(current_cols.union(new_cols))
+                #     subheadings[subheading].set(updated)
 
-                # Remove deselected columns from subheading_1
-                removed_cols = current_cols - available_columns
-                if removed_cols:
-                    updated = [col for col in subheadings[subheading]() if col not in removed_cols]
-                    subheadings[subheading].set(updated)
+                # # Remove deselected columns from subheading_1
+                # removed_cols = current_cols - available_columns
+                # if removed_cols:
+                #     updated = [col for col in subheadings[subheading]() if col not in removed_cols]
+                #     subheadings[subheading].set(updated)
                 
                 generate_subheading_ui(subheading)
         
