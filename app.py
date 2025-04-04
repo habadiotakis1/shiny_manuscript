@@ -201,7 +201,7 @@ def create_word_table(df,var_config, group_var, subheadings):
         # Get and sort all variables for the current subheading
         subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[subheading_name]()]
         subheading_vars = [col for col in subheading_vars if col != group_var]
-        sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
+        sorted_subheading_vars = sorted(subheading_vars, key=lambda x: int(var_config[x]["position"]))
         
         # Add a row for each variable under the current subheading
         for var in sorted_subheading_vars:
