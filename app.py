@@ -476,6 +476,7 @@ def server(input, output, session):
         if choices:
             ui.update_select("grouping_var", choices=choices, selected=choices[0])
             group_var.set(choices[0])  # Set the initial grouping variable
+            print(group_var.get())
 
     @reactive.effect
     def update_group_var():
@@ -534,6 +535,7 @@ def server(input, output, session):
         # 3. Save the new group_var
         previous_group_var.set(old_group)
         group_var.set(new_group)
+        print("Set new group var: ", group_var.get())
 
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
