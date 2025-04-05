@@ -315,7 +315,7 @@ app_ui = ui.page_fluid(
         ),
     
     
-    ui.h5("Step 2: Select Variables"),
+    ui.h5("Step 2: Select Columns"),
     ui.output_ui('select_columns'),
     
     ui.h5("Step 3: Table Options"),
@@ -390,7 +390,7 @@ def server(input, output, session):
     @output
     @render.ui
     def select_columns():
-        return ui.input_selectize("column_selectize", "Select desired columns below:",  
+        return ui.input_selectize("column_selectize", "Select desired variables below:",  
                 {  "": {"":""} },  
                 multiple=True,  
                 width="100%",
@@ -414,6 +414,17 @@ def server(input, output, session):
             for col in columns:
                 column_dict[col] = col
             
+            default_type = "Omit"
+            default_position = 15
+            
+            # Store variable settings in a dictionary
+            if not var_config.get():
+                var_config.set({col: {
+                    "type": default_type, 
+                    "name": col, 
+                    "position": default_position,
+                } for col in columns})
+
             ui.update_selectize(  
                 "column_selectize",  
                 choices={"":column_dict}
@@ -422,11 +433,13 @@ def server(input, output, session):
     @reactive.effect
     def column_selectize():
         available_columns = set(input.column_selectize())
+
+        old_columns = set(selected_columns.get())
+        new_columns = available_columns - old_columns
+        removed_columns = old_columns - available_columns
+
         selected_columns.set(available_columns)
 
-        default_type = "Omit"
-        default_position = 15
-            
         all_subheading_values = set()
         for subheading in subheadings:
             all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
@@ -435,23 +448,21 @@ def server(input, output, session):
             if col not in all_subheading_values:
                 subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
         
-            # Store variable settings in a dictionary
-            if col not in var_config.get().values():
-                var_config.set({col: {
-                    "type": default_type, 
-                    "name": col, 
-                    "position": default_position,
-                } for col in available_columns})
-            # if not var_config.get():
-            #     var_config.set({col: {
-            #         "type": default_type, 
-            #         "name": col, 
-            #         "position": default_position,
-            #     } for col in available_columns})
 
-        @reactive.effect
-        def sync_column_selection_with_subheadings():
-            for subheading in subheadings:
+        var_config_copy = var_config.get().copy()
+
+        for subheading in subheadings:
+            for col in removed_columns:
+                var_config_copy[col]["type"] = "Omit"
+                if col in subheadings[subheading]():
+                    updated = [c for c in subheadings[subheading]() if c != col]
+                    subheadings[subheading].set(updated)
+            generate_subheading_ui(subheading)
+        var_config.set(var_config_copy)  # Update stored config
+                
+        # @reactive.effect
+        # def sync_column_selection_with_subheadings():
+            # for subheading in subheadings:
                 # current_cols = set(subheadings[subheading]())
 
                 # # Add new columns to subheading
@@ -466,7 +477,7 @@ def server(input, output, session):
                 #     updated = [col for col in subheadings[subheading]() if col not in removed_cols]
                 #     subheadings[subheading].set(updated)
                 
-                generate_subheading_ui(subheading)
+                # generate_subheading_ui(subheading)
 
     # Set Grouping Variable for analysis
     @output
