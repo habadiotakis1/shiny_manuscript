@@ -628,12 +628,13 @@ def server(input, output, session):
 
         print("Currently Selected Columns",selected_columns.get())
         
-        for col in df.columns:
+        # for col in df.columns:
+        for col in selected_columns.get():
             new_subheading = input[f"subheading_{col}"]()
             old_subheading = var_config.get()[col]["subheading"]
             
-            new_subheading_mapped = [k for k, v in subheading_names.items() if v() == new_subheading][0]
-            old_subheading_mapped = [k for k, v in subheading_names.items() if v() == old_subheading][0]
+            new_subheading_mapped = next((k for k, v in subheading_names.items() if v() == new_subheading), None)
+            old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), None)
 
             # print(new_subheading_mapped, old_subheading_mapped)
             
@@ -647,12 +648,14 @@ def server(input, output, session):
             # If the subheading has changed, move the column to the new subheading
             if new_subheading != old_subheading:
                 # Remove the variable from the current subheading
-                subheadings[old_subheading_mapped].set([
-                    c for c in subheadings[old_subheading_mapped]() if c != col
-                ])
+                subheadings[old_subheading_mapped].set(
+                    [c for c in subheadings[old_subheading_mapped]() if c != col]
+                )
                 
                 # Add the variable to the new subheading
-                subheadings[new_subheading_mapped].set(subheadings[new_subheading]() + [col])
+                subheadings[new_subheading_mapped].set(
+                    subheadings[new_subheading]() + [col]
+                )
                 
                 # Debugging print statement to track the change
                 print(f"Moved {col} from {old_subheading_mapped} to {new_subheading_mapped}")
