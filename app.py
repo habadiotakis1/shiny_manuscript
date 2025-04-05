@@ -494,10 +494,13 @@ def server(input, output, session):
     def sync_group_var_with_dropdown():
         selected = input.grouping_var()
         current = group_var.get()
+        if current == None:
+            return
+            
         if selected != current:
             print("Updating group_var from dropdown:", selected)
             group_var.set(selected)
-            
+
     # Set Grouping Variable for analysis
     @output
     @render.ui
