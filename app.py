@@ -318,7 +318,7 @@ app_ui = ui.page_fluid(
     ui.layout_columns(
         ui.h5("Step 1: Upload File"),
         ui.layout_columns(
-            ui.card(ui.input_file("data_file", ".csv & .xlsx files are accepted. Please refresh when re-uploading a file", accept=[".csv", ".xlsx"]), width="100%"),
+            ui.card(ui.input_file("data_file", ui.row(".csv & .xlsx files are accepted. Please refresh when re-uploading a file"), accept=[".csv", ".xlsx"]), width="100%"),
             ui.card(),
             # ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
             col_widths=(8, 4),
@@ -346,14 +346,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        ui.card(ui.input_radio_buttons("remove_blanks", #ui.row(
-            #"Remove Unknown Values (e.g., NA, Unknown)",
-            ui.tooltip(
-                ui.icon("info-circle"),
-                f"Select 'Yes' to exclude rows with values {", ".join(missing_values)} from the analysis. 999 will not be excluded"
-            )
-        # )#"Remove Unknown Values (e.g., NA, Unknown)"
-        , ["No (Default)", "Yes"]),width="100%"),
+        ui.card(ui.input_radio_buttons("remove_blanks", ui.row("Remove Unknown Values (e.g., NA, Unknown)"), ["No (Default)", "Yes"]),width="100%"),
         col_widths= (2,2,2,6)
         ),
 
