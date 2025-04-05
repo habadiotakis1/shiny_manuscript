@@ -168,7 +168,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     return col_var_config
 
 # Function to create Word table from var_config
-def create_word_table(df,var_config, group_var, subheadings, subheading_names):
+def create_word_table(df,var_config, group_var, subheadings, subheading_names, table_name):
     # Create a new Word Document
     doc = Document()
 
@@ -223,7 +223,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names):
                 continue
             elif var_type == "Categorical (Y/N)":
                 row_cells = table.add_row().cells
-                row_cells[0].text = f"{var}"  
+                row_cells[0].text = f"   {var}"  
                 row_cells[1].text = str(var_config[var]["group1"])
                 row_cells[2].text = str(var_config[var]["group2"])
                 row_cells[3].text = str(var_config[var]["p_value"])
@@ -235,7 +235,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names):
                 row_cells[2].text = ""
                 row_cells[3].text = ""
 
-                row_cells[0].paragraphs[0].runs[0].font.underline = True
+                # row_cells[0].paragraphs[0].runs[0].font.underline = True
 
                 var_options = df[var].unique()        
                 for i in range(len(var_options)):
@@ -257,7 +257,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names):
                 row_cells[2].text = ""
                 row_cells[3].text = ""
 
-                row_cells[0].paragraphs[0].runs[0].font.underline = True
+                # row_cells[0].paragraphs[0].runs[0].font.underline = True
 
                 var_options = df[var].unique()        
                 for i in range(len(var_options)):
@@ -274,19 +274,17 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names):
 
             elif var_type == "Ratio Continuous" or var_type == "Ordinal Discrete":
                 row_cells = table.add_row().cells
-                row_cells[0].text = f"{var}"  
+                row_cells[0].text = f"   {var}"  
                 row_cells[1].text = str(var_config[var]["group1"])
                 row_cells[2].text = str(var_config[var]["group2"])
                 row_cells[3].text = str(var_config[var]["p_value"])
                 
-                # Apply formatting to the variable name cell (indentation and smaller font)
-                # para = row_cells[0].paragraphs[0]
-                # run = para.add_run(row_cells[0].text)
-                # run.font.size = Pt(8)  # Smaller font size
-                # para.paragraph_format.left_indent = Pt(12)  # Indentation for the variable name            
 
     # Save the document to a file
-    doc_filename = "statistical_analysis_results.docx"
+    table_name = re.sub(r'\W+', '', table_name.strip())
+    if table_name == "":
+        table_name = "Statistical_Analysis"
+    doc_filename = f"{table_name}.docx"
     doc.save(doc_filename)
     return doc_filename
 
@@ -695,7 +693,7 @@ def server(input, output, session):
             return None  # Return None if no data is available
         
         # Generate the Word table document
-        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings, subheading_names.get())
+        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings, subheading_names.get(), input.table_name())
         
         return doc_filename  # Return the Word document file for download
 
