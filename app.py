@@ -317,11 +317,6 @@ app_ui = ui.page_fluid(
     
     ui.layout_columns(
         ui.h5("Step 1: Upload File"),
-        # ui.layout_columns(
-            # ui.row("   .csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file"),
-            # ui.row("   Example Output File"),
-            # col_widths=(8, 4)
-            # ),
         ui.layout_columns(
             ui.card(".csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file", ui.input_file("data_file", "", accept=[".csv", ".xlsx"]), width="100%"),
             ui.card("Example Output File", ui.download_button("download_example", "NOT IMPLEMENTED")),
@@ -350,7 +345,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        ui.card("Remove Unknown Values (e.g., NA, Unknown)", ui.input_radio_buttons("remove_blanks", choices=["No (Default)", "Yes"]), width="100%"),
+        # ui.card("Remove Unknown Values (e.g., NA, Unknown)", ui.input_radio_buttons("remove_blanks", choices=["No (Default)", "Yes"]), width="100%"),
         col_widths= (2,2,2,6)
         ),
 
