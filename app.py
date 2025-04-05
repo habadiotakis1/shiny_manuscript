@@ -91,7 +91,7 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
 
 # Function to perform aggregation analysis based on the variable type
 def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
-    groups = df[group_var].dropna().unique()
+    groups = df[group_var].unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
     
@@ -100,7 +100,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     yn_var = None
 
     print("BEFORE:", var_name, var_options)
-    var_options = df[var_name].dropna().unique()        
+    var_options = df[var_name].dropna().unique()
     print(var_name, var_options)
     for val in yes_values:
         if val in var_options:
@@ -235,7 +235,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
 
                 # row_cells[0].paragraphs[0].runs[0].font.underline = True
 
-                var_options = df[var].unique()        
+                var_options = df[var].dropna().unique()        
                 for i in range(len(var_options)):
                     row_cells = table.add_row().cells
                     row_cells[0].text = f"      {var_options[i]}"  
@@ -257,7 +257,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
 
                 # row_cells[0].paragraphs[0].runs[0].font.underline = True
 
-                var_options = df[var].unique()        
+                var_options = df[var].dropna().unique()        
                 for i in range(len(var_options)):
                     row_cells = table.add_row().cells
                     row_cells[0].text = f"      {var_options[i]}"  
