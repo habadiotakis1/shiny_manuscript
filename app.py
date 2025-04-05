@@ -417,21 +417,9 @@ def server(input, output, session):
             elif ext == ".xlsx":
                 df = pd.read_excel(file_info["datapath"])
 
-            # strip whitespace in column names and str values
-            # df.columns = df.columns.str.strip()
-            # df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-
-            # data.set(df)  # Store data in reactive value
-            
-            # columns = df.columns.tolist()  # Get column names
-            # columns = [re.sub(r'\W+', '', col) for col in columns]
-
             # Clean column names: strip and remove non-alphanumeric chars
             clean_columns = [re.sub(r'\W+', '', col.strip()) for col in df.columns]
             df.columns = clean_columns
-
-            # Strip whitespace from all string values in the DataFrame
-            # df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
             df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
             print(df["group"].unique())
@@ -562,37 +550,7 @@ def server(input, output, session):
     def var_settings_4():
         return generate_subheading_ui("subheading_4")
 
-    @reactive.effect
-    def update_variable_subheading():
-        # Loop through the columns in var_config
-        for col in var_config.get():
-            # Get the new subheading selected by the user
-            new_subheading = input[f"subheading_{col}"]()
-            
-            # Get the current subheading from the var_config
-            current_subheading = var_config.get()[col]["subheading"]
-            
-            # If the subheading has changed, move the column to the new subheading
-            if new_subheading != current_subheading:
-                # Remove the variable from the current subheading
-                subheadings[current_subheading].set([
-                    c for c in subheadings[current_subheading]() if c != col
-                ])
-                
-                # Add the variable to the new subheading
-                subheadings[new_subheading].set(subheadings[new_subheading]() + [col])
-                
-                # Update var_config to reflect the new subheading
-                var_config.get()[col]["subheading"] = new_subheading
-                var_config.set(var_config.get())  # Update var_config reactively
-                
-                # Debugging print statement to track the change
-                print(f"Moved {col} from {current_subheading} to {new_subheading}")
-                
-                # Optionally, you can also call generate_subheading_ui to re-render the UI for updated subheadings
-                generate_subheading_ui(current_subheading)
-                generate_subheading_ui(new_subheading)
-
+   
     # JavaScript to enable drag-and-drop using SortableJS
     ui.tags.script(
         """
@@ -645,14 +603,69 @@ def server(input, output, session):
         
         print("SELECTED COLUMNS", type(selected_columns.get()),selected_columns.get())
         for col in df.columns:
-            # if col in set(selected_columns.get()):
+            new_subheading = input[f"subheading_{col}"]()
+            current_subheading = var_config.get()[col]["subheading"]
+            
             print("❗️ Updating variable configurations...", updated_config[col])
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
             updated_config[col]["name"] = input[f"name_{col}"]() or col
             updated_config[col]["position"] = input[f"position_{col}"]() or 15
             updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "subheading_1"
             print("to...", updated_config[col])
+
+            
+            # If the subheading has changed, move the column to the new subheading
+            if new_subheading != current_subheading:
+                # Remove the variable from the current subheading
+                subheadings[current_subheading].set([
+                    c for c in subheadings[current_subheading]() if c != col
+                ])
+                
+                # Add the variable to the new subheading
+                subheadings[new_subheading].set(subheadings[new_subheading]() + [col])
+                
+                # Update var_config to reflect the new subheading
+                var_config.get()[col]["subheading"] = new_subheading
+                var_config.set(var_config.get())  # Update var_config reactively
+                
+                # Debugging print statement to track the change
+                print(f"Moved {col} from {current_subheading} to {new_subheading}")
+
+            generate_subheading_ui(current_subheading)
+            generate_subheading_ui(new_subheading)
+
         var_config.set(updated_config)  # Update stored config
+
+    # @reactive.effect
+    # def update_variable_subheading():
+    #     # Loop through the columns in var_config
+    #     for col in var_config.get():
+    #         # Get the new subheading selected by the user
+    #         new_subheading = input[f"subheading_{col}"]()
+            
+    #         # Get the current subheading from the var_config
+    #         current_subheading = var_config.get()[col]["subheading"]
+            
+    #         # If the subheading has changed, move the column to the new subheading
+    #         if new_subheading != current_subheading:
+    #             # Remove the variable from the current subheading
+    #             subheadings[current_subheading].set([
+    #                 c for c in subheadings[current_subheading]() if c != col
+    #             ])
+                
+    #             # Add the variable to the new subheading
+    #             subheadings[new_subheading].set(subheadings[new_subheading]() + [col])
+                
+    #             # Update var_config to reflect the new subheading
+    #             var_config.get()[col]["subheading"] = new_subheading
+    #             var_config.set(var_config.get())  # Update var_config reactively
+                
+    #             # Debugging print statement to track the change
+    #             print(f"Moved {col} from {current_subheading} to {new_subheading}")
+                
+    #             # Optionally, you can also call generate_subheading_ui to re-render the UI for updated subheadings
+    #             generate_subheading_ui(current_subheading)
+    #             generate_subheading_ui(new_subheading)
 
     @reactive.effect
     def update_subheading_names():
