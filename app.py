@@ -345,9 +345,10 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values", ["No (Default)", "Yes"])),
-        ui.card(ui.tooltip(ui.icon("info-circle"),"Customize how each variable appears in the final table.")),
-        col_widths= (2,2,2,4,2)
+        ui.card(ui.row(
+            ui.input_radio_buttons("remove_blanks", "Remove Unknown Values", ["No (Default)", "Yes"]),
+            ui.tooltip(ui.icon("info-circle"),"Customize how each variable appears in the final table."))),
+        col_widths= (2,2,2,6)
         ),
 
     ui.h5("Step 4: Customize Table & Rows"),
