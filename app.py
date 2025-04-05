@@ -371,7 +371,7 @@ def server(input, output, session):
     selected_columns = reactive.Value([])  # Store selected columns
     var_config = reactive.Value({})  # Store variable settings dynamically
     group_var = reactive.Value(None)  # Store grouping variable
-    previous_group_var = reactive.Value(None)
+    prev_group_var = reactive.Value(None)
     subheadings = { # Reactive values to track column assignments per subheading
         "subheading_1": reactive.Value([]),
         "subheading_2": reactive.Value([]),
@@ -482,9 +482,11 @@ def server(input, output, session):
     def update_group_var():
         new_group = input.grouping_var()
         old_group = group_var.get()
+        print("NEW GROUP VAR", old_group)
+        print("OLD GROUP VAR", old_group)
 
         group_var.set(new_group)
-        previous_group_var.set(old_group)
+        prev_group_var.set(old_group)
         
         if not new_group or new_group == old_group:
             return
@@ -537,7 +539,7 @@ def server(input, output, session):
         #             ui.modal_remove()  # Close modal after selection
 
         # # Update tracking variables
-        # previous_group_var.set(old_group)
+        # prev_group_var.set(old_group)
         # group_var.set(new_group)
 
     # Update columns under subheadings
