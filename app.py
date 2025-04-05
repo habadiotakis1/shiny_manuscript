@@ -214,21 +214,21 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         
         # Add a row for each variable under the current subheading
         for var in sorted_subheading_vars:
-            var = var_config[var]["name"]
+            var_name = var_config[var]["name"]
             var_type = var_config[var]["type"]
 
             if var_type == "Omit":
                 continue
             elif var_type == "Categorical (Y/N)":
                 row_cells = table.add_row().cells
-                row_cells[0].text = f"   {var}"  
+                row_cells[0].text = f"   {var_name}"  
                 row_cells[1].text = str(var_config[var]["group1"])
                 row_cells[2].text = str(var_config[var]["group2"])
                 row_cells[3].text = str(var_config[var]["p_value"])
 
             elif var_type == "Categorical (Dichotomous)":
                 row_cells = table.add_row().cells
-                row_cells[0].text = f"   {var}"  
+                row_cells[0].text = f"   {var_name}"  
                 row_cells[1].text = ""
                 row_cells[2].text = ""
                 row_cells[3].text = ""
@@ -250,7 +250,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
 
             elif var_type == "Categorical (Multinomial)":
                 row_cells = table.add_row().cells
-                row_cells[0].text = f"   {var}"  
+                row_cells[0].text = f"   {var_name}"  
                 row_cells[1].text = ""
                 row_cells[2].text = ""
                 row_cells[3].text = ""
@@ -272,7 +272,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
 
             elif var_type == "Ratio Continuous" or var_type == "Ordinal Discrete":
                 row_cells = table.add_row().cells
-                row_cells[0].text = f"   {var}"  
+                row_cells[0].text = f"   {var_name}"  
                 row_cells[1].text = str(var_config[var]["group1"])
                 row_cells[2].text = str(var_config[var]["group2"])
                 row_cells[3].text = str(var_config[var]["p_value"])
