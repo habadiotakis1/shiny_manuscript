@@ -475,12 +475,7 @@ def server(input, output, session):
         def sync_column_selection_with_subheadings():
             for subheading in subheadings:
                 generate_subheading_ui(subheading)
-    
-    # Re-render the UI to reflect the updated subheadings
-    @reactive.effect
-    def sync_column_selection_with_subheadings():
-        for subheading in subheadings:
-            generate_subheading_ui(subheading)
+   
 
     @reactive.effect
     def watch_column_changes():
