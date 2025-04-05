@@ -648,10 +648,10 @@ def server(input, output, session):
             # print(new_subheading_mapped, old_subheading_mapped)
             
             print("❗️ Updating configuration to...", updated_config[col])
-            updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
-            updated_config[col]["name"] = input[f"name_{col}"]() or col
-            updated_config[col]["position"] = int(input[f"position_{col}"]()) or 15
-            updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "subheading_1"
+            updated_config[col]["type"] = input[f"var_type_{col}"]()
+            updated_config[col]["name"] = input[f"name_{col}"]() 
+            updated_config[col]["position"] = int(input[f"position_{col}"]())
+            updated_config[col]["subheading"] = input[f"subheading_{col}"]() 
             print("-                         to...", updated_config[col])
             
             # If the subheading has changed, move the column to the new subheading
