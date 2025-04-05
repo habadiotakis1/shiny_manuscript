@@ -482,6 +482,9 @@ def server(input, output, session):
     def update_group_var():
         new_group = input.grouping_var()
         old_group = group_var.get()
+
+        group_var.set(new_group)
+        previous_group_var.set(old_group)
         
         if not new_group or new_group == old_group:
             return
@@ -504,8 +507,6 @@ def server(input, output, session):
         #             break
 
         # 3. Save the new group_var
-        previous_group_var.set(old_group)
-        group_var.set(new_group)
         print("Set new group var: ", group_var.get())
 
         # # If there's a previous group_var, ask the user where to put it
