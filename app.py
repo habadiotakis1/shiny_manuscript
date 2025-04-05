@@ -54,7 +54,7 @@ variable_types = list(default_tests.keys())
 ### ONLY SUPPORTS 2 GROUPS AT THE MOMENT, NEED TO UPDATE TO MULTIPLE GROUPS ####
 ################################################################################
 def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
-    groups = df[group_var].unique()
+    groups = df[group_var].dropna().unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
 
@@ -91,7 +91,8 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
 
 # Function to perform aggregation analysis based on the variable type
 def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
-    groups = df[group_var].unique()
+    print("PERFORM AGG ANALYSIS")
+    groups = df[group_var].dropna().unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
     
