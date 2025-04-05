@@ -91,7 +91,7 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
 
 # Function to perform aggregation analysis based on the variable type
 def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
-    groups = df[group_var].unique()
+    groups = df[group_var].dropna().unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
     
@@ -99,7 +99,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     yes_values = ['Yes', 'Y', 'y', 'yes', 1]
     yn_var = None
 
-    var_options = df[var_name].unique()        
+    var_options = df[var_name].dropna().unique()        
     for val in yes_values:
         if val in var_options:
             yn_var=val
@@ -207,9 +207,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         row_cells[0].paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
         
         # Get and sort all variables for the current subheading
-        # subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[sub]()]
         subheading_vars = [col for col, config in var_config.items() if config["subheading"] == sub]
-        print("TRYING TO PRINT SUBHEADING VARS", subheading_vars)
         subheading_vars = [col for col in subheading_vars if col != group_var]
         sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
         
@@ -217,7 +215,6 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         for var in sorted_subheading_vars:
             var_name = var_config[var]["name"]
             var_type = var_config[var]["type"]
-            print(var, var_name, var_type)
             if var_type == "Omit":
                 continue
             elif var_type == "Categorical (Y/N)":
