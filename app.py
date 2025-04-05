@@ -198,7 +198,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
 
     # Loop through subheadings
     for sub in subheadings:
-        subheading_name = subheading_names[sub]
+        subheading_name = subheading_names[sub]()
 
         # Add a row for the subheading (this is the row header)
         row_cells = table.add_row().cells
@@ -522,9 +522,7 @@ def server(input, output, session):
                 ui.input_select(
                     f"subheading_{col}",
                     "Subheading",
-                    # ['subheading_1', 'subheading_2', 'subheading_3', 'subheading_4'],
                     [subheading_val.get() for subheading_val in subheading_names.values()],
-                    # subheading_names.values(),
                     selected=var_config.get()[col]["subheading"],
                 ),
                 ui.input_select(
@@ -637,6 +635,8 @@ def server(input, output, session):
                     updated_names[key] = key  # fallback to default internal name
             except:
                 updated_names[key] = key
+            
+
             subheading_names[key].set(updated_names[key])
         print("Subheading names updated:", updated_names)
 
@@ -699,7 +699,7 @@ def server(input, output, session):
             return None  # Return None if no data is available
         
         # Generate the Word table document
-        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings, subheading_names.get(), input.table_name())
+        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings, subheading_names, input.table_name())
         
         return doc_filename  # Return the Word document file for download
 
