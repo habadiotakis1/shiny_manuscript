@@ -214,6 +214,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         # Get and sort all variables for the current subheading
         subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[sub]()]
         subheading_vars = [col for col in subheading_vars if col != group_var]
+        print("Subheading Vars", [var_config[col]["position"] for col in subheading_vars])
         sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
         
         # Add a row for each variable under the current subheading
@@ -627,7 +628,7 @@ def server(input, output, session):
             new_subheading_mapped = [k for k, v in subheading_names.items() if v() == new_subheading][0]
             old_subheading_mapped = [k for k, v in subheading_names.items() if v() == old_subheading][0]
 
-            print(new_subheading_mapped, old_subheading_mapped)
+            # print(new_subheading_mapped, old_subheading_mapped)
             
             print("❗️ Updating variable configurations...", updated_config[col])
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
