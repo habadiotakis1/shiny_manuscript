@@ -209,14 +209,13 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         # Get and sort all variables for the current subheading
         subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[sub]()]
         subheading_vars = [col for col in subheading_vars if col != group_var]
-        print("Subheading Vars", [var_config[col]["position"] for col in subheading_vars])
         sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
         
         # Add a row for each variable under the current subheading
         for var in sorted_subheading_vars:
             var_name = var_config[var]["name"]
             var_type = var_config[var]["type"]
-
+            print(var, var_name, var_type)
             if var_type == "Omit":
                 continue
             elif var_type == "Categorical (Y/N)":
