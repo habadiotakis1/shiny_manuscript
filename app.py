@@ -238,6 +238,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
 
                 var_options = df[var].unique()        
                 for i in range(len(var_options)):
+                    print(var_options)
                     row_cells = table.add_row().cells
                     row_cells[0].text = f"      {var_options[i]}"  
                     row_cells[1].text = str(var_config[var][f"group1_subgroup{i}"])
