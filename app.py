@@ -647,7 +647,7 @@ def server(input, output, session):
             updated_config[col]["name"] = input[f"name_{col}"]() or col
             updated_config[col]["position"] = int(input[f"position_{col}"]()) or 15
             updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "subheading_1"
-            print("to...", updated_config[col])
+            print("                        to...", updated_config[col])
 
             
             # If the subheading has changed, move the column to the new subheading
