@@ -238,7 +238,8 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
 
                 # row_cells[0].paragraphs[0].runs[0].font.underline = True
 
-                var_options = df[var].dropna().unique()        
+                var_options = df[var].dropna().unique()
+                print(var, var_options)        
                 for i in range(len(var_options)):
                     row_cells = table.add_row().cells
                     row_cells[0].text = f"      {var_options[i]}"  
