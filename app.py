@@ -425,11 +425,24 @@ def server(input, output, session):
                 choices={"":column_dict}
             )  
 
+    # @reactive.effect
+    # def _():
+    #     choices = input.column_selectize()
+        
+
     @reactive.effect
     def column_selectize():
         available_columns = set(input.column_selectize())
 
         selected_columns.set(available_columns)
+
+        if available_columns:
+            ui.update_select("grouping_var", choices=available_columns, selected=available_columns[0])
+            if not group_var.get():
+                group_var.set(available_columns[0])  # Set the initial grouping variable
+                print("First group var: ", group_var.get())
+            elif group_var.get() not in available_columns:
+                group_var.set(available_columns[0])
 
         all_subheading_values = set()
         for subheading in subheadings:
@@ -464,16 +477,6 @@ def server(input, output, session):
     def grouping_variable():
         return ui.input_select("grouping_var", "Grouping Variable", choices=[])
 
-    @reactive.effect
-    def _():
-        choices = input.column_selectize()
-        if choices:
-            ui.update_select("grouping_var", choices=choices, selected=choices[0])
-            if not group_var.get():
-                group_var.set(choices[0])  # Set the initial grouping variable
-                print("First group var: ", group_var.get())
-            elif group_var.get() not in choices:
-                group_var.set(choices[0])
 
     @reactive.effect
     def update_group_var():
