@@ -474,36 +474,25 @@ def server(input, output, session):
         except:
             pass
 
-        @reactive.effect
-        def sync_column_selection_with_subheadings():
-            for subheading in subheadings:
-                generate_subheading_ui(subheading)
-    
-    # Re-render the UI to reflect the updated subheadings
     @reactive.effect
     def sync_column_selection_with_subheadings():
         for subheading in subheadings:
             generate_subheading_ui(subheading)
-
 
     @reactive.effect
     def watch_column_changes():
         column_selectize()
 
     @reactive.effect
-    def sync_group_var_with_dropdown():
-        selected = input.grouping_var()
-        if selected and selected != group_var.get():
-            print("Setting group_var to:", selected)
-            group_var.set(selected)
-
-    @reactive.effect
-    def initialize_group_var():
+    def manage_group_var():
         available = input.column_selectize()
+        selected = input.grouping_var()
         if not group_var.get() and available:
             print("Initializing group_var:", available[0])
             group_var.set(available[0])
             ui.update_select("grouping_var", choices=available, selected=available[0])
+        elif selected and selected != group_var.get():
+            group_var.set(selected)
 
     # Set Grouping Variable for analysis
     @output
@@ -563,26 +552,34 @@ def server(input, output, session):
         # width=1, 
         class_="droppable-area",
         )
+    
+    for i in range(1, 5):
+        subheading_key = f"subheading_{i}"
+
+        @output
+        @render.ui(label=subheading_key)
+        def _render_subheading(subheading_key=subheading_key):  # use default argument trick
+            return generate_subheading_ui(subheading_key)
         
-    @output
-    @render.ui
-    def var_settings_1():
-        return generate_subheading_ui("subheading_1")
+    # @output
+    # @render.ui
+    # def var_settings_1():
+    #     return generate_subheading_ui("subheading_1")
 
-    @output
-    @render.ui
-    def var_settings_2():
-        return generate_subheading_ui("subheading_2")
+    # @output
+    # @render.ui
+    # def var_settings_2():
+    #     return generate_subheading_ui("subheading_2")
 
-    @output
-    @render.ui
-    def var_settings_3():
-        return generate_subheading_ui("subheading_3")
+    # @output
+    # @render.ui
+    # def var_settings_3():
+    #     return generate_subheading_ui("subheading_3")
 
-    @output
-    @render.ui
-    def var_settings_4():
-        return generate_subheading_ui("subheading_4")
+    # @output
+    # @render.ui
+    # def var_settings_4():
+    #     return generate_subheading_ui("subheading_4")
 
    
     # JavaScript to enable drag-and-drop using SortableJS
@@ -637,7 +634,6 @@ def server(input, output, session):
 
         print("Currently Selected Columns",selected_columns.get(), "\n")
         
-        print(df.columns)
         for col in df.columns:
             new_subheading = input[f"subheading_{col}"]()
             old_subheading = var_config.get()[col]["subheading"]
@@ -647,12 +643,12 @@ def server(input, output, session):
 
             # print(new_subheading_mapped, old_subheading_mapped)
             
-            print("❗️ Updating configuration to...", updated_config[col])
+            print("❗️ Updating configuration from...", updated_config[col])
             updated_config[col]["type"] = input[f"var_type_{col}"]()
             updated_config[col]["name"] = input[f"name_{col}"]() 
             updated_config[col]["position"] = int(input[f"position_{col}"]())
             updated_config[col]["subheading"] = input[f"subheading_{col}"]() 
-            print("-                         to...", updated_config[col])
+            print("-                           to...", updated_config[col])
             
             # If the subheading has changed, move the column to the new subheading
             if new_subheading != old_subheading:
