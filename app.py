@@ -331,7 +331,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        col_widths= (4,2,2,2,2)
+        col_widths= (3,3,2,2,2)
         ),
 
     ui.h5("Step 4: Customize Table"),
@@ -461,57 +461,11 @@ def server(input, output, session):
             group_var.set(available[0])
             ui.update_select("grouping_var", choices=available, selected=available[0])
 
-
-    # @reactive.effect
-    # def column_selectize():
-    #     available_columns = input.column_selectize()
-    #     selected_columns.set(available_columns)
-
-    #     if available_columns:
-    #         current_group_var = group_var.get()
-
-    #         if current_group_var is None or current_group_var not in available_columns:
-    #             default_group = available_columns[0]
-    #             group_var.set(default_group)
-    #             ui.update_select("grouping_var", choices=available_columns)#, selected=default_group)
-    #             print("Setting initial group_var to:", default_group)
-    #         else:
-    #             # Just update the choices, not the selected value
-    #             ui.update_select("grouping_var", choices=available_columns)
-
-        
-    #     # Make sure all selected columns are initially added to subheading 1 if not already assigned
-    #     all_subheading_values = set()
-    #     for subheading in subheadings:
-    #         all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
-        
-    #     for col in available_columns:
-    #         if col not in all_subheading_values:
-    #             subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
-
-    #     @reactive.effect
-    #     def sync_column_selection_with_subheadings():
-    #         for subheading in subheadings:
-    #             generate_subheading_ui(subheading)
-
-   
-    # @reactive.effect
-    # def sync_group_var_with_dropdown():
-    #     selected = input.grouping_var()
-    #     current = group_var.get()
-        
-    #     if current == None or selected == None:
-    #         return
-            
-    #     if selected != current:
-    #         print("Updating group_var from dropdown:", selected)
-    #         group_var.set(selected)
-
     # Set Grouping Variable for analysis
     @output
     @render.ui
     def grouping_variable():
-        return ui.input_select("grouping_var", "Grouping Variable", choices=[])
+        return ui.input_select("grouping_var", "Grouping Variable: Table Column", choices=[])
 
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
@@ -635,8 +589,11 @@ def server(input, output, session):
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
             updated_config[col]["name"] = input[f"name_{col}"]() or col
             updated_config[col]["position"] = input[f"position_{col}"]() or 15
+            updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "subheading_1"
             print("to...", updated_config[col])
         var_config.set(updated_config)  # Update stored config
+
+
 
     # Perform statistical analysis when the "Calculate" button is clicked
     @reactive.effect
