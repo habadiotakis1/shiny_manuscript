@@ -40,7 +40,7 @@ variable_types = [
     "Binary (i.e. Smoking, Diabetes, Hypertension)",
     "Categorical (Dichotomous) (i.e. Sex)",
     "Categorical (Multinomial) (i.e. Race)",
-    "Ratio Continuous (i.e., Age, BMI),
+    "Ratio Continuous (i.e., Age, BMI)",
     "Ordinal Discrete (i.e., GCS, Tumor Grade)",
 ]
 
