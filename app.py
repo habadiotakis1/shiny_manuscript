@@ -209,6 +209,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         # Get and sort all variables for the current subheading
         # subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[sub]()]
         subheading_vars = [col for col, config in var_config.items() if config["subheading"] == sub]
+        print("TRYING TO PRINT SUBHEADING VARS", subheading_vars)
         subheading_vars = [col for col in subheading_vars if col != group_var]
         sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
         
