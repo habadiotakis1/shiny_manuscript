@@ -61,8 +61,6 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places, remo
     if remove_blanks:
         df = df.replace(missing_values, np.nan)
 
-    print(remove_blanks, df["Sex"].unique(), groups)
-
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
 
@@ -436,7 +434,7 @@ def server(input, output, session):
             df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
             data.set(df)  # Store data in reactive value
-            clean_df = df.replace(missing_values, "")
+            clean_df = df.replace(missing_values, np.nan)
             cleaned_data.set(clean_df)  # Store cleaned data in reactive value
             
             column_dict = {col: col for col in df.columns}
@@ -535,7 +533,7 @@ def server(input, output, session):
         *[
             ui.card(
                 ui.h5(col),
-                ui.p(", ".join(map(str, df[col].unique()[:5]))),
+                ui.p(", ".join(map(str, df[col].dropna().unique()[:5]))),
                 ui.input_text(
                     f"name_{col}",
                     "Column Name",
@@ -677,37 +675,6 @@ def server(input, output, session):
 
         var_config.set(updated_config)  # Update stored config
 
-    # @reactive.effect
-    # def update_variable_subheading():
-    #     # Loop through the columns in var_config
-    #     for col in var_config.get():
-    #         # Get the new subheading selected by the user
-    #         new_subheading = input[f"subheading_{col}"]()
-            
-    #         # Get the current subheading from the var_config
-    #         current_subheading = var_config.get()[col]["subheading"]
-            
-    #         # If the subheading has changed, move the column to the new subheading
-    #         if new_subheading != current_subheading:
-    #             # Remove the variable from the current subheading
-    #             subheadings[current_subheading].set([
-    #                 c for c in subheadings[current_subheading]() if c != col
-    #             ])
-                
-    #             # Add the variable to the new subheading
-    #             subheadings[new_subheading].set(subheadings[new_subheading]() + [col])
-                
-    #             # Update var_config to reflect the new subheading
-    #             var_config.get()[col]["subheading"] = new_subheading
-    #             var_config.set(var_config.get())  # Update var_config reactively
-                
-    #             # Debugging print statement to track the change
-    #             print(f"Moved {col} from {current_subheading} to {new_subheading}")
-                
-    #             # Optionally, you can also call generate_subheading_ui to re-render the UI for updated subheadings
-    #             generate_subheading_ui(current_subheading)
-    #             generate_subheading_ui(new_subheading)
-
     @reactive.effect
     def update_subheading_names():
         updated_names = {}
@@ -730,7 +697,11 @@ def server(input, output, session):
     @reactive.event(input.calculate)
     def calculate_statistical_analysis():
         print("🔄 Calculate button pressed. Updating variable configurations...")
-        df = data.get()
+        if input.remove_blanks() == "Yes":
+            df = cleaned_data.get()
+        else:
+            df = data.get()
+
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
             return
         
@@ -771,7 +742,6 @@ def server(input, output, session):
                             print("After: ", updated_config[col])
 
                 var_config.set(updated_config)
-                print(updated_config['sex'])
 
                 ui.notification_show("✅ Calculation complete! File ready to download", duration=60, type="message")
         except:
