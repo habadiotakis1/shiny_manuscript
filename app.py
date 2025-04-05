@@ -440,10 +440,10 @@ def server(input, output, session):
 
             # Only reset the group var if it hasn't been set yet
             if current_group_var is None or current_group_var not in available_columns:
-                default_group = available_columns[0]
-                group_var.set(default_group)
-                ui.update_select("grouping_var", choices=available_columns, selected=default_group)
-                print("Setting initial group_var to:", default_group)
+                # default_group = available_columns[0]
+                # group_var.set(default_group)
+                ui.update_select("grouping_var", choices=available_columns)#, selected=default_group)
+                # print("Setting initial group_var to:", default_group)
             else:
                 # Just update the choices, not the selected value
                 ui.update_select("grouping_var", choices=available_columns)
