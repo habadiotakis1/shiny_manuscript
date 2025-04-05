@@ -553,33 +553,25 @@ def server(input, output, session):
         class_="droppable-area",
         )
     
-    for i in range(1, 5):
-        subheading_key = f"subheading_{i}"
+    @output
+    @render.ui
+    def var_settings_1():
+        return generate_subheading_ui("subheading_1")
 
-        @output
-        @render.ui(label=subheading_key)
-        def _render_subheading(subheading_key=subheading_key):  # use default argument trick
-            return generate_subheading_ui(subheading_key)
-        
-    # @output
-    # @render.ui
-    # def var_settings_1():
-    #     return generate_subheading_ui("subheading_1")
+    @output
+    @render.ui
+    def var_settings_2():
+        return generate_subheading_ui("subheading_2")
 
-    # @output
-    # @render.ui
-    # def var_settings_2():
-    #     return generate_subheading_ui("subheading_2")
+    @output
+    @render.ui
+    def var_settings_3():
+        return generate_subheading_ui("subheading_3")
 
-    # @output
-    # @render.ui
-    # def var_settings_3():
-    #     return generate_subheading_ui("subheading_3")
-
-    # @output
-    # @render.ui
-    # def var_settings_4():
-    #     return generate_subheading_ui("subheading_4")
+    @output
+    @render.ui
+    def var_settings_4():
+        return generate_subheading_ui("subheading_4")
 
    
     # JavaScript to enable drag-and-drop using SortableJS
