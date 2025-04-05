@@ -433,28 +433,54 @@ def server(input, output, session):
     @reactive.effect
     def column_selectize():
         available_columns = input.column_selectize()
-
         selected_columns.set(available_columns)
 
         if available_columns:
-            ui.update_select("grouping_var", choices=available_columns, selected=available_columns[0])
-            if group_var.get() == None:
-                group_var.set(available_columns[0])  # Set the initial grouping variable
-                print("First group var: ", group_var.get())
-            # elif group_var.get() not in available_columns:
-                # group_var.set(available_columns[0])
+            current_group_var = group_var.get()
 
+            # Only reset the group var if it hasn't been set yet
+            if current_group_var is None or current_group_var not in available_columns:
+                default_group = available_columns[0]
+                group_var.set(default_group)
+                ui.update_select("grouping_var", choices=available_columns, selected=default_group)
+                print("Setting initial group_var to:", default_group)
+            else:
+                # Just update the choices, not the selected value
+                ui.update_select("grouping_var", choices=available_columns)
+        
+        # Make sure all selected columns are initially added to subheading 1 if not already assigned
         all_subheading_values = set()
         for subheading in subheadings:
             all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
-            
+        
         for col in available_columns:
             if col not in all_subheading_values:
                 subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
-        
+
         @reactive.effect
         def sync_column_selection_with_subheadings():
             for subheading in subheadings:
+                generate_subheading_ui(subheading)
+            
+        # if available_columns:
+        #     ui.update_select("grouping_var", choices=available_columns, selected=available_columns[0])
+        #     if group_var.get() == None:
+        #         group_var.set(available_columns[0])  # Set the initial grouping variable
+        #         print("First group var: ", group_var.get())
+        #     # elif group_var.get() not in available_columns:
+        #         # group_var.set(available_columns[0])
+
+        # all_subheading_values = set()
+        # for subheading in subheadings:
+        #     all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
+            
+        # for col in available_columns:
+        #     if col not in all_subheading_values:
+        #         subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
+        
+        # @reactive.effect
+        # def sync_column_selection_with_subheadings():
+        #     for subheading in subheadings:
                 # current_cols = set(subheadings[subheading]())
 
                 # # Add new columns to subheading
