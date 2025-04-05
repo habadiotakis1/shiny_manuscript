@@ -441,8 +441,8 @@ def server(input, output, session):
             if not group_var.get():
                 group_var.set(available_columns[0])  # Set the initial grouping variable
                 print("First group var: ", group_var.get())
-            elif group_var.get() not in available_columns:
-                group_var.set(available_columns[0])
+            # elif group_var.get() not in available_columns:
+                # group_var.set(available_columns[0])
 
         all_subheading_values = set()
         for subheading in subheadings:
