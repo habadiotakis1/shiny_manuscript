@@ -433,17 +433,17 @@ def server(input, output, session):
         for subheading in subheadings:
             all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
             
-        removed_cols = old_columns - available_columns
-        new_cols = available_columns - old_columns
-
         for col in available_columns:
             if col not in all_subheading_values:
                 subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
         
-        for col in removed_cols:
-            for subheading in subheadings:
-                if col in subheadings[subheading]():
-                    subheadings[subheading].set([c for c in subheadings[subheading]() if c != col])
+        if len(old_columns) > 0:
+            removed_cols = old_columns - available_columns
+            
+            for col in removed_cols:
+                for subheading in subheadings:
+                    if col in subheadings[subheading]():
+                        subheadings[subheading].set([c for c in subheadings[subheading]() if c != col])
 
         @reactive.effect
         def sync_column_selection_with_subheadings():
