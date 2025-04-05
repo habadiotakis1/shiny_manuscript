@@ -100,15 +100,12 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     yn_var = None
 
     var_options = df[var_name].unique()        
-
     for val in yes_values:
         if val in var_options:
             yn_var=val
     
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
-
-    print(group1.unique(), group2.unique())
 
     group1_total = len(group1)
     group2_total = len(group2)
@@ -693,7 +690,6 @@ def server(input, output, session):
     @reactive.event(input.calculate)
     def calculate_statistical_analysis():
         print("🔄 Calculate button pressed. Updating variable configurations...")
-        
         if input.remove_blanks() == "Yes":
             df = cleaned_data.get()
         else:
@@ -716,7 +712,6 @@ def server(input, output, session):
                     if col != curr_group_var and col in selected_columns.get():
                         print(f"\n📂 Processing Variable: {col}", updated_config[col])
                         
-                        print(ol, df[col].unique())
                         var_type = updated_config[col]["type"]
                         
                         if var_type != "Omit":
@@ -748,7 +743,6 @@ def server(input, output, session):
             df = cleaned_data.get()
         else:
             df = data.get()
-
         updated_config = var_config.get()
         
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
