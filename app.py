@@ -326,7 +326,7 @@ app_ui = ui.page_fluid(
     ui.layout_columns(
         ui.h5("Step 1: Upload File"),
         ui.layout_columns(
-            ui.card(ui.input_file("data_file", ".csv & .xlsx files are accepted. Please refresh when re-uploading a file", accept=[".csv", ".xlsx"]),width="100%")),
+            ui.card(ui.input_file("data_file", ".csv & .xlsx files are accepted. Please refresh when re-uploading a file", accept=[".csv", ".xlsx"]),width="100%"),
             ui.card(),
             # ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
             col_widths=(8, 4),
