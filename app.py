@@ -20,23 +20,31 @@ import json
 # set default and alternative statistical tests
 default_tests = {
     "Omit": "Omit",
-    "Categorical (Y/N) (i.e. Smoking, Diabetes)": "fisher",
-    "Categorical (Dichotomous) (i.e. Sex)": "fisher",
-    "Categorical (Multinomial) (i.e. Race)": "fisher-freeman-halton",
-    "Ratio Continuous (i.e., Age, BMI)": "ttest",
-    "Ordinal Discrete (i.e., GCS, Tumor Grade)": "wilcoxon",
+    "Categorical (Y/N)": "fisher",
+    "Categorical (Dichotomous)": "fisher",
+    "Categorical (Multinomial)": "fisher-freeman-halton",
+    "Ratio Continuous": "ttest",
+    "Ordinal Discrete": "wilcoxon",
 }
 
 alternative_tests = {
-    "Categorical (Y/N) (i.e. Smoking, Diabetes)": "chi2",
-    "Categorical (Dichotomous) (i.e. Sex)": "chi2",
-    "Categorical (Multinomial) (i.e. Race)": "chi2",
-    "Ratio Continuous (i.e., Age, BMI)": "mannwhitney",
-    "Ordinal Discrete (i.e., GCS, Tumor Grade)": "ttest",
+    "Categorical (Y/N)": "chi2",
+    "Categorical (Dichotomous)": "chi2",
+    "Categorical (Multinomial)": "chi2",
+    "Ratio Continuous": "mannwhitney",
+    "Ordinal Discrete": "ttest",
 }
 
-variable_types = list(default_tests.keys())
+# variable_types = [
+#     "Omit",
+#     "Binary (i.e. Smoking, Diabetes, Hypertension)",
+#     "Categorical (Dichotomous) (i.e. Sex)",
+#     "Categorical (Multinomial) (i.e. Race)",
+#     "Ratio Continuous (i.e., Age, BMI)",
+#     "Ordinal Discrete (i.e., GCS, Tumor Grade)",
+# ]
 
+variable_types = list(default_tests.keys())
 
 # get p-values from statistical test
 ################################################################################
@@ -416,7 +424,8 @@ def server(input, output, session):
             df.columns = clean_columns
 
             # Strip whitespace from all string values in the DataFrame
-            df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+            # df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+            df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
             print(df["group"].unique())
             data.set(df)  # Store data in reactive value
