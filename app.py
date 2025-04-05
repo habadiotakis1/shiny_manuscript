@@ -633,7 +633,7 @@ def server(input, output, session):
             print("❗️ Updating variable configurations...", updated_config[col])
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
             updated_config[col]["name"] = input[f"name_{col}"]() or col
-            updated_config[col]["position"] = input[f"position_{col}"]() or 15
+            updated_config[col]["position"] = int(input[f"position_{col}"]()) or 15
             updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "subheading_1"
             print("to...", updated_config[col])
 
