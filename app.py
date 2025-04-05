@@ -428,7 +428,7 @@ def server(input, output, session):
     def column_selectize():
         available_columns = set(input.column_selectize())
 
-        old_columns = set(selected_columns.get())
+        old_columns = selected_columns.get()
         all_subheading_values = set()
         for subheading in subheadings:
             all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
