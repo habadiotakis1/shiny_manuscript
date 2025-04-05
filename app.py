@@ -36,7 +36,7 @@ alternative_tests = {
 }
 
 variable_types = [
-    "Omit": "Omit",
+    "Omit",
     "Binary (i.e. Smoking, Diabetes, Hypertension)",
     "Categorical (Dichotomous) (i.e. Sex)",
     "Categorical (Multinomial) (i.e. Race)",
