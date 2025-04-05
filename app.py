@@ -494,7 +494,8 @@ def server(input, output, session):
     def sync_group_var_with_dropdown():
         selected = input.grouping_var()
         current = group_var.get()
-        if current == None:
+        
+        if current == None or not selected:
             return
             
         if selected != current:
