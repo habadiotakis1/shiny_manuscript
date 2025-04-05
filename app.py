@@ -9,6 +9,7 @@ import shinywidgets as sw
 import os
 from io import StringIO
 import re
+import numpy as np
 from scipy import stats
 from docx import Document
 from docx.shared import Pt, Cm, Inches
@@ -35,8 +36,8 @@ alternative_tests = {
     "Ordinal Discrete": "ttest",
 }
 
-blanks = ["NA" "N/A" "na","n/a", "unk", "unknown", "Unk", "Unknown", "UNKNOWN"]
-
+missing_values = ["NA" "N/A" "na","n/a", "unk", "unknown", "Unk", "Unknown", "UNKNOWN"] # List of strings representing unknown or missing data
+ 
 # variable_types = [
 #     "Omit",
 #     "Binary (i.e. Smoking, Diabetes, Hypertension)",
@@ -52,14 +53,17 @@ variable_types = list(default_tests.keys())
 ################################################################################
 ### ONLY SUPPORTS 2 GROUPS AT THE MOMENT, NEED TO UPDATE TO MULTIPLE GROUPS ####
 ################################################################################
-def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
+def run_statistical_test(df, group_var, var_type, var_name, decimal_places, remove_blanks):
     groups = df[group_var].unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
     
+    if remove_blanks:
+        df = df.replace(missing_values, np.nan)
+
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
-    
+
     test_type = default_tests[var_type]
 
     if test_type == "fisher":
@@ -94,7 +98,7 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
     return p_value
 
 # Function to perform aggregation analysis based on the variable type
-def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
+def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config, remove_blanks):
     groups = df[group_var].unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
@@ -108,6 +112,9 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     for val in yes_values:
         if val in var_options:
             yn_var=val
+    
+    if remove_blanks:
+        df = df.replace(missing_values, np.nan)
 
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
@@ -319,7 +326,7 @@ app_ui = ui.page_fluid(
     ui.layout_columns(
         ui.h5("Step 1: Upload File"),
         ui.layout_columns(
-            ui.card(ui.input_file("data_file", ".csv & .xlsx files are accepted. Please refresh when re-uploading a file", accept=[".csv", ".xlsx"])),
+            ui.card(ui.input_file("data_file", ".csv & .xlsx files are accepted. Please refresh when re-uploading a file", accept=[".csv", ".xlsx"]),width="100%")),
             ui.card(),
             # ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
             col_widths=(8, 4),
@@ -339,11 +346,16 @@ app_ui = ui.page_fluid(
         # Grouping Variable
         ui.card(ui.output_ui("grouping_variable")),
         
+        col_widths= (6,6,)
+        ),
+
+    ui.layout_columns(    
         # Formatting Options
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        col_widths= (3,3,2,2,2)
+        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values", ["Yes", "No"])),
+        col_widths= (3,3,3,3)
         ),
 
     ui.h5("Step 4: Customize Table & Rows"),
@@ -719,8 +731,14 @@ def server(input, output, session):
             decimals_pval = input.decimals_pvalue()
             decimals_tab = input.decimals_table()
             output_format = input.output_format()
-            
+    
             updated_config = var_config.get()
+
+            remove_blanks = input.remove_blanks()
+            if remove_blanks == "Yes":
+                remove_blanks = True
+            else:
+                remove_blanks = False        
             
             # Perform statistical analysis using the grouping variable
             if len(selected_columns.get()) > 0:
@@ -731,14 +749,14 @@ def server(input, output, session):
                         var_type = updated_config[col]["type"]
                         
                         if var_type != "Omit":
-                            p_value = run_statistical_test(df, curr_group_var, var_type, col, decimals_pval)
+                            p_value = run_statistical_test(df, curr_group_var, var_type, col, decimals_pval, remove_blanks)
                             
                             # Store the p-value in the var_config dictionary
                             updated_config[col]["p_value"] = p_value
                             print(f"Column: {col}, Grouping Variable: {curr_group_var}, p-value: {p_value}")
 
                             # Perform aggregate analysis and update var_config with the results
-                            aggregate_result = perform_aggregate_analysis(df, curr_group_var, var_type, col, decimals_tab, output_format, updated_config[col])
+                            aggregate_result = perform_aggregate_analysis(df, curr_group_var, var_type, col, decimals_tab, output_format, updated_config[col], remove_blanks)
                             if aggregate_result:
                                 updated_config[col].update(aggregate_result)
                             
