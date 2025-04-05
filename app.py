@@ -658,7 +658,7 @@ def server(input, output, session):
             if new_subheading != old_subheading:
                 # Remove the variable from the current subheading
                 subheadings[old_subheading_mapped].set([
-                    c for c in subheadings[new_subheading_mapped]() if c != col
+                    c for c in subheadings[old_subheading_mapped]() if c != col
                 ])
                 
                 # Add the variable to the new subheading
@@ -669,6 +669,7 @@ def server(input, output, session):
 
                 generate_subheading_ui(new_subheading_mapped)
                 generate_subheading_ui(old_subheading_mapped)
+
 
         var_config.set(updated_config)  # Update stored config
 
