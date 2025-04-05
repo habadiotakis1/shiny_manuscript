@@ -491,7 +491,7 @@ def server(input, output, session):
                 #     updated = [col for col in subheadings[subheading]() if col not in removed_cols]
                 #     subheadings[subheading].set(updated)
                 
-                generate_subheading_ui(subheading)
+                # generate_subheading_ui(subheading)
 
     # Set Grouping Variable for analysis
     @output
