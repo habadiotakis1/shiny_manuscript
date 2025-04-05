@@ -416,6 +416,7 @@ def server(input, output, session):
                 var_config.set({col: {
                     "type": default_type, 
                     "name": col, 
+                    "subheading": "subheading_1",
                     "position": default_position,
                 } for col in columns})
 
@@ -552,6 +553,12 @@ def server(input, output, session):
                     selected=var_config.get()[col]["type"],
                 ),
                 ui.input_select(
+                    f"subheading_{col}",
+                    "Subheading",
+                    subheadings.keys(),
+                    selected=var_config.get()[col]["subheading"],
+                ),
+                ui.input_select(
                     f"position_{col}",
                     "Position",
                     list(range(1,31)),
@@ -563,7 +570,7 @@ def server(input, output, session):
             )
             for col in columns
         ],
-        col_widths=(6),
+        col_widths=(4),
         # width=1, 
         class_="droppable-area",
         )
