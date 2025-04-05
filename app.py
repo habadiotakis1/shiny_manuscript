@@ -94,7 +94,6 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     groups = df[group_var].unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
-    # print(group_var, test_type, var_name, decimal_places, output_format, col_var_config)
     
     # Check if the variable has a "Yes" option
     yes_values = ['Yes', 'Y', 'y', 'yes', 1]
@@ -632,7 +631,7 @@ def server(input, output, session):
             return
         
         updated_config = var_config.get()
-                
+
         print("SELECTED COLUMNS", type(selected_columns.get()),selected_columns.get())
         for col in df.columns:
             new_subheading = input[f"subheading_{col}"]()
@@ -691,6 +690,7 @@ def server(input, output, session):
     @reactive.event(input.calculate)
     def calculate_statistical_analysis():
         print("🔄 Calculate button pressed. Updating variable configurations...")
+        
         if input.remove_blanks() == "Yes":
             df = cleaned_data.get()
         else:
@@ -713,6 +713,7 @@ def server(input, output, session):
                     if col != curr_group_var and col in selected_columns.get():
                         print(f"\n📂 Processing Variable: {col}", updated_config[col])
                         
+                        print(col, df[col].unique())
                         var_type = updated_config[col]["type"]
                         
                         if var_type != "Omit":
@@ -744,6 +745,7 @@ def server(input, output, session):
             df = cleaned_data.get()
         else:
             df = data.get()
+
         updated_config = var_config.get()
         
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
