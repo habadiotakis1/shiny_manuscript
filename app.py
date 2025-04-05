@@ -475,7 +475,13 @@ def server(input, output, session):
         def sync_column_selection_with_subheadings():
             for subheading in subheadings:
                 generate_subheading_ui(subheading)
-   
+    
+    # Re-render the UI to reflect the updated subheadings
+    @reactive.effect
+    def sync_column_selection_with_subheadings():
+        for subheading in subheadings:
+            generate_subheading_ui(subheading)
+
 
     @reactive.effect
     def watch_column_changes():
@@ -658,8 +664,8 @@ def server(input, output, session):
                 # Debugging print statement to track the change
                 print(f"Moved {col} from {old_subheading_mapped} to {new_subheading_mapped}")
 
-                generate_subheading_ui(new_subheading_mapped)
-                generate_subheading_ui(old_subheading_mapped)
+            generate_subheading_ui(new_subheading_mapped)
+            generate_subheading_ui(old_subheading_mapped)
 
         var_config.set(updated_config)  # Update stored config
 
