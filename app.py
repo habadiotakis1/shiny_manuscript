@@ -99,13 +99,14 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     yes_values = ['Yes', 'Y', 'y', 'yes', 1]
     yn_var = None
 
-    var_options = df[var_name].unique()        
     for val in yes_values:
         if val in var_options:
             yn_var=val
     
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
+
+    print(group1.unique(), group2.unique())
 
     group1_total = len(group1)
     group2_total = len(group2)
