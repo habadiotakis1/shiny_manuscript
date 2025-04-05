@@ -201,7 +201,7 @@ def create_word_table(df,var_config, group_var, subheadings):
         # Get and sort all variables for the current subheading
         subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[subheading_name]()]
         subheading_vars = [col for col in subheading_vars if col != group_var]
-        sorted_subheading_vars = sorted(subheading_vars, key=lambda x: int(var_config[x]["position"]))
+        sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
         
         # Add a row for each variable under the current subheading
         for var in sorted_subheading_vars:
@@ -434,10 +434,6 @@ def server(input, output, session):
     def column_selectize():
         available_columns = set(input.column_selectize())
 
-        old_columns = set(selected_columns.get())
-        new_columns = available_columns - old_columns
-        removed_columns = old_columns - available_columns
-
         selected_columns.set(available_columns)
 
         all_subheading_values = set()
@@ -448,18 +444,6 @@ def server(input, output, session):
             if col not in all_subheading_values:
                 subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
         
-
-        # var_config_copy = var_config.get().copy()
-
-        # for subheading in subheadings:
-        #     for col in removed_columns:
-        #         var_config_copy[col]["type"] = "Omit"
-        #         if col in subheadings[subheading]():
-        #             updated = [c for c in subheadings[subheading]() if c != col]
-        #             subheadings[subheading].set(updated)
-            # generate_subheading_ui(subheading)
-        # var_config.set(var_config_copy)  # Update stored config
-                
         @reactive.effect
         def sync_column_selection_with_subheadings():
             for subheading in subheadings:
@@ -659,7 +643,7 @@ def server(input, output, session):
         
         updated_config = var_config.get().copy()
         
-        print("SELECTED COLUMNS", type(selected_columns.get()), selected_columns.get())
+        print("SELECTED COLUMNS", type(selected_columns.get()),selected_columns.get())
         for col in df.columns:
             # if col in set(selected_columns.get()):
             print("❗️ Updating variable configurations...", updated_config[col])
