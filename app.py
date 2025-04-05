@@ -410,18 +410,26 @@ def server(input, output, session):
                 df = pd.read_excel(file_info["datapath"])
 
             # strip whitespace in column names and str values
-            df.columns = df.columns.str.strip()
-            df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+            # df.columns = df.columns.str.strip()
+            # df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+
+            # data.set(df)  # Store data in reactive value
+            
             # columns = df.columns.tolist()  # Get column names
-            columns = df.columns.str.strip()
-            columns = [re.sub(r'\W+', '', col) for col in columns]
-            df.columns = columns  # Update column names in the DataFrame
+            # columns = [re.sub(r'\W+', '', col) for col in columns]
+
+            # Clean column names: strip and remove non-alphanumeric chars
+            clean_columns = [re.sub(r'\W+', '', col.strip()) for col in df.columns]
+            df.columns = clean_columns
+
+            # Strip whitespace from all string values in the DataFrame
+            df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+
+            print(df["group"].unique())
             data.set(df)  # Store data in reactive value
             
-            column_dict = {}
-            for col in columns:
-                column_dict[col] = col
-            
+            column_dict = {col: col for col in df.columns}
+        
             default_type = "Omit"
             default_position = 15
             
@@ -432,7 +440,7 @@ def server(input, output, session):
                     "name": col, 
                     "subheading": "subheading_1",
                     "position": default_position,
-                } for col in columns})
+                } for col in df.columns})
 
             ui.update_selectize(  
                 "column_selectize",  
