@@ -35,6 +35,8 @@ alternative_tests = {
     "Ordinal Discrete": "ttest",
 }
 
+blanks = ["NA" "N/A" "na","n/a", "unk", "unknown", "Unk", "Unknown", "UNKNOWN"]
+
 # variable_types = [
 #     "Omit",
 #     "Binary (i.e. Smoking, Diabetes, Hypertension)",
@@ -422,7 +424,6 @@ def server(input, output, session):
             df.columns = clean_columns
             df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
-            print(df["group"].unique())
             data.set(df)  # Store data in reactive value
             
             column_dict = {col: col for col in df.columns}
