@@ -629,14 +629,13 @@ def server(input, output, session):
         for key in subheadings.keys():  # subheadings = {"subheading_1": ..., etc.}
             try:
                 text_input = input.get(key)
+                print("Subheading name:", key, "Text input:", text_input)
                 if text_input and text_input.strip() != "":
                     updated_names[key] = text_input.strip()
                 else:
                     updated_names[key] = key  # fallback to default internal name
             except:
                 updated_names[key] = key
-            
-
             subheading_names[key].set(updated_names[key])
         print("Subheading names updated:", updated_names)
 
