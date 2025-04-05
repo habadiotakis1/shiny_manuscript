@@ -412,10 +412,12 @@ def server(input, output, session):
             # strip whitespace in column names and str values
             df.columns = df.columns.str.strip()
             df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
-
-            data.set(df)  # Store data in reactive value
-            columns = df.columns.tolist()  # Get column names
+            # columns = df.columns.tolist()  # Get column names
+            columns = df.columns.str.strip()
             columns = [re.sub(r'\W+', '', col) for col in columns]
+            df.columns = columns  # Update column names in the DataFrame
+            data.set(df)  # Store data in reactive value
+            
             column_dict = {}
             for col in columns:
                 column_dict[col] = col
