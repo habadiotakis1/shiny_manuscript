@@ -36,7 +36,7 @@ alternative_tests = {
     "Ordinal Discrete": "ttest",
 }
 
-missing_values = ["NA" "N/A" "na","n/a", "unk", "unknown", "Unk", "Unknown", "UNKNOWN"] # List of strings representing unknown or missing data
+missing_values = ["NA" "N/A" "na","n/a", "Na", "unk", "unknown", "Unk", "Unknown", "UNKNOWN"] # List of strings representing unknown or missing data
  
 # variable_types = [
 #     "Omit",
@@ -354,8 +354,8 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values", ["Yes", "No"])),
-        col_widths= (3,3,3,3)
+        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values (e.g., NA, Unknown)", ["Yes", "No"])),
+        col_widths= (2,2,2,6)
         ),
 
     ui.h5("Step 4: Customize Table & Rows"),
