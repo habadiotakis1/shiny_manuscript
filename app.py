@@ -323,10 +323,10 @@ app_ui = ui.page_fluid(
     ui.layout_columns(
         ui.h5("Step 1: Upload File"),
         ui.layout_columns(
-            ui.card(ui.input_file("data_file", ".csv & .xlsx files are accepted. Please refresh when re-uploading a file", accept=[".csv", ".xlsx"]),width="100%"),
+            ui.card(ui.input_file("data_file", ".csv & .xlsx files are accepted. Please refresh when re-uploading a file", accept=[".csv", ".xlsx"]), width="100%"),
             ui.card(),
             # ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
-            col_widths=(12, 4),
+            col_widths=(8, 4),
             ),
         col_widths= 12,
         ),
@@ -517,49 +517,51 @@ def server(input, output, session):
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
         df = data.get()
-        if df != {}:
-            columns = subheadings[subheading_key]()
-            if not columns:
-                return ui.p("No variables assigned yet.")
+        if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
+            return 
+        
+        columns = subheadings[subheading_key]()
+        if not columns:
+            return ui.p("No variables assigned yet.")
 
-            return ui.layout_columns(
-            *[
-                ui.card(
-                    ui.h5(col),
-                    ui.div(df[col].unique()[:5]),
-                    ui.input_text(
-                        f"name_{col}",
-                        "Column Name",
-                        value=var_config.get()[col]["name"],
-                    ),
-                    ui.input_select(
-                        f"var_type_{col}",
-                        "Variable Type",
-                        variable_types,
-                        selected=var_config.get()[col]["type"],
-                    ),
-                    ui.input_select(
-                        f"subheading_{col}",
-                        "Subheading",
-                        [subheading_val.get() for subheading_val in subheading_names.values()],
-                        selected=var_config.get()[col]["subheading"],
-                    ),
-                    ui.input_select(
-                        f"position_{col}",
-                        "Position",
-                        list(range(1,31)),
-                        selected=var_config.get()[col]["position"],
-                    ),
-                    # col_widths=(3, 3, 3, 3),
-                    class_="draggable-item",
-                    id=f"{subheading_key}_{col}"
-                )
-                for col in columns
-            ],
-            col_widths=(4),
-            # width=1, 
-            class_="droppable-area",
+        return ui.layout_columns(
+        *[
+            ui.card(
+                ui.h5(col),
+                ui.div(df[col].unique()[:5]),
+                ui.input_text(
+                    f"name_{col}",
+                    "Column Name",
+                    value=var_config.get()[col]["name"],
+                ),
+                ui.input_select(
+                    f"var_type_{col}",
+                    "Variable Type",
+                    variable_types,
+                    selected=var_config.get()[col]["type"],
+                ),
+                ui.input_select(
+                    f"subheading_{col}",
+                    "Subheading",
+                    [subheading_val.get() for subheading_val in subheading_names.values()],
+                    selected=var_config.get()[col]["subheading"],
+                ),
+                ui.input_select(
+                    f"position_{col}",
+                    "Position",
+                    list(range(1,31)),
+                    selected=var_config.get()[col]["position"],
+                ),
+                # col_widths=(3, 3, 3, 3),
+                class_="draggable-item",
+                id=f"{subheading_key}_{col}"
             )
+            for col in columns
+        ],
+        col_widths=(4),
+        # width=1, 
+        class_="droppable-area",
+        )
         
     @output
     @render.ui
@@ -723,7 +725,6 @@ def server(input, output, session):
         print("🔄 Calculate button pressed. Updating variable configurations...")
         df = data.get()
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
-            print(df)
             return
         
         try:
