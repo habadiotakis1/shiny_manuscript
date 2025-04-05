@@ -54,7 +54,9 @@ variable_types = list(default_tests.keys())
 ### ONLY SUPPORTS 2 GROUPS AT THE MOMENT, NEED TO UPDATE TO MULTIPLE GROUPS ####
 ################################################################################
 def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
+    print("PERFORM PVAL TEST", group_var, var_type, var_name, df[var_name].unique())
     groups = df[group_var].dropna().unique()
+    
     if len(groups) != 2:
         print("Only supports two-group comparisons")
         return None  # Only supports two-group comparisons
@@ -92,7 +94,7 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
 
 # Function to perform aggregation analysis based on the variable type
 def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
-    print("PERFORM AGG ANALYSIS", group_var, var_type, var_name, decimal_places, output_format, col_var_config)
+    print("PERFORM AGG ANALYSIS", group_var, var_type, var_name, df[var_name].unique(), decimal_places, output_format, col_var_config)
     groups = df[group_var].dropna().unique()
     if len(groups) != 2:
         print("Only supports two-group comparisons")
@@ -624,7 +626,7 @@ def server(input, output, session):
         
         updated_config = var_config.get()
 
-        print("Currently Selected Columns",selected_columns.get(), "\n")
+        print("Currently Selected Columns",selected_columns.get())
         
         for col in df.columns:
             new_subheading = input[f"subheading_{col}"]()
@@ -658,7 +660,7 @@ def server(input, output, session):
                 generate_subheading_ui(new_subheading_mapped)
                 generate_subheading_ui(old_subheading_mapped)
 
-
+        print()
         var_config.set(updated_config)  # Update stored config
 
     @reactive.effect
