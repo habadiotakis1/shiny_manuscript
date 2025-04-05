@@ -567,7 +567,7 @@ def server(input, output, session):
         # Loop through the columns in var_config
         for col in var_config.get():
             # Get the new subheading selected by the user
-            new_subheading = input.get(f"subheading_{col}")
+            new_subheading = input[f"subheading_{col}"]()
             
             # Get the current subheading from the var_config
             current_subheading = var_config.get()[col]["subheading"]
