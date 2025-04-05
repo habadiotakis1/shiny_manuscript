@@ -560,10 +560,10 @@ def server(input, output, session):
                 ui.input_select(
                     f"position_{col}",
                     "Position",
-                    [i for i in range(1, 30)],
+                    list(range(1,30)),
                     selected=var_config.get()[col]["position"],
                 ),
-                col_widths=(3, 3, 3, 3),
+                # col_widths=(3, 3, 3, 3),
                 class_="draggable-item",
                 id=f"{subheading_key}_{col}"
             )
