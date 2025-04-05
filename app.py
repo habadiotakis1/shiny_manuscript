@@ -746,7 +746,7 @@ def server(input, output, session):
             return None  # Return None if no data is available
         
         # Generate the Word table document
-        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings, subheading_names, input.table_name())
+        doc_filename = create_word_table(df, updated_config, group_var.get(), subheadings, subheading_names, input.table_name())
         
         return doc_filename  # Return the Word document file for download
 
