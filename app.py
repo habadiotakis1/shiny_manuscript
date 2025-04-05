@@ -631,8 +631,8 @@ def server(input, output, session):
         if selected_columns.get() is None or len(selected_columns.get()) == 0:
             return
         
-        updated_config = var_config.get().copy()
-        
+        updated_config = var_config.get()
+                
         print("SELECTED COLUMNS", type(selected_columns.get()),selected_columns.get())
         for col in df.columns:
             new_subheading = input[f"subheading_{col}"]()
