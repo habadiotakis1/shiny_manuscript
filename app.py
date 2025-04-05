@@ -528,7 +528,7 @@ def server(input, output, session):
         *[
             ui.card(
                 ui.h5(col),
-                ui.div(df[col].unique()[:5].join(", ")),
+                ui.div(df[col].unique()[:5].tostring()),
                 ui.input_text(
                     f"name_{col}",
                     "Column Name",
