@@ -307,15 +307,15 @@ app_ui = ui.page_fluid(
     ui.layout_columns(
         ui.h5("Step 1: Upload File"),
         ui.layout_columns(
-            ui.card(ui.input_file("data_file", "Only .csv or .xlsx files will be accepted", accept=[".csv", ".xlsx"])),
-            ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
+            ui.card(ui.input_file("data_file", "Only .csv or .xlsx files will be accepted. Please refresh if you want to re-upload a file", accept=[".csv", ".xlsx"])),
+            ui.card(),
+            # ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
             col_widths=(8, 4),
             ),
         col_widths= 12,
         ),
     
-    
-    ui.h5("Step 2: Select Columns"),
+    ui.h5("Step 2: Select Variables"),
     ui.output_ui('select_columns'),
     
     ui.h5("Step 3: Table Options"),
@@ -326,7 +326,6 @@ app_ui = ui.page_fluid(
 
         # Grouping Variable
         ui.card(ui.output_ui("grouping_variable")),
-        # ui.input_select("group_var", "Select Grouping Variable", choices=[], selected=None),
         
         # Formatting Options
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
@@ -349,10 +348,8 @@ app_ui = ui.page_fluid(
     ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"),
     ui.output_ui("var_settings_4"),
     
-    
     # Variable Selection UI (dynamically generated)
     ui.output_ui("var_settings"),
-    
     
     # Calculate
     ui.input_action_button("calculate", "Calculate"),
@@ -373,19 +370,16 @@ def server(input, output, session):
     data = reactive.Value({})  # Store uploaded data
     selected_columns = reactive.Value([])  # Store selected columns
     var_config = reactive.Value({})  # Store variable settings dynamically
-    # subheadings = reactive.Value({0:"",1:None,2:None,3:None})  # Store subheadings
     group_var = reactive.Value(None)  # Store grouping variable
     previous_group_var = reactive.Value(None)
-    decimal_places = reactive.Value(None)
-    output_format = reactive.Value(None)
-
-    # Reactive values to track column assignments per subheading
-    subheadings = {
+    subheadings = { # Reactive values to track column assignments per subheading
         "subheading_1": reactive.Value([]),
         "subheading_2": reactive.Value([]),
         "subheading_3": reactive.Value([]),
         "subheading_4": reactive.Value([])
     }
+    decimal_places = reactive.Value(None)
+    output_format = reactive.Value(None)
 
     @output
     @render.ui
@@ -434,16 +428,23 @@ def server(input, output, session):
     def column_selectize():
         available_columns = set(input.column_selectize())
 
-        selected_columns.set(available_columns)
-
+        old_columns = set(selected_columns.get())
         all_subheading_values = set()
         for subheading in subheadings:
             all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
             
+        removed_cols = old_columns - available_columns
+        new_cols = available_columns - old_columns
+
         for col in available_columns:
             if col not in all_subheading_values:
                 subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
         
+        for col in removed_cols:
+            for subheading in subheadings:
+                if col in subheadings[subheading]():
+                    subheadings[subheading].set([c for c in subheadings[subheading]() if c != col])
+
         @reactive.effect
         def sync_column_selection_with_subheadings():
             for subheading in subheadings:
@@ -462,6 +463,8 @@ def server(input, output, session):
                 #     subheadings[subheading].set(updated)
                 
                 generate_subheading_ui(subheading)
+        
+        selected_columns.set(available_columns)
 
     # Set Grouping Variable for analysis
     @output
@@ -569,7 +572,7 @@ def server(input, output, session):
             )
             for col in columns
         ],
-        col_widths=(12),
+        col_widths=(6),
         # width=1, 
         class_="droppable-area",
         )
