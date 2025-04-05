@@ -61,6 +61,8 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places, remo
     if remove_blanks:
         df = df.replace(missing_values, np.nan)
 
+    print(remove_blanks, df["Sex"].unique(), groups)
+
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
 
@@ -72,11 +74,6 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places, remo
     elif test_type == 'fisher-freeman-halton': # UPDATE
         contingency_table = pd.crosstab(df[var_name], df[group_var])
         _, p_value, _, _ = stats.chi2_contingency(contingency_table, lambda_="log-likelihood")        
-        # rpy2.robjects.numpy2ri.activate()
-        # stats = importr('stats')
-        # m = np.array([[4,4],[4,5],[10,6]])
-        # res = stats.fisher_test(m)
-        # print 'p-value: {}'.format(res[0][0])
     elif test_type == "chi2":
         contingency_table = pd.crosstab(df[var_name], df[group_var])
         _, p_value, _, _ = stats.chi2_contingency(contingency_table)
@@ -329,7 +326,7 @@ app_ui = ui.page_fluid(
             ui.card(ui.input_file("data_file", ".csv & .xlsx files are accepted. Please refresh when re-uploading a file", accept=[".csv", ".xlsx"]),width="100%"),
             ui.card(),
             # ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
-            col_widths=(8, 4),
+            col_widths=(12, 4),
             ),
         col_widths= 12,
         ),
@@ -763,6 +760,7 @@ def server(input, output, session):
                             print("After: ", updated_config[col])
 
                 var_config.set(updated_config)
+                print(updated_config)
 
                 ui.notification_show("✅ Calculation complete! File ready to download", duration=60, type="message")
         except:
