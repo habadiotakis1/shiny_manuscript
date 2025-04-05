@@ -307,7 +307,7 @@ app_ui = ui.page_fluid(
     ui.layout_columns(
         ui.h5("Step 1: Upload File"),
         ui.layout_columns(
-            ui.card(ui.input_file("data_file", "Only .csv or .xlsx files will be accepted. Please refresh if you want to re-upload a file", accept=[".csv", ".xlsx"])),
+            ui.card(ui.input_file("data_file", ".csv & .xlsx files are accepted. Please refresh when re-uploading a file", accept=[".csv", ".xlsx"])),
             ui.card(),
             # ui.card("Example Output File: ", ui.download_button("download_example", "Download Example")),
             col_widths=(8, 4),
@@ -425,28 +425,24 @@ def server(input, output, session):
                 choices={"":column_dict}
             )  
 
-    # @reactive.effect
-    # def _():
-    #     choices = input.column_selectize()
-        
-
     @reactive.effect
     def column_selectize():
         available_columns = input.column_selectize()
         selected_columns.set(available_columns)
 
         if available_columns:
-            current_group_var = group_var.get()
+            # current_group_var = group_var.get()
+            ui.update_select("grouping_var", choices=available_columns)
 
             # Only reset the group var if it hasn't been set yet
-            if current_group_var is None or current_group_var not in available_columns:
+            # if current_group_var is None or current_group_var not in available_columns:
                 # default_group = available_columns[0]
                 # group_var.set(default_group)
-                ui.update_select("grouping_var", choices=available_columns)#, selected=default_group)
+                # ui.update_select("grouping_var", choices=available_columns)#, selected=default_group)
                 # print("Setting initial group_var to:", default_group)
-            else:
+            # else:
                 # Just update the choices, not the selected value
-                ui.update_select("grouping_var", choices=available_columns)
+                # ui.update_select("grouping_var", choices=available_columns)
         
         # Make sure all selected columns are initially added to subheading 1 if not already assigned
         all_subheading_values = set()
