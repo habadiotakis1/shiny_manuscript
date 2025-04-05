@@ -638,7 +638,6 @@ def server(input, output, session):
                 updated_names[key] = key
             subheading_names[key].set(updated_names[key])
         print("Subheading names updated:", updated_names)
-        subheading_names.set(updated_names)
 
 
     # Perform statistical analysis when the "Calculate" button is clicked
