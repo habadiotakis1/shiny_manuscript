@@ -20,29 +20,22 @@ import json
 # set default and alternative statistical tests
 default_tests = {
     "Omit": "Omit",
-    "Categorical (Y/N)": "fisher",
-    "Categorical (Dichotomous)": "fisher",
-    "Categorical (Multinomial)": "fisher-freeman-halton",
-    "Ratio Continuous": "ttest",
-    "Ordinal Discrete": "wilcoxon",
+    "Categorical (Y/N) (i.e. Smoking, Diabetes)": "fisher",
+    "Categorical (Dichotomous) (i.e. Sex)": "fisher",
+    "Categorical (Multinomial) (i.e. Race)": "fisher-freeman-halton",
+    "Ratio Continuous (i.e., Age, BMI)": "ttest",
+    "Ordinal Discrete (i.e., GCS, Tumor Grade)": "wilcoxon",
 }
 
 alternative_tests = {
-    "Categorical (Y/N)": "chi2",
-    "Categorical (Dichotomous)": "chi2",
-    "Categorical (Multinomial)": "chi2",
-    "Ratio Continuous": "mannwhitney",
-    "Ordinal Discrete": "ttest",
+    "Categorical (Y/N) (i.e. Smoking, Diabetes)": "chi2",
+    "Categorical (Dichotomous) (i.e. Sex)": "chi2",
+    "Categorical (Multinomial) (i.e. Race)": "chi2",
+    "Ratio Continuous (i.e., Age, BMI)": "mannwhitney",
+    "Ordinal Discrete (i.e., GCS, Tumor Grade)": "ttest",
 }
 
-variable_types = [
-    "Omit",
-    "Binary (i.e. Smoking, Diabetes, Hypertension)",
-    "Categorical (Dichotomous) (i.e. Sex)",
-    "Categorical (Multinomial) (i.e. Race)",
-    "Ratio Continuous (i.e., Age, BMI)",
-    "Ordinal Discrete (i.e., GCS, Tumor Grade)",
-]
+variable_types = list(default_tests.keys())
 
 
 # get p-values from statistical test
