@@ -456,13 +456,15 @@ def server(input, output, session):
         # Update dropdown choices but don't set selected value here
         ui.update_select("grouping_var", choices=available_columns)
 
-        if data.get() != {}:
+        try:
             df = data.get()
             for col in df.columns:
                 if col not in available_columns:
                     for subheading in subheadings: # Remove from all subheadings if the column is not selected
                         if col in subheadings[subheading]():
                             subheadings[subheading].set([c for c in subheadings[subheading]() if c != col])
+        except:
+            pass
 
         @reactive.effect
         def sync_column_selection_with_subheadings():
