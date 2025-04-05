@@ -555,7 +555,8 @@ def server(input, output, session):
                 ui.input_select(
                     f"subheading_{col}",
                     "Subheading",
-                    subheadings.keys(),
+                    ['subheading_1', 'subheading_2', 'subheading_3', 'subheading_4'],
+                    # subheadings.keys(),
                     selected=var_config.get()[col]["subheading"],
                 ),
                 ui.input_select(
