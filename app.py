@@ -262,7 +262,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names):
                 var_options = df[var].unique()        
                 for i in range(len(var_options)):
                     row_cells = table.add_row().cells
-                    row_cells[0].text = f"   {var_options[i]}"  
+                    row_cells[0].text = f"      {var_options[i]}"  
                     row_cells[1].text = str(var_config[var][f"group1_subgroup{i}"])
                     row_cells[2].text = str(var_config[var][f"group2_subgroup{i}"])
                     if i == 0:
@@ -629,12 +629,14 @@ def server(input, output, session):
     def update_subheading_names():
         updated_names = {}
         for key in subheadings.keys():  # subheadings = {"subheading_1": ..., etc.}
-            text_input = input.get(key)
-            if text_input and text_input.strip() != "":
-                updated_names[key] = text_input.strip()
-            else:
-                updated_names[key] = key  # fallback to default internal name
-
+            try:
+                text_input = input.get(key)
+                if text_input and text_input.strip() != "":
+                    updated_names[key] = text_input.strip()
+                else:
+                    updated_names[key] = key  # fallback to default internal name
+            except:
+                updated_names[key] = key
         print("Subheading names updated:", updated_names)
         subheading_names.set(updated_names)
 
