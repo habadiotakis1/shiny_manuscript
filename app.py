@@ -573,7 +573,7 @@ def server(input, output, session):
             current_subheading = var_config.get()[col]["subheading"]
             
             # If the subheading has changed, move the column to the new subheading
-            if new_subheading and new_subheading != current_subheading:
+            if new_subheading != current_subheading:
                 # Remove the variable from the current subheading
                 subheadings[current_subheading].set([
                     c for c in subheadings[current_subheading]() if c != col
