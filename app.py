@@ -660,6 +660,8 @@ def server(input, output, session):
                             print("After: ", updated_config[col])
 
                 var_config.set(updated_config)
+
+                ui.notification_show("✅ Calculation complete!", duration=2000, type="message")
         except:
             return
 
