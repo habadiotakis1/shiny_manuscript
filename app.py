@@ -54,7 +54,7 @@ variable_types = list(default_tests.keys())
 ### ONLY SUPPORTS 2 GROUPS AT THE MOMENT, NEED TO UPDATE TO MULTIPLE GROUPS ####
 ################################################################################
 def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
-    print("PERFORM PVAL TEST", group_var, var_type, var_name, df[var_name].unique())
+    print("PERFORM PVAL TEST", group_var, var_type, var_name, df[var_name].dropna().unique())
     groups = df[group_var].dropna().unique()
     
     if len(groups) != 2:
@@ -94,7 +94,7 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
 
 # Function to perform aggregation analysis based on the variable type
 def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
-    print("PERFORM AGG ANALYSIS", group_var, var_type, var_name, df[var_name].unique(), decimal_places, output_format, col_var_config)
+    print("PERFORM AGG ANALYSIS", group_var, var_type, var_name, df[var_name].dropna().unique(), decimal_places, output_format, col_var_config)
     groups = df[group_var].dropna().unique()
     if len(groups) != 2:
         print("Only supports two-group comparisons")
