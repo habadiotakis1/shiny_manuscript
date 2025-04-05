@@ -523,7 +523,8 @@ def server(input, output, session):
                     f"subheading_{col}",
                     "Subheading",
                     # ['subheading_1', 'subheading_2', 'subheading_3', 'subheading_4'],
-                    subheading_names.values(),
+                    [subheading_val.get() for subheading_val in subheading_names.values()],
+                    # subheading_names.values(),
                     selected=var_config.get()[col]["subheading"],
                 ),
                 ui.input_select(
