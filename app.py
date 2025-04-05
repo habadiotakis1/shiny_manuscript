@@ -604,8 +604,11 @@ def server(input, output, session):
         print("SELECTED COLUMNS", type(selected_columns.get()),selected_columns.get())
         for col in df.columns:
             new_subheading = input[f"subheading_{col}"]()
-            current_subheading = var_config.get()[col]["subheading"]
+            old_subheading = var_config.get()[col]["subheading"]
             
+            new_subheading_mapped = [k for k, v in subheading_names.items() if v() == new_subheading]
+            old_subheading_mapped = [k for k, v in subheading_names.items() if v() == old_subheading]
+
             print("❗️ Updating variable configurations...", updated_config[col])
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
             updated_config[col]["name"] = input[f"name_{col}"]() or col
@@ -615,24 +618,20 @@ def server(input, output, session):
 
             
             # If the subheading has changed, move the column to the new subheading
-            if new_subheading != current_subheading:
+            if new_subheading != old_subheading:
                 # Remove the variable from the current subheading
-                subheadings[current_subheading].set([
-                    c for c in subheadings[current_subheading]() if c != col
+                subheadings[new_subheading_mapped].set([
+                    c for c in subheadings[new_subheading_mapped]() if c != col
                 ])
                 
                 # Add the variable to the new subheading
-                subheadings[new_subheading].set(subheadings[new_subheading]() + [col])
-                
-                # Update var_config to reflect the new subheading
-                var_config.get()[col]["subheading"] = new_subheading
-                var_config.set(var_config.get())  # Update var_config reactively
+                subheadings[new_subheading_mapped].set(subheadings[new_subheading]() + [col])
                 
                 # Debugging print statement to track the change
-                print(f"Moved {col} from {current_subheading} to {new_subheading}")
+                print(f"Moved {col} from {new_subheading_mapped} to {new_subheading}")
 
-            generate_subheading_ui(current_subheading)
-            generate_subheading_ui(new_subheading)
+            generate_subheading_ui(new_subheading_mapped)
+            generate_subheading_ui(old_subheading_mapped)
 
         var_config.set(updated_config)  # Update stored config
 
