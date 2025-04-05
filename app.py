@@ -495,7 +495,7 @@ def server(input, output, session):
         selected = input.grouping_var()
         current = group_var.get()
         
-        if current == None or not selected:
+        if current == None or selected == None:
             return
             
         if selected != current:
