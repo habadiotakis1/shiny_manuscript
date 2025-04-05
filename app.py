@@ -185,8 +185,8 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
 
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = 'Variable'
-    hdr_cells[1].text = 'Group 1'
-    hdr_cells[2].text = 'Group 2'
+    hdr_cells[1].text = f'{df[group_var].unique()[0]}'
+    hdr_cells[2].text = f'{df[group_var].unique()[1]}'
     hdr_cells[3].text = 'P-Value'
     
     for row in hdr_cells:
