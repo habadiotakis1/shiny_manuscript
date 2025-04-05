@@ -168,7 +168,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     return col_var_config
 
 # Function to create Word table from var_config
-def create_word_table(df,var_config, group_var, subheadings):
+def create_word_table(df,var_config, group_var, subheadings, subheading_names):
     # Create a new Word Document
     doc = Document()
 
@@ -197,7 +197,9 @@ def create_word_table(df,var_config, group_var, subheadings):
     grp_cells[3].text = ''
 
     # Loop through subheadings
-    for subheading_name in subheadings:
+    for sub in subheadings:
+        subheading_name = subheading_names[sub]
+
         # Add a row for the subheading (this is the row header)
         row_cells = table.add_row().cells
         row_cells[0].text = f"{subheading_name}"  # Subheading name in the first column
@@ -208,7 +210,7 @@ def create_word_table(df,var_config, group_var, subheadings):
         row_cells[0].paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
         
         # Get and sort all variables for the current subheading
-        subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[subheading_name]()]
+        subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[sub]()]
         subheading_vars = [col for col in subheading_vars if col != group_var]
         sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
         
@@ -228,7 +230,7 @@ def create_word_table(df,var_config, group_var, subheadings):
 
             elif var_type == "Categorical (Dichotomous)":
                 row_cells = table.add_row().cells
-                row_cells[0].text = f"{var}"  
+                row_cells[0].text = f"   {var}"  
                 row_cells[1].text = ""
                 row_cells[2].text = ""
                 row_cells[3].text = ""
@@ -238,7 +240,7 @@ def create_word_table(df,var_config, group_var, subheadings):
                 var_options = df[var].unique()        
                 for i in range(len(var_options)):
                     row_cells = table.add_row().cells
-                    row_cells[0].text = f"   {var_options[i]}"  
+                    row_cells[0].text = f"      {var_options[i]}"  
                     row_cells[1].text = str(var_config[var][f"group1_subgroup{i}"])
                     row_cells[2].text = str(var_config[var][f"group2_subgroup{i}"])
                     if i == 0:
@@ -250,7 +252,7 @@ def create_word_table(df,var_config, group_var, subheadings):
 
             elif var_type == "Categorical (Multinomial)":
                 row_cells = table.add_row().cells
-                row_cells[0].text = f"{var}"  
+                row_cells[0].text = f"   {var}"  
                 row_cells[1].text = ""
                 row_cells[2].text = ""
                 row_cells[3].text = ""
@@ -386,6 +388,12 @@ def server(input, output, session):
         "subheading_2": reactive.Value([]),
         "subheading_3": reactive.Value([]),
         "subheading_4": reactive.Value([])
+    }
+    subheading_names = { # Reactive values to track column assignments per subheading
+        "subheading_1": reactive.Value(None),
+        "subheading_2": reactive.Value(None),
+        "subheading_3": reactive.Value(None),
+        "subheading_4": reactive.Value(None)
     }
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
@@ -617,6 +625,18 @@ def server(input, output, session):
             print("to...", updated_config[col])
         var_config.set(updated_config)  # Update stored config
 
+    @reactive.effect
+    def update_subheading_names():
+        updated_names = {}
+        for key in subheadings.keys():  # subheadings = {"subheading_1": ..., etc.}
+            text_input = input.get(key)
+            if text_input and text_input.strip() != "":
+                updated_names[key] = text_input.strip()
+            else:
+                updated_names[key] = key  # fallback to default internal name
+
+        print("Subheading names updated:", updated_names)
+        subheading_names.set(updated_names)
 
 
     # Perform statistical analysis when the "Calculate" button is clicked
@@ -661,7 +681,7 @@ def server(input, output, session):
 
                 var_config.set(updated_config)
 
-                ui.notification_show("✅ Calculation complete!", duration=2000, type="message")
+                ui.notification_show("✅ Calculation complete! File ready to download", duration=2000, type="message")
         except:
             return
 
@@ -677,7 +697,7 @@ def server(input, output, session):
             return None  # Return None if no data is available
         
         # Generate the Word table document
-        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings)
+        doc_filename = create_word_table(data.get(), updated_config, group_var.get(), subheadings, subheading_names.get())
         
         return doc_filename  # Return the Word document file for download
 
