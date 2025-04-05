@@ -425,50 +425,87 @@ def server(input, output, session):
                 choices={"":column_dict}
             )  
 
-    @reactive.effect
     def column_selectize():
         available_columns = input.column_selectize()
         selected_columns.set(available_columns)
 
-        if available_columns:
-            current_group_var = group_var.get()
-
-            if current_group_var is None or current_group_var not in available_columns:
-                default_group = available_columns[0]
-                group_var.set(default_group)
-                ui.update_select("grouping_var", choices=[""]+available_columns)#, selected=default_group)
-                print("Setting initial group_var to:", default_group)
-            else:
-                # Just update the choices, not the selected value
-                ui.update_select("grouping_var", choices=[""]+available_columns)
-
-        
-        # Make sure all selected columns are initially added to subheading 1 if not already assigned
-        all_subheading_values = set()
-        for subheading in subheadings:
-            all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
-        
+        all_assigned = set().union(*[set(subheadings[s]()) for s in subheadings])
         for col in available_columns:
-            if col not in all_subheading_values:
+            if col not in all_assigned:
                 subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
+
+        # Update dropdown choices but don't set selected value here
+        ui.update_select("grouping_var", choices=available_columns)
 
         @reactive.effect
         def sync_column_selection_with_subheadings():
             for subheading in subheadings:
                 generate_subheading_ui(subheading)
 
-   
+    @reactive.effect
+    def watch_column_changes():
+        column_selectize()
+
     @reactive.effect
     def sync_group_var_with_dropdown():
         selected = input.grouping_var()
-        current = group_var.get()
-        
-        if current == None or selected == None:
-            return
-            
-        if selected != current:
-            print("Updating group_var from dropdown:", selected)
+        if selected and selected != group_var.get():
+            print("Setting group_var to:", selected)
             group_var.set(selected)
+
+    @reactive.effect
+    def initialize_group_var():
+        available = input.column_selectize()
+        if not group_var.get() and available:
+            print("Initializing group_var:", available[0])
+            group_var.set(available[0])
+            ui.update_select("grouping_var", choices=available, selected=available[0])
+
+
+    # @reactive.effect
+    # def column_selectize():
+    #     available_columns = input.column_selectize()
+    #     selected_columns.set(available_columns)
+
+    #     if available_columns:
+    #         current_group_var = group_var.get()
+
+    #         if current_group_var is None or current_group_var not in available_columns:
+    #             default_group = available_columns[0]
+    #             group_var.set(default_group)
+    #             ui.update_select("grouping_var", choices=available_columns)#, selected=default_group)
+    #             print("Setting initial group_var to:", default_group)
+    #         else:
+    #             # Just update the choices, not the selected value
+    #             ui.update_select("grouping_var", choices=available_columns)
+
+        
+    #     # Make sure all selected columns are initially added to subheading 1 if not already assigned
+    #     all_subheading_values = set()
+    #     for subheading in subheadings:
+    #         all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
+        
+    #     for col in available_columns:
+    #         if col not in all_subheading_values:
+    #             subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
+
+    #     @reactive.effect
+    #     def sync_column_selection_with_subheadings():
+    #         for subheading in subheadings:
+    #             generate_subheading_ui(subheading)
+
+   
+    # @reactive.effect
+    # def sync_group_var_with_dropdown():
+    #     selected = input.grouping_var()
+    #     current = group_var.get()
+        
+    #     if current == None or selected == None:
+    #         return
+            
+    #     if selected != current:
+    #         print("Updating group_var from dropdown:", selected)
+    #         group_var.set(selected)
 
     # Set Grouping Variable for analysis
     @output
