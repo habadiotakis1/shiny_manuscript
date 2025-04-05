@@ -467,10 +467,13 @@ def server(input, output, session):
     @reactive.effect
     def _():
         choices = input.column_selectize()
-        if choices and not group_var.get():
+        if choices:
             ui.update_select("grouping_var", choices=choices, selected=choices[0])
-            group_var.set(choices[0])  # Set the initial grouping variable
-            print("First group var: ", group_var.get())
+            if not group_var.get():
+                group_var.set(choices[0])  # Set the initial grouping variable
+                print("First group var: ", group_var.get())
+            elif group_var.get() not in choices:
+                group_var.set(choices[0])
 
     @reactive.effect
     def update_group_var():
