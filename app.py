@@ -457,7 +457,8 @@ def server(input, output, session):
         ui.update_select("grouping_var", choices=available_columns)
 
         if data.get() is not None:
-            for col in data.get().columns:
+            df = data.get()
+            for col in df.columns:
                 if col not in available_columns:
                     for subheading in subheadings: # Remove from all subheadings if the column is not selected
                         if col in subheadings[subheading]():
