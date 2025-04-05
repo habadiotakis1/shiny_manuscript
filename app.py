@@ -53,13 +53,10 @@ variable_types = list(default_tests.keys())
 ################################################################################
 ### ONLY SUPPORTS 2 GROUPS AT THE MOMENT, NEED TO UPDATE TO MULTIPLE GROUPS ####
 ################################################################################
-def run_statistical_test(df, group_var, var_type, var_name, decimal_places, remove_blanks):
+def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
     groups = df[group_var].unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
-    
-    if remove_blanks:
-        df = df.replace(missing_values, np.nan)
 
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
@@ -93,7 +90,7 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places, remo
     return p_value
 
 # Function to perform aggregation analysis based on the variable type
-def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config, remove_blanks):
+def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
     groups = df[group_var].unique()
     if len(groups) != 2:
         return None  # Only supports two-group comparisons
@@ -108,9 +105,6 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
         if val in var_options:
             yn_var=val
     
-    if remove_blanks:
-        df = df.replace(missing_values, np.nan)
-
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
 
@@ -712,13 +706,7 @@ def server(input, output, session):
             output_format = input.output_format()
     
             updated_config = var_config.get().copy()
-
-            remove_blanks = input.remove_blanks()
-            if remove_blanks == "Yes":
-                remove_blanks = True
-            else:
-                remove_blanks = False        
-            
+           
             # Perform statistical analysis using the grouping variable
             if len(selected_columns.get()) > 0:
                 for col in df.columns:
@@ -728,14 +716,14 @@ def server(input, output, session):
                         var_type = updated_config[col]["type"]
                         
                         if var_type != "Omit":
-                            p_value = run_statistical_test(df, curr_group_var, var_type, col, decimals_pval, remove_blanks)
+                            p_value = run_statistical_test(df, curr_group_var, var_type, col, decimals_pval)
                             
                             # Store the p-value in the var_config dictionary
                             updated_config[col]["p_value"] = p_value
                             print(f"Column: {col}, Grouping Variable: {curr_group_var}, p-value: {p_value}")
 
                             # Perform aggregate analysis and update var_config with the results
-                            aggregate_result = perform_aggregate_analysis(df, curr_group_var, var_type, col, decimals_tab, output_format, updated_config[col], remove_blanks)
+                            aggregate_result = perform_aggregate_analysis(df, curr_group_var, var_type, col, decimals_tab, output_format, updated_config[col])
                             if aggregate_result:
                                 updated_config[col].update(aggregate_result)
                             
