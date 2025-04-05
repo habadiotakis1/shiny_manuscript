@@ -705,7 +705,7 @@ def server(input, output, session):
             decimals_tab = input.decimals_table()
             output_format = input.output_format()
     
-            updated_config = var_config.get().copy()
+            updated_config = var_config.get()
            
             # Perform statistical analysis using the grouping variable
             if len(selected_columns.get()) > 0:
