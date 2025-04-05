@@ -317,14 +317,14 @@ app_ui = ui.page_fluid(
     
     ui.layout_columns(
         ui.h5("Step 1: Upload File"),
+        # ui.layout_columns(
+            # ui.row("   .csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file"),
+            # ui.row("   Example Output File"),
+            # col_widths=(8, 4)
+            # ),
         ui.layout_columns(
-            ui.row("   .csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file"),
-            ui.row("   Example Output File"),
-            col_widths=(8, 4)
-            ),
-        ui.layout_columns(
-            ui.card("lskjdlaksjd", ui.input_file("data_file", "", accept=[".csv", ".xlsx"]), width="100%"),
-            ui.download_button("download_example", "NOT IMPLEMENTED"),
+            ui.card("   .csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file", ui.input_file("data_file", "", accept=[".csv", ".xlsx"]), width="100%"),
+            ui.card("Example Output File", ui.download_button("download_example", "NOT IMPLEMENTED")),
             col_widths=(8, 4),
             ),
         col_widths= 12,
