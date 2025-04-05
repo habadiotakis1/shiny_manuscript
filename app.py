@@ -481,7 +481,7 @@ def server(input, output, session):
     @reactive.effect
     def update_group_var():
         new_group = input.grouping_var()
-        old_group = group_var()
+        old_group = group_var.get()
         
         if not new_group or new_group == old_group:
             return
@@ -489,6 +489,8 @@ def server(input, output, session):
         # 1. Remove new group var from subheadings
         for subheading in subheadings:
             updated_cols = [col for col in subheadings[subheading]() if col != new_group]
+            if var_config.get()[new_group]["subheading"] == subheading:
+                updated_cols.append(new_group)
             subheadings[subheading].set(updated_cols)
             generate_subheading_ui(subheading)
 
