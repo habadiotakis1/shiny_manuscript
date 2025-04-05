@@ -482,7 +482,6 @@ def server(input, output, session):
         for subheading in subheadings:
             generate_subheading_ui(subheading)
 
-
     @reactive.effect
     def watch_column_changes():
         column_selectize()
