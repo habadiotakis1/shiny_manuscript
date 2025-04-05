@@ -387,7 +387,12 @@ def server(input, output, session):
         "subheading_3": reactive.Value([]),
         "subheading_4": reactive.Value([])
     }
-    subheading_names = reactive.Value({})
+    subheading_names = { # Reactive values to track column assignments per subheading
+        "subheading_1": reactive.Value("subheading_1"),
+        "subheading_2": reactive.Value("subheading_2"),
+        "subheading_3": reactive.Value("subheading_3"),
+        "subheading_4": reactive.Value("subheading_4")
+    } 
 
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
@@ -517,8 +522,8 @@ def server(input, output, session):
                 ui.input_select(
                     f"subheading_{col}",
                     "Subheading",
-                    ['subheading_1', 'subheading_2', 'subheading_3', 'subheading_4'],
-                    # subheadings.keys(),
+                    # ['subheading_1', 'subheading_2', 'subheading_3', 'subheading_4'],
+                    subheading_names.values(),
                     selected=var_config.get()[col]["subheading"],
                 ),
                 ui.input_select(
@@ -631,6 +636,7 @@ def server(input, output, session):
                     updated_names[key] = key  # fallback to default internal name
             except:
                 updated_names[key] = key
+            subheading_names[key].set(updated_names[key])
         print("Subheading names updated:", updated_names)
         subheading_names.set(updated_names)
 
@@ -677,7 +683,7 @@ def server(input, output, session):
 
                 var_config.set(updated_config)
 
-                ui.notification_show("✅ Calculation complete! File ready to download", duration=2000, type="message")
+                ui.notification_show("✅ Calculation complete! File ready to download", duration=60, type="message")
         except:
             return
 
