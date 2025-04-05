@@ -36,7 +36,7 @@ alternative_tests = {
     "Ordinal Discrete": "ttest",
 }
 
-missing_values = ["NA" "N/A" "na","n/a", "Na", "unk", "unknown", "Unk", "Unknown", "UNKNOWN"] # List of strings representing unknown or missing data
+missing_values = ["NA", "N/A", "NAN", "na", "n/a", "nan", "Na", "unk", "unknown", "Unk", "Unknown", "UNKNOWN"] # List of strings representing unknown or missing data
  
 # variable_types = [
 #     "Omit",
@@ -351,7 +351,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values (e.g., NA, Unknown)", ["Yes", "No"])),
+        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values (e.g., NA, Unknown)", ["No (Default)", "Yes"])),
         col_widths= (2,2,2,6)
         ),
 
@@ -389,6 +389,7 @@ app_ui = ui.page_fluid(
 ################################################################################
 def server(input, output, session):
     data = reactive.Value({})  # Store uploaded data
+    cleaned_data = reactive.Value({})  # Store cleaned data
     selected_columns = reactive.Value([])  # Store selected columns
     var_config = reactive.Value({})  # Store variable settings dynamically
     group_var = reactive.Value(None)  # Store grouping variable
@@ -435,6 +436,8 @@ def server(input, output, session):
             df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
             data.set(df)  # Store data in reactive value
+            clean_df = df.replace(missing_values, np.nan)
+            cleaned_data.set(clean_df)  # Store cleaned data in reactive value
             
             column_dict = {col: col for col in df.columns}
         
@@ -516,7 +519,11 @@ def server(input, output, session):
 
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
-        df = data.get()
+        if input.remove_blanks() == "Yes":
+            df = cleaned_data.get()
+        else:
+            df = data.get()
+
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
             return 
         
