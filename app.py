@@ -560,7 +560,7 @@ def server(input, output, session):
                 ui.input_select(
                     f"position_{col}",
                     "Position",
-                    list(range(1,30)),
+                    [i for i in range(1, 30)],
                     selected=var_config.get()[col]["position"],
                 ),
                 col_widths=(3, 3, 3, 3),
