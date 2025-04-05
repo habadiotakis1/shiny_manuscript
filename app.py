@@ -456,7 +456,7 @@ def server(input, output, session):
         # Update dropdown choices but don't set selected value here
         ui.update_select("grouping_var", choices=available_columns)
 
-        if data.get() is not None:
+        if data.get() != {}:
             df = data.get()
             for col in df.columns:
                 if col not in available_columns:
