@@ -433,13 +433,15 @@ def server(input, output, session):
         for subheading in subheadings:
             all_subheading_values = all_subheading_values.union(set(subheadings[subheading]()))
             
+        selected_columns.set(available_columns)
+
         for col in available_columns:
             if col not in all_subheading_values:
                 subheadings["subheading_1"].set(subheadings["subheading_1"]() + [col])
         
         if len(old_columns) > 0:
             removed_cols = old_columns - available_columns
-            
+            new_cols = available_columns - old_columns
             for col in removed_cols:
                 for subheading in subheadings:
                     if col in subheadings[subheading]():
@@ -462,9 +464,7 @@ def server(input, output, session):
                 #     updated = [col for col in subheadings[subheading]() if col not in removed_cols]
                 #     subheadings[subheading].set(updated)
                 
-                generate_subheading_ui(subheading)
-        
-        selected_columns.set(available_columns)
+                generate_subheading_ui(subheading)  
 
     # Set Grouping Variable for analysis
     @output
