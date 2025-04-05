@@ -606,8 +606,8 @@ def server(input, output, session):
             new_subheading = input[f"subheading_{col}"]()
             old_subheading = var_config.get()[col]["subheading"]
             
-            new_subheading_mapped = [k for k, v in subheading_names.items() if v() == new_subheading]
-            old_subheading_mapped = [k for k, v in subheading_names.items() if v() == old_subheading]
+            new_subheading_mapped = [k for k, v in subheading_names.items() if v() == new_subheading][0]
+            old_subheading_mapped = [k for k, v in subheading_names.items() if v() == old_subheading][0]
 
             print(new_subheading_mapped, old_subheading_mapped)
             
