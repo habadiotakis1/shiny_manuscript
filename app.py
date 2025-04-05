@@ -207,7 +207,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         row_cells[0].paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
         
         # Get and sort all variables for the current subheading
-        subheading_vars = [col for col, config in var_config.items() if config['name'] in subheadings[sub]()]
+        subheading_vars = [col for col, config in var_config.items() if config[col] in subheadings[sub]()]
         subheading_vars = [col for col in subheading_vars if col != group_var]
         sorted_subheading_vars = sorted(subheading_vars, key=lambda x: var_config[x]["position"])
         
@@ -631,7 +631,8 @@ def server(input, output, session):
         
         updated_config = var_config.get()
 
-        print("SELECTED COLUMNS", type(selected_columns.get()),selected_columns.get())
+        print("Currently Selected Columns",selected_columns.get(), "\n")
+
         for col in df.columns:
             new_subheading = input[f"subheading_{col}"]()
             old_subheading = var_config.get()[col]["subheading"]
