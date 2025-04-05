@@ -642,12 +642,12 @@ def server(input, output, session):
 
             # print(new_subheading_mapped, old_subheading_mapped)
             
-            print("❗️ Updating variable configurations...", updated_config[col])
+            print("❗️ Updating configuration to...", updated_config[col])
             updated_config[col]["type"] = input[f"var_type_{col}"]() or "Omit"
             updated_config[col]["name"] = input[f"name_{col}"]() or col
             updated_config[col]["position"] = int(input[f"position_{col}"]()) or 15
             updated_config[col]["subheading"] = input[f"subheading_{col}"]() or "subheading_1"
-            print("                        to...", updated_config[col])
+            print("                          to...", updated_config[col])
 
             
             # If the subheading has changed, move the column to the new subheading
@@ -663,8 +663,8 @@ def server(input, output, session):
                 # Debugging print statement to track the change
                 print(f"Moved {col} from {old_subheading_mapped} to {new_subheading_mapped}")
 
-            generate_subheading_ui(new_subheading_mapped)
-            generate_subheading_ui(old_subheading_mapped)
+                generate_subheading_ui(new_subheading_mapped)
+                generate_subheading_ui(old_subheading_mapped)
 
         var_config.set(updated_config)  # Update stored config
 
