@@ -438,7 +438,7 @@ def server(input, output, session):
 
         if available_columns:
             ui.update_select("grouping_var", choices=available_columns, selected=available_columns[0])
-            if not group_var.get():
+            if group_var.get() == None:
                 group_var.set(available_columns[0])  # Set the initial grouping variable
                 print("First group var: ", group_var.get())
             # elif group_var.get() not in available_columns:
