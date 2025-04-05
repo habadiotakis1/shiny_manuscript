@@ -433,16 +433,14 @@ def server(input, output, session):
         if available_columns:
             current_group_var = group_var.get()
 
-            # ui.update_select("grouping_var", choices=available_columns)
-
             if current_group_var is None or current_group_var not in available_columns:
                 default_group = available_columns[0]
                 group_var.set(default_group)
-                ui.update_select("grouping_var", choices=available_columns)#, selected=default_group)
+                ui.update_select("grouping_var", choices=[""]+available_columns)#, selected=default_group)
                 print("Setting initial group_var to:", default_group)
             else:
                 # Just update the choices, not the selected value
-                ui.update_select("grouping_var", choices=available_columns)
+                ui.update_select("grouping_var", choices=[""]+available_columns)
 
         
         # Make sure all selected columns are initially added to subheading 1 if not already assigned
