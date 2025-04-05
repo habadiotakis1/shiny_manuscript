@@ -35,7 +35,15 @@ alternative_tests = {
     "Ordinal Discrete": "ttest",
 }
 
-variable_types = list(default_tests.keys())
+variable_types = [
+    "Omit": "Omit",
+    "Binary (i.e. Smoking, Diabetes, Hypertension)",
+    "Categorical (Dichotomous) (i.e. Sex)",
+    "Categorical (Multinomial) (i.e. Race)",
+    "Ratio Continuous (i.e., Age, BMI),
+    "Ordinal Discrete (i.e., GCS, Tumor Grade)",
+]
+
 
 # get p-values from statistical test
 ################################################################################
@@ -334,7 +342,7 @@ app_ui = ui.page_fluid(
         col_widths= (3,3,2,2,2)
         ),
 
-    ui.h5("Step 4: Customize Table"),
+    ui.h5("Step 4: Customize Table & Rows"),
     # Subheadings
     ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"),
     ui.output_ui("var_settings_1"),
@@ -401,6 +409,10 @@ def server(input, output, session):
             elif ext == ".xlsx":
                 df = pd.read_excel(file_info["datapath"])
 
+            # strip whitespace in column names and str values
+            df.columns = df.columns.str.strip()
+            df = df.applymap(lambda x: x.strip() if isinstance(x, str) else x)
+
             data.set(df)  # Store data in reactive value
             columns = df.columns.tolist()  # Get column names
             columns = [re.sub(r'\W+', '', col) for col in columns]
@@ -465,7 +477,7 @@ def server(input, output, session):
     @output
     @render.ui
     def grouping_variable():
-        return ui.input_select("grouping_var", "Grouping Variable: Table Column", choices=[])
+        return ui.input_select("grouping_var", "Grouping Variable (Table Column)", choices=[])
 
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
