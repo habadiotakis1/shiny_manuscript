@@ -99,6 +99,8 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     yes_values = ['Yes', 'Y', 'y', 'yes', 1]
     yn_var = None
 
+    var_options = df[var_name].unique()        
+
     for val in yes_values:
         if val in var_options:
             yn_var=val
@@ -714,7 +716,7 @@ def server(input, output, session):
                     if col != curr_group_var and col in selected_columns.get():
                         print(f"\n📂 Processing Variable: {col}", updated_config[col])
                         
-                        print(col, df[col].unique())
+                        print(ol, df[col].unique())
                         var_type = updated_config[col]["type"]
                         
                         if var_type != "Omit":
