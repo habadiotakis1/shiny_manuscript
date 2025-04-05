@@ -238,7 +238,6 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
 
                 var_options = df[var].unique()        
                 for i in range(len(var_options)):
-                    print(var_options)
                     row_cells = table.add_row().cells
                     row_cells[0].text = f"      {var_options[i]}"  
                     row_cells[1].text = str(var_config[var][f"group1_subgroup{i}"])
@@ -741,7 +740,10 @@ def server(input, output, session):
     @session.download()
     def download_table():
         # Retrieve the data and var_config
-        df = data.get()
+        if input.remove_blanks() == "Yes":
+            df = cleaned_data.get()
+        else:
+            df = data.get()
         updated_config = var_config.get()
         
         if df is None or not isinstance(df, pd.DataFrame) or df.empty:  
