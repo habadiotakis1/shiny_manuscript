@@ -482,14 +482,14 @@ def server(input, output, session):
     def update_group_var():
         new_group = input.grouping_var()
         old_group = group_var.get()
-        print("NEW GROUP VAR", old_group)
-        print("OLD GROUP VAR", old_group)
-
-        group_var.set(new_group)
-        prev_group_var.set(old_group)
         
         if not new_group or new_group == old_group:
             return
+        
+        print("NEW GROUP VAR", new_group)
+        print("OLD GROUP VAR", old_group)
+        group_var.set(new_group)
+        prev_group_var.set(old_group)
         
         # 1. Remove new group var from subheadings
         for subheading in subheadings:
