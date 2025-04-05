@@ -560,7 +560,7 @@ def server(input, output, session):
                 ui.input_select(
                     f"position_{col}",
                     "Position",
-                    list(range(1,30)),
+                    list(range(1,31)),
                     selected=var_config.get()[col]["position"],
                 ),
                 # col_widths=(3, 3, 3, 3),
@@ -569,7 +569,8 @@ def server(input, output, session):
             )
             for col in columns
         ],
-        width=1, 
+        col_widths=(12),
+        # width=1, 
         class_="droppable-area",
         )
         
