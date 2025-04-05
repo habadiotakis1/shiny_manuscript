@@ -109,6 +109,8 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
         if val in var_options:
             yn_var=val
     
+    print("HERE")
+    
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
 
@@ -132,6 +134,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
             col_var_config['group2'] = str(round(group2_sum / group2_total * 100, decimal_places)) + "% (" + str(group2_sum) + ")"
         
     elif var_type == "Categorical (Dichotomous)" or var_type == "Categorical (Multinomial)":
+        print(var_options)
         for i in range(len(var_options)):
             group1_sum = (group1 == var_options[i]).sum()
             group2_sum = (group2 == var_options[i]).sum()
