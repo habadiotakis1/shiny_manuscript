@@ -389,12 +389,8 @@ def server(input, output, session):
         "subheading_3": reactive.Value([]),
         "subheading_4": reactive.Value([])
     }
-    subheading_names = { # Reactive values to track column assignments per subheading
-        "subheading_1": reactive.Value(None),
-        "subheading_2": reactive.Value(None),
-        "subheading_3": reactive.Value(None),
-        "subheading_4": reactive.Value(None)
-    }
+    subheading_names = reactive.Value({})
+
     decimal_places = reactive.Value(None)
     output_format = reactive.Value(None)
 
