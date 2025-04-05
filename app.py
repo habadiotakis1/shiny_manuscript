@@ -516,47 +516,50 @@ def server(input, output, session):
 
     # Update columns under subheadings
     def generate_subheading_ui(subheading_key):
-        columns = subheadings[subheading_key]()
-        if not columns:
-            return ui.p("No variables assigned yet.")
+        df = data.get()
+        if df != {}:
+            columns = subheadings[subheading_key]()
+            if not columns:
+                return ui.p("No variables assigned yet.")
 
-        return ui.layout_columns(
-        *[
-            ui.card(
-                ui.h5(col),
-                ui.input_text(
-                    f"name_{col}",
-                    "Column Name",
-                    value=var_config.get()[col]["name"],
-                ),
-                ui.input_select(
-                    f"var_type_{col}",
-                    "Variable Type",
-                    variable_types,
-                    selected=var_config.get()[col]["type"],
-                ),
-                ui.input_select(
-                    f"subheading_{col}",
-                    "Subheading",
-                    [subheading_val.get() for subheading_val in subheading_names.values()],
-                    selected=var_config.get()[col]["subheading"],
-                ),
-                ui.input_select(
-                    f"position_{col}",
-                    "Position",
-                    list(range(1,31)),
-                    selected=var_config.get()[col]["position"],
-                ),
-                # col_widths=(3, 3, 3, 3),
-                class_="draggable-item",
-                id=f"{subheading_key}_{col}"
+            return ui.layout_columns(
+            *[
+                ui.card(
+                    ui.h5(col),
+                    ui.div(df[col].unique()[:5]),
+                    ui.input_text(
+                        f"name_{col}",
+                        "Column Name",
+                        value=var_config.get()[col]["name"],
+                    ),
+                    ui.input_select(
+                        f"var_type_{col}",
+                        "Variable Type",
+                        variable_types,
+                        selected=var_config.get()[col]["type"],
+                    ),
+                    ui.input_select(
+                        f"subheading_{col}",
+                        "Subheading",
+                        [subheading_val.get() for subheading_val in subheading_names.values()],
+                        selected=var_config.get()[col]["subheading"],
+                    ),
+                    ui.input_select(
+                        f"position_{col}",
+                        "Position",
+                        list(range(1,31)),
+                        selected=var_config.get()[col]["position"],
+                    ),
+                    # col_widths=(3, 3, 3, 3),
+                    class_="draggable-item",
+                    id=f"{subheading_key}_{col}"
+                )
+                for col in columns
+            ],
+            col_widths=(4),
+            # width=1, 
+            class_="droppable-area",
             )
-            for col in columns
-        ],
-        col_widths=(4),
-        # width=1, 
-        class_="droppable-area",
-        )
         
     @output
     @render.ui
@@ -729,7 +732,7 @@ def server(input, output, session):
             decimals_tab = input.decimals_table()
             output_format = input.output_format()
     
-            updated_config = var_config.get()
+            updated_config = var_config.get().copy()
 
             remove_blanks = input.remove_blanks()
             if remove_blanks == "Yes":
@@ -760,7 +763,7 @@ def server(input, output, session):
                             print("After: ", updated_config[col])
 
                 var_config.set(updated_config)
-                print(updated_config)
+                print(updated_config['sex'])
 
                 ui.notification_show("✅ Calculation complete! File ready to download", duration=60, type="message")
         except:
