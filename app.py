@@ -99,7 +99,9 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     yes_values = ['Yes', 'Y', 'y', 'yes', 1]
     yn_var = None
 
+    print("BEFORE:", var_name, var_options)
     var_options = df[var_name].dropna().unique()        
+    print(var_name, var_options)
     for val in yes_values:
         if val in var_options:
             yn_var=val
