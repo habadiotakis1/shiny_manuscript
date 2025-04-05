@@ -351,7 +351,7 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values (e.g., NA, Unknown)", ["No (Default)", "Yes"])),
+        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values (e.g., NA, Unknown)", ["No (Default)", "Yes"]),width="100%"),
         col_widths= (2,2,2,6)
         ),
 
@@ -436,7 +436,7 @@ def server(input, output, session):
             df = df.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
 
             data.set(df)  # Store data in reactive value
-            clean_df = df.replace(missing_values, np.nan)
+            clean_df = df.replace(missing_values, "")
             cleaned_data.set(clean_df)  # Store cleaned data in reactive value
             
             column_dict = {col: col for col in df.columns}
