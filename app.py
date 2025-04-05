@@ -451,18 +451,18 @@ def server(input, output, session):
 
         # var_config_copy = var_config.get().copy()
 
-        for subheading in subheadings:
+        # for subheading in subheadings:
         #     for col in removed_columns:
         #         var_config_copy[col]["type"] = "Omit"
         #         if col in subheadings[subheading]():
         #             updated = [c for c in subheadings[subheading]() if c != col]
         #             subheadings[subheading].set(updated)
-            generate_subheading_ui(subheading)
+            # generate_subheading_ui(subheading)
         # var_config.set(var_config_copy)  # Update stored config
                 
-        # @reactive.effect
-        # def sync_column_selection_with_subheadings():
-            # for subheading in subheadings:
+        @reactive.effect
+        def sync_column_selection_with_subheadings():
+            for subheading in subheadings:
                 # current_cols = set(subheadings[subheading]())
 
                 # # Add new columns to subheading
@@ -477,7 +477,7 @@ def server(input, output, session):
                 #     updated = [col for col in subheadings[subheading]() if col not in removed_cols]
                 #     subheadings[subheading].set(updated)
                 
-                # generate_subheading_ui(subheading)
+                generate_subheading_ui(subheading)
 
     # Set Grouping Variable for analysis
     @output
