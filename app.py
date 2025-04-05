@@ -622,7 +622,7 @@ def server(input, output, session):
             # If the subheading has changed, move the column to the new subheading
             if new_subheading != old_subheading:
                 # Remove the variable from the current subheading
-                subheadings[new_subheading_mapped].set([
+                subheadings[old_subheading_mapped].set([
                     c for c in subheadings[new_subheading_mapped]() if c != col
                 ])
                 
@@ -630,7 +630,7 @@ def server(input, output, session):
                 subheadings[new_subheading_mapped].set(subheadings[new_subheading]() + [col])
                 
                 # Debugging print statement to track the change
-                print(f"Moved {col} from {new_subheading_mapped} to {new_subheading}")
+                print(f"Moved {col} from {old_subheading_mapped} to {new_subheading_mapped}")
 
             generate_subheading_ui(new_subheading_mapped)
             generate_subheading_ui(old_subheading_mapped)
