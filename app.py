@@ -668,19 +668,16 @@ def server(input, output, session):
 
     @reactive.effect
     def update_subheading_names():
-        updated_names = {}
         for key in subheadings.keys():  # subheadings = {"subheading_1": ..., etc.}
             try:
                 text_input = input[key]()
                 print("Subheading name:", key, "Text input:", text_input)
                 if text_input and text_input.strip() != "":
-                    updated_names[key] = text_input.strip()
-                else:
-                    updated_names[key] = key  # fallback to default internal name
+                    key = text_input.strip()
             except:
-                updated_names[key] = key
-            subheading_names[key].set(updated_names[key])
-        print("Subheading names updated:", updated_names)
+                pass
+            subheading_names[key].set(key)
+        print("Subheading names updated:", key)
 
 
     # Perform statistical analysis when the "Calculate" button is clicked
