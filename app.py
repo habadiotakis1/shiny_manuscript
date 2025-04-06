@@ -633,8 +633,10 @@ def server(input, output, session):
             new_subheading = input[f"subheading_{col}"]()
             old_subheading = var_config.get()[col]["subheading"]
             
-            new_subheading_mapped = next((k for k, v in subheading_names.items() if v() == new_subheading), None)
+            
             old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), None)
+            subheading_names[old_subheading_mapped].set(new_subheading)
+            new_subheading_mapped = next((k for k, v in subheading_names.items() if v() == new_subheading), None)
 
             print(new_subheading_mapped, old_subheading_mapped)
             
@@ -674,7 +676,7 @@ def server(input, output, session):
                 print("Subheading name:", key, "Text input:", text_input)
                 if text_input and text_input.strip() != "":
                     subheading_names[key].set(text_input.strip())
-                    print("Subheading names updated:", key, text_input.strip())
+                    print("Subheading names updated:", key, text_input.strip()))
             except:
                 pass
             
