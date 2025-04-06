@@ -636,7 +636,7 @@ def server(input, output, session):
             new_subheading_mapped = next((k for k, v in subheading_names.items() if v() == new_subheading), None)
             old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), None)
 
-            # print(new_subheading_mapped, old_subheading_mapped)
+            print(new_subheading_mapped, old_subheading_mapped)
             
             print("❗️ Updating configuration from...", updated_config[col])
             updated_config[col]["type"] = input[f"var_type_{col}"]()
