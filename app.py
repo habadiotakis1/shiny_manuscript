@@ -576,42 +576,42 @@ def server(input, output, session):
         return generate_subheading_ui("subheading_4")
 
    
-    # JavaScript to enable drag-and-drop using SortableJS
-    ui.tags.script(
-        """
-        document.addEventListener("DOMContentLoaded", function() {
-            document.querySelectorAll('.draggable-list').forEach(list => {
-                new Sortable(list, {
-                    group: 'shared',
-                    animation: 150,
-                    onEnd: function(evt) {
-                        let movedVar = evt.item.dataset.var;
-                        let newGroup = evt.to.id.replace('list-', '');
+    # # JavaScript to enable drag-and-drop using SortableJS
+    # ui.tags.script(
+    #     """
+    #     document.addEventListener("DOMContentLoaded", function() {
+    #         document.querySelectorAll('.draggable-list').forEach(list => {
+    #             new Sortable(list, {
+    #                 group: 'shared',
+    #                 animation: 150,
+    #                 onEnd: function(evt) {
+    #                     let movedVar = evt.item.dataset.var;
+    #                     let newGroup = evt.to.id.replace('list-', '');
                         
-                        // Update the server-side reactive variable
-                        Shiny.setInputValue("dragged_var", JSON.stringify({movedVar, newGroup}));
-                    }
-                });
-            });
-        });
-        """
-    )
-    # Handle drag-and-drop updates in the server
-    @reactive.effect
-    def update_subheadings():
-        drag_event = input.dragged_var()
-        if drag_event:
-            drag_data = json.loads(drag_event)
-            moved_var = drag_data["movedVar"]
-            new_group = drag_data["newGroup"]
+    #                     // Update the server-side reactive variable
+    #                     Shiny.setInputValue("dragged_var", JSON.stringify({movedVar, newGroup}));
+    #                 }
+    #             });
+    #         });
+    #     });
+    #     """
+    # )
+    # # Handle drag-and-drop updates in the server
+    # @reactive.effect
+    # def update_subheadings():
+    #     drag_event = input.dragged_var()
+    #     if drag_event:
+    #         drag_data = json.loads(drag_event)
+    #         moved_var = drag_data["movedVar"]
+    #         new_group = drag_data["newGroup"]
 
-            # Remove from old subheading
-            for key in subheadings:
-                if moved_var in subheadings[key]():
-                    subheadings[key].set([v for v in subheadings[key]() if v != moved_var])
+    #         # Remove from old subheading
+    #         for key in subheadings:
+    #             if moved_var in subheadings[key]():
+    #                 subheadings[key].set([v for v in subheadings[key]() if v != moved_var])
 
-            # Add to new subheading
-            subheadings[new_group].set(subheadings[new_group]() + [moved_var])
+    #         # Add to new subheading
+    #         subheadings[new_group].set(subheadings[new_group]() + [moved_var])
             
     
     # Update variable settings dynamically when inputs change
@@ -676,7 +676,7 @@ def server(input, output, session):
                 print("Subheading name:", key, "Text input:", text_input)
                 if text_input and text_input.strip() != "":
                     subheading_names[key].set(text_input.strip())
-                    print("Subheading names updated:", key, text_input.strip()))
+                    print("Subheading names updated:", key, text_input.strip())
             except:
                 pass
             
