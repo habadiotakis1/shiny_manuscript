@@ -646,7 +646,7 @@ def server(input, output, session):
             print("-                           to...", updated_config[col])
             
             # If the subheading has changed, move the column to the new subheading
-            if new_subheading != old_subheading:
+            if new_subheading_mapped != old_subheading_mapped:
                 # Remove the variable from the current subheading
                 subheadings[old_subheading_mapped].set(
                     [c for c in subheadings[old_subheading_mapped]() if c != col]
@@ -654,7 +654,7 @@ def server(input, output, session):
                 
                 # Add the variable to the new subheading
                 subheadings[new_subheading_mapped].set(
-                    subheadings[new_subheading]() + [col]
+                    subheadings[new_subheading_mapped]() + [col]
                 )
                 
                 # Debugging print statement to track the change
