@@ -669,14 +669,15 @@ def server(input, output, session):
     @reactive.effect
     def update_subheading_names():
         for key in subheadings.keys():  # subheadings = {"subheading_1": ..., etc.}
+            name = key
             try:
                 text_input = input[key]()
                 print("Subheading name:", key, "Text input:", text_input)
                 if text_input and text_input.strip() != "":
-                    key = text_input.strip()
+                    name = text_input.strip()
             except:
                 pass
-            subheading_names[key].set(key)
+            subheading_names[key].set(name)
         print("Subheading names updated:", key)
 
 
