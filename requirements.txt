@@ -7,3 +7,4 @@ ridgeplot
 scipy
 python-docx
 docx
+openpyxl
