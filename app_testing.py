@@ -414,7 +414,8 @@ def server(input, output, session):
                 multiple=True,  
                 width="100%",
             )  
-        
+       
+    @reactive.effect
     def show_modal_on_excel():
         if excel_trigger.get():
             ui.modal_show(
@@ -427,7 +428,7 @@ def server(input, output, session):
             )
             excel_trigger.set(False)  # Reset the trigger after showing the modal
 
-    @reactive.effect
+    @reactive.calc
     def _():
         if input.data_file():
             file_info = input.data_file()[0]
