@@ -351,11 +351,11 @@ app_ui = ui.page_fluid(
     ui.h5("Step 4: Customize Table & Rows"),
     ui.p("Update variable names, type, subheading and position. Variables that have the same position value will be ordered alphabetically. Variable types include:"),
     ui.layout_columns(    
-        ui.card(ui.tags.strong("Categorical (Y/N): ") + "Fisher's Exact Test, ex: Smoking, Diabetes"),
-        ui.card(ui.tags.strong("Categorical (Dichotomous): ") + "Fisher's Exact Test, ex: Sex"),
-        ui.card(ui.tags.strong("Categorical (Multinomial): ") + "Chi2, ex: Race"),
-        ui.card(ui.tags.strong("Ratio Continuos: ") + "T-Test, examples include: Age, GFR"),
-        ui.card(ui.tags.strong("Ordinal Discrete: ") + "Wilcoxon, examples include: GCS, Tumor Grade"),
+        ui.card(ui.tags.strong("Categorical (Y/N): "), "Fisher's Exact Test, ex: Smoking, Diabetes"),
+        ui.card(ui.tags.strong("Categorical (Dichotomous): "), "Fisher's Exact Test, ex: Sex"),
+        ui.card(ui.tags.strong("Categorical (Multinomial): "), "Chi2, ex: Race"),
+        ui.card(ui.tags.strong("Ratio Continuos: "), "T-Test, examples include: Age, GFR"),
+        ui.card(ui.tags.strong("Ordinal Discrete: "), "Wilcoxon, examples include: GCS, Tumor Grade"),
         # col_widths= (2,2,2,6)
         ),
     # ui.tags.ul(
