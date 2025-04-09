@@ -381,6 +381,9 @@ app_ui = ui.page_fluid(
 ######################### Shiny App Server #####################################
 ################################################################################
 def server(input, output, session):
+    sheet_names = reactive.Value([])
+    excel_trigger = reactive.Value(False)
+
     data = reactive.Value({})  # Store uploaded data
     cleaned_data = reactive.Value({})  # Store cleaned data
     selected_columns = reactive.Value([])  # Store selected columns
@@ -411,7 +414,39 @@ def server(input, output, session):
                 multiple=True,  
                 width="100%",
             )  
-    
+        
+
+    # Show modal when Excel is uploaded
+    @reactive.effect
+    def trigger_excel_modal():
+        file_info = input.data_file()[0]
+        if not file:
+            return
+
+        file_info = input.data_file()[0]
+        ext = os.path.splitext(file_info["name"])[-1]
+
+        if ext == "xlsx":
+            with open(file_info[0]["datapath"], "rb") as f:
+                xls = pd.ExcelFile(f)
+                sheet_names.set(xls.sheet_names)
+
+            excel_trigger.set(True)  # Trigger modal
+
+    # Modal display
+    @reactive.effect
+    def show_modal_on_excel():
+        if excel_trigger.get():
+            ui.modal_show(
+                ui.modal(
+                    ui.input_select("selected_sheet", "Select a Sheet", choices=sheet_names.get()),
+                    title="Choose a Sheet",
+                    easy_close=False,
+                    footer=ui.modal_button("Confirm"),
+                )
+            )
+            excel_trigger.set(False)  # Reset trigger after showing
+
     @reactive.effect
     def _():
         if input.data_file():
@@ -421,7 +456,9 @@ def server(input, output, session):
             if ext == ".csv":
                 df = pd.read_csv(file_info["datapath"])  # Reads header row by default
             elif ext == ".xlsx":
-                df = pd.read_excel(file_info["datapath"])
+                selected = input.selected_sheet()
+                if selected:
+                    df = pd.read_excel(file_info["datapath"], sheet_name=selected)
 
             # Clean column names: strip and remove non-alphanumeric chars
             clean_columns = [re.sub(r'\W+', '', col.strip()) for col in df.columns]
