@@ -350,16 +350,16 @@ app_ui = ui.page_fluid(
 
     ui.h5("Step 4: Customize Table & Rows"),
     # Subheadings
-    ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"), #, disabled=True),
+    ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"), 
     ui.output_ui("var_settings_1"),
 
-    ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name"), #, disabled=True),
+    ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name"), 
     ui.output_ui("var_settings_2"),
     
-    ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name"), #, disabled=True),
+    ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name"), 
     ui.output_ui("var_settings_3"),
     
-    ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"), #, disabled=True),
+    ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"), 
     ui.output_ui("var_settings_4"),
     
     # Variable Selection UI (dynamically generated)
@@ -416,37 +416,17 @@ def server(input, output, session):
             )  
         
 
-    # Show modal when Excel is uploaded
-    @reactive.effect
-    def trigger_excel_modal():
-        if input.data_file():
-            file_info = input.data_file()[0]
-            if not file_info:
-                return
-
-            file_info = input.data_file()[0]
-            ext = os.path.splitext(file_info["name"])[-1]
-
-            if ext == "xlsx":
-                with open(file_info[0]["datapath"], "rb") as f:
-                    xls = pd.ExcelFile(f)
-                    sheet_names.set(xls.sheet_names)
-
-                excel_trigger.set(True)  # Trigger modal
-
     # Modal display
     @reactive.effect
     def show_modal_on_excel():
-        if excel_trigger.get():
-            ui.modal_show(
-                ui.modal(
-                    ui.input_select("selected_sheet", "Select a Sheet", choices=sheet_names.get()),
-                    title="Choose a Sheet",
-                    easy_close=False,
-                    footer=ui.modal_button("Confirm"),
-                )
+        ui.modal_show(
+            ui.modal(
+                ui.input_select("selected_sheet", "Select a Sheet", choices=sheet_names.get()),
+                title="Choose a Sheet",
+                easy_close=True,
+                footer=ui.modal_button("Confirm"),
             )
-            excel_trigger.set(False)  # Reset trigger after showing
+        )
 
     @reactive.effect
     def _():
@@ -457,6 +437,12 @@ def server(input, output, session):
             if ext == ".csv":
                 df = pd.read_csv(file_info["datapath"])  # Reads header row by default
             elif ext == ".xlsx":
+                with open(file_info[0]["datapath"], "rb") as f:
+                    xls = pd.ExcelFile(f)
+                    sheet_names.set(xls.sheet_names)
+                    
+                    show_modal_on_excel()
+
                 selected = input.selected_sheet()
                 if selected:
                     df = pd.read_excel(file_info["datapath"], sheet_name=selected)
