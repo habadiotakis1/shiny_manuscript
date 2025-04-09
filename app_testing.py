@@ -443,14 +443,14 @@ def server(input, output, session):
                     xls = pd.ExcelFile(f)
                     sheet_names.set(xls.sheet_names)
                     print("Sheet Names", sheet_names.get)
-                    excel_trigger.set(True)
-                    print(sheet_names.get(), excel_trigger.get())
-                    if len(sheet_names.get()) > 0 and excel_trigger.get():
-                        show_modal_on_excel()
+                
+                excel_trigger.set(True)
+                print(sheet_names.get(), excel_trigger.get())
+                if len(sheet_names.get()) > 1 and excel_trigger.get():
+                    show_modal_on_excel()
 
-                selected = input.selected_sheet()
-                if selected:
-                    df = pd.read_excel(file_info["datapath"], sheet_name=selected)
+                selected = input.selected_sheet() or sheet_names.get()[0]  # Default to the first sheet if none selected
+                df = pd.read_excel(file_info["datapath"], sheet_name=selected)
 
             # Clean column names: strip and remove non-alphanumeric chars
             clean_columns = [re.sub(r'\W+', '', col.strip()) for col in df.columns]
