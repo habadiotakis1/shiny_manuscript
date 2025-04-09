@@ -419,19 +419,20 @@ def server(input, output, session):
     # Show modal when Excel is uploaded
     @reactive.effect
     def trigger_excel_modal():
-        file_info = input.data_file()[0]
-        if not file:
-            return
+        if input.data_file():
+            file_info = input.data_file()[0]
+            if not file_info:
+                return
 
-        file_info = input.data_file()[0]
-        ext = os.path.splitext(file_info["name"])[-1]
+            file_info = input.data_file()[0]
+            ext = os.path.splitext(file_info["name"])[-1]
 
-        if ext == "xlsx":
-            with open(file_info[0]["datapath"], "rb") as f:
-                xls = pd.ExcelFile(f)
-                sheet_names.set(xls.sheet_names)
+            if ext == "xlsx":
+                with open(file_info[0]["datapath"], "rb") as f:
+                    xls = pd.ExcelFile(f)
+                    sheet_names.set(xls.sheet_names)
 
-            excel_trigger.set(True)  # Trigger modal
+                excel_trigger.set(True)  # Trigger modal
 
     # Modal display
     @reactive.effect
