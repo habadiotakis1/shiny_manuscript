@@ -12,6 +12,7 @@ from docx import Document
 from docx.shared import Pt, Cm, Inches
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from fisher import pvalue_nway
 import pickle
 import json
 
@@ -68,7 +69,7 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
         _, p_value = stats.fisher_exact(contingency_table)
     elif test_type == 'fisher-freeman-halton': # UPDATE
         contingency_table = pd.crosstab(df[var_name], df[group_var])
-        _, p_value, _, _ = stats.chi2_contingency(contingency_table, lambda_="log-likelihood")        
+        p_value = pvalue_nway(contingency_table.values).two_tail
     elif test_type == "chi2":
         contingency_table = pd.crosstab(df[var_name], df[group_var])
         _, p_value, _, _ = stats.chi2_contingency(contingency_table)
