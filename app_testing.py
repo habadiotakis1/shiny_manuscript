@@ -351,20 +351,12 @@ app_ui = ui.page_fluid(
     ui.h5("Step 4: Customize Table & Rows"),
     ui.p("Update variable names, type, subheading and position. Variables that have the same position value will be ordered alphabetically. Variable types include:"),
     ui.layout_columns(    
-        ui.card(ui.tags.strong("Categorical (Y/N): "), "Fisher's Exact Test, ex: Smoking, Diabetes"),
-        ui.card(ui.tags.strong("Categorical (Dichotomous): "), "Fisher's Exact Test, ex: Sex"),
-        ui.card(ui.tags.strong("Categorical (Multinomial): "), "Chi2, ex: Race"),
-        ui.card(ui.tags.strong("Ratio Continuos: "), "T-Test, examples include: Age, GFR"),
-        ui.card(ui.tags.strong("Ordinal Discrete: "), "Wilcoxon, examples include: GCS, Tumor Grade"),
-        # col_widths= (2,2,2,6)
+        ui.card(ui.tags.strong("Categorical (Y/N): "), "Fisher's Exact Test", ui.tags.em("ex: Smoking, Diabetes"),
+        ui.card(ui.tags.strong("Categorical (Dichotomous): "), "Fisher's Exact Test", ui.tags.em("ex: Sex")),
+        ui.card(ui.tags.strong("Categorical (Multinomial): "), "Chi2", ui.tags.em("ex: Race")),
+        ui.card(ui.tags.strong("Ratio Continuos: "), "T-Test", ui.tags.em("ex: Age, GFR")),
+        ui.card(ui.tags.strong("Ordinal Discrete: "), "Wilcoxon", ui.tags.em("ex: GCS, Tumor Grade")),
         ),
-    # ui.tags.ul(
-    #     ui.tags.li(ui.tags.strong("Categorical (Y/N): ") + "Fisher's Exact Test, ex: Smoking, Diabetes"),
-    #     ui.tags.li(ui.tags.strong("Categorical (Dichotomous): ") + "Fisher's Exact Test, ex: Sex"),
-    #     ui.tags.li(ui.tags.strong("Categorical (Multinomial): ") + "Chi2, ex: Race"),
-    #     ui.tags.li(ui.tags.strong("Ratio Continuos: ") + "T-Test, examples include: Age, GFR"),
-    #     ui.tags.li(ui.tags.strong("Ordinal Discrete: ") + "Wilcoxon, examples include: GCS, Tumor Grade"),
-    # ),
 
     # Subheadings
     ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"), 
