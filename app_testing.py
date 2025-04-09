@@ -423,17 +423,17 @@ def server(input, output, session):
                 width="100%",
             )  
        
-    def show_modal_on_excel():
-        if len(sheet_names.get()) > 1 and excel_trigger.get():
-            ui.modal_show(
-                ui.modal(
-                    ui.input_select("selected_sheet", "Select a Sheet", choices=sheet_names.get()),
-                    title="Choose a Sheet",
-                    easy_close=False,
-                    footer=ui.modal_button("Confirm"),
-                )
-            )
-            excel_trigger.set(False)  # Reset the trigger after showing the modal
+    # def show_modal_on_excel():
+    #     if len(sheet_names.get()) > 1 and excel_trigger.get():
+    #         ui.modal_show(
+    #             ui.modal(
+    #                 ui.input_select("selected_sheet", "Select a Sheet", choices=sheet_names.get()),
+    #                 title="Choose a Sheet",
+    #                 easy_close=False,
+    #                 footer=ui.modal_button("Confirm"),
+    #             )
+    #         )
+    #         excel_trigger.set(False)  # Reset the trigger after showing the modal
 
     @reactive.effect
     def _():
@@ -449,8 +449,8 @@ def server(input, output, session):
                     sheet_names.set(xls.sheet_names)
                     print("Sheet Names", sheet_names.get)
                 
-                excel_trigger.set(True)
-                show_modal_on_excel()
+                # excel_trigger.set(True)
+                # show_modal_on_excel()
 
                 selected = input.selected_sheet() or sheet_names.get()[0]  # Default to the first sheet if none selected
                 df = pd.read_excel(file_info["datapath"], sheet_name=selected)
