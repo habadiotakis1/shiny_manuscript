@@ -442,8 +442,9 @@ def server(input, output, session):
                 with open(file_info[0]["datapath"], "rb") as f:
                     xls = pd.ExcelFile(f)
                     sheet_names.set(xls.sheet_names)
-                    if sheet_names.get() and not excel_trigger.get():
-                        excel_trigger.set(True)
+                    print("Sheet Names", sheet_names.get)
+                    excel_trigger.set(True)
+                    if sheet_names.get() and excel_trigger.get():
                         show_modal_on_excel()
 
                 selected = input.selected_sheet()
