@@ -8,3 +8,4 @@ scipy
 python-docx
 docx
 openpyxl
+fisher
