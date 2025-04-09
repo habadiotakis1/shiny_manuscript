@@ -423,10 +423,11 @@ def server(input, output, session):
             ui.modal(
                 ui.input_select("selected_sheet", "Select a Sheet", choices=sheet_names.get()),
                 title="Choose a Sheet",
-                easy_close=True,
+                easy_close=False,
                 footer=ui.modal_button("Confirm"),
             )
         )
+        excel_trigger.set(False)  # Reset the trigger after showing the modal
 
     @reactive.effect
     def _():
@@ -440,8 +441,9 @@ def server(input, output, session):
                 with open(file_info[0]["datapath"], "rb") as f:
                     xls = pd.ExcelFile(f)
                     sheet_names.set(xls.sheet_names)
-                    
-                    show_modal_on_excel()
+
+                    if excel_trigger.get():
+                        show_modal_on_excel()
 
                 selected = input.selected_sheet()
                 if selected:
