@@ -444,7 +444,8 @@ def server(input, output, session):
                     sheet_names.set(xls.sheet_names)
                     print("Sheet Names", sheet_names.get)
                     excel_trigger.set(True)
-                    if sheet_names.get() and excel_trigger.get():
+                    print(sheet_names.get(), excel_trigger.get())
+                    if len(sheet_names.get()) > 0 and excel_trigger.get():
                         show_modal_on_excel()
 
                 selected = input.selected_sheet()
