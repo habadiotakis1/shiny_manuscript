@@ -415,9 +415,6 @@ def server(input, output, session):
                 width="100%",
             )  
         
-
-    # Modal display
-    @reactive.effect
     def show_modal_on_excel():
         if excel_trigger.get():
             ui.modal_show(
