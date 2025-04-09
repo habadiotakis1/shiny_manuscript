@@ -436,7 +436,7 @@ def server(input, output, session):
             if ext == ".csv":
                 df = pd.read_csv(file_info["datapath"])  # Reads header row by default
             elif ext == ".xlsx":
-                with open(file_info[0]["datapath"], "rb") as f:
+                with open(file_info["datapath"], "rb") as f:
                     xls = pd.ExcelFile(f)
                     sheet_names.set(xls.sheet_names)
                     print("Sheet Names", sheet_names.get)
