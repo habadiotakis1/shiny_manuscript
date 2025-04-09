@@ -349,13 +349,14 @@ app_ui = ui.page_fluid(
         ),
 
     ui.h5("Step 4: Customize Table & Rows"),
-    ui.p("Update variable names, type, subheading and position. Variables that have the same position value will be ordered alphabetically. Variable types, associated statistical test, and examples include:" \
-    "Cateogorical (Y/N): Fisher's Exact Test, examples include: Smoking, Diabetes, Hypertension " \
-    "Categorical (Dichotomous): Fisher's Exact Test, examples include: Sex" \
-    "Categorical (Multinomial): Chi2, examples include: Race" \
-    "Ratio Continuos: T-Test, examples include: Age, GF " \
-    "Ordinal Discrete: Wilcoxon, examples include: GCS, Tumor Grade" \
-    ""),
+    ui.p("Update variable names, type, subheading and position. Variables that have the same position value will be ordered alphabetically. Variable types include:)"),
+    ui.tags.ul(
+        ui.tags.li("Categorical (Y/N): Fisher's Exact Test, ex: Smoking, Diabetes"),
+        ui.tags.li("Categorical (Dichotomous): Fisher's Exact Test, ex: Sex"),
+        ui.tags.li("Categorical (Multinomial): Chi2, ex: Race"),
+        ui.tags.li("Ratio Continuos: T-Test, examples include: Age, GFR"),
+        ui.tags.li("Ordinal Discrete: Wilcoxon, examples include: GCS, Tumor Grade"),
+    ),
 
     # Subheadings
     ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"), 
