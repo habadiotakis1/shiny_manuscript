@@ -9,4 +9,4 @@ scipy
 python-docx
 docx
 openpyxl
-fisher
+fisher==0.1.14
