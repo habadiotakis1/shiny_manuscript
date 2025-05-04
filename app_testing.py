@@ -225,7 +225,10 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
     doc = Document()
 
     # Create the table with columns for Variable, Group 1, Group 2, P-Value
-    table = doc.add_table(rows=1, cols=4)
+    if odds_ratio:
+        table = doc.add_table(rows=1, cols=5)
+    else:
+        table = doc.add_table(rows=1, cols=4)
     table.columns[0].width=Inches(3.5)
     table.columns[1].width=Inches(1.5)
     table.columns[2].width=Inches(1.5)
