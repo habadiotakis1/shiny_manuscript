@@ -644,9 +644,7 @@ def server(input, output, session):
                     f"ref_val_{col}",
                     "Reference Values",
                     df[col].unique().tolist().sort(),
-                    selected=var_config.get()[col]["ref_val"],
                 ),
-                # col_widths=(3, 3, 3, 3),
                 class_="draggable-item",
                 id=f"{subheading_key}_{col}"
             )
