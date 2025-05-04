@@ -643,7 +643,7 @@ def server(input, output, session):
                 ui.input_select(
                     f"ref_val_{col}",
                     "Reference Values",
-                    df[col].unique().tolist().sort(),
+                    df[col].unique().tolist(),
                 ),
                 class_="draggable-item",
                 id=f"{subheading_key}_{col}"
