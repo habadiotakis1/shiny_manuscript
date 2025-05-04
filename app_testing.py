@@ -642,11 +642,7 @@ def server(input, output, session):
                 ),
                 ui.input_select(
                     f"ref_val_{col}",
-<<<<<<< HEAD
                     "Reference Value (For Odds Ratio of Dichotomous Variables)",
-=======
-                    "Reference Values",
->>>>>>> 0b24a83a91e154ea51fd327808949ca739a74896
                     df[col].unique().tolist(),
                 ),
                 class_="draggable-item",
