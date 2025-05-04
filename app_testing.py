@@ -8,6 +8,7 @@ from io import StringIO
 import re
 import numpy as np
 from scipy import stats
+from statsmodels.stats.contingency_tables import Table2x2
 from docx import Document
 from docx.shared import Pt, Cm, Inches
 from docx.oxml import OxmlElement
@@ -91,6 +92,49 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
 
     return p_value
 
+def compute_odds_ratio_between_groups(group1, group2, reference_value):
+    """
+    Calculates odds ratio and 95% CI between two groups for a binary categorical variable.
+
+    Parameters:
+    - group1: pd.Series of exposure variable values for group 1 (e.g., var_name from df[group_var] == Group1)
+    - group2: pd.Series of exposure variable values for group 2
+    - reference_value: The reference value (default "No")
+
+    Returns:
+    - String in format "OR [low–high]" or "undefined" if the table is invalid
+    """
+    # Drop NA
+    group1 = group1.dropna().astype(str)
+    group2 = group2.dropna().astype(str)
+
+    # Convert to binary: 0 = reference, 1 = not reference
+    group1_binary = (group1 != reference_value).astype(int)
+    group2_binary = (group2 != reference_value).astype(int)
+
+    # Build 2x2 contingency table:
+    #         | not reference (1) | reference (0)
+    # group1 |        a          |      b
+    # group2 |        c          |      d
+    a = (group1_binary == 1).sum()
+    b = (group1_binary == 0).sum()
+    c = (group2_binary == 1).sum()
+    d = (group2_binary == 0).sum()
+
+    table = [[a, b], [c, d]]
+
+    # Ensure valid 2x2 table
+    if any(v == 0 for row in table for v in row):
+        return "undefined"
+
+    try:
+        ct = Table2x2(table)
+        or_value = ct.oddsratio
+        ci_low, ci_high = ct.oddsratio_confint()
+        return f"{or_value:.2f} [{ci_low:.2f}–{ci_high:.2f}]"
+    except Exception as e:
+        return f"error: {str(e)}"
+
 # Function to perform aggregation analysis based on the variable type
 def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
     print("PERFORM AGG ANALYSIS", group_var, var_type, var_name, df[var_name].dropna().unique(), decimal_places, output_format, col_var_config)
@@ -107,9 +151,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     for val in yes_values:
         if val in var_options:
             yn_var=val
-    
-    print("HERE")
-    
+        
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
 
@@ -131,6 +173,8 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
         else:
             col_var_config['group1'] = str(round(group1_sum / group1_total * 100, decimal_places)) + "% (" + str(group1_sum) + ")"
             col_var_config['group2'] = str(round(group2_sum / group2_total * 100, decimal_places)) + "% (" + str(group2_sum) + ")"
+
+        col_var_config['odds_ratio'] = compute_odds_ratio_between_groups(group1, group2, reference_value=col_var_config['ref_val'])
         
     elif var_type == "Categorical (Dichotomous)" or var_type == "Categorical (Multinomial)":
         print(var_options)
@@ -144,6 +188,8 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
             else:
                 col_var_config[f'group1_subgroup{i}'] = str(round(group1_sum / group1_total * 100, decimal_places)) + "% (" + str(group1_sum) + ")"
                 col_var_config[f'group2_subgroup{i}'] = str(round(group2_sum / group2_total * 100, decimal_places)) + "% (" + str(group2_sum) + ")"
+            
+            col_var_config['odds_ratio'] = compute_odds_ratio_between_groups(group1, group2, reference_value=col_var_config['ref_val'])
 
     elif var_type == "Ratio Continuous":
         # Aggregate: Mean and Standard Deviation
@@ -169,7 +215,12 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     return col_var_config
 
 # Function to create Word table from var_config
-def create_word_table(df,var_config, group_var, subheadings, subheading_names, table_name):
+def create_word_table(df,var_config, group_var, subheadings, subheading_names, table_name, odds_ratio):
+    if odds_ratio == 'Yes':
+        odds_ratio = True
+    else:
+        odds_ratio = False
+
     # Create a new Word Document
     doc = Document()
 
@@ -179,12 +230,17 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
     table.columns[1].width=Inches(1.5)
     table.columns[2].width=Inches(1.5)
     table.columns[3].width=Inches(.5)
+    if odds_ratio:
+        table.columns[4].width=Inches(.5)
 
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = 'Variable'
     hdr_cells[1].text = f'{df[group_var].unique()[0]}'
     hdr_cells[2].text = f'{df[group_var].unique()[1]}'
     hdr_cells[3].text = 'P-Value'
+    if odds_ratio:
+        hdr_cells[4].text='Odds Ratio'
+
     
     for row in hdr_cells:
         row.paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
@@ -196,6 +252,9 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
     grp_cells[1].text = '(n= ' + str(group1_size) + ")"
     grp_cells[2].text = '(n= ' + str(group2_size) + ")"
     grp_cells[3].text = ''
+    if odds_ratio:
+        grp_cells[4].text = ''
+
 
     # Loop through subheadings
     for sub in subheadings:
@@ -207,6 +266,8 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         row_cells[1].text = ''  # Leave empty for Group 1
         row_cells[2].text = ''  # Leave empty for Group 2
         row_cells[3].text = ''  # Leave empty for P-Value
+        if odds_ratio:
+            row_cells[4].text = ''  # Leave empty for Odds Ratio
 
         row_cells[0].paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
         
@@ -227,6 +288,8 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
                 row_cells[1].text = str(var_config[var]["group1"])
                 row_cells[2].text = str(var_config[var]["group2"])
                 row_cells[3].text = str(var_config[var]["p_value"])
+                if odds_ratio:
+                    row_cells[4].text = str(var_config[var]["odds_ratio"])
 
             elif var_type == "Categorical (Dichotomous)":
                 row_cells = table.add_row().cells
@@ -234,6 +297,8 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
                 row_cells[1].text = ""
                 row_cells[2].text = ""
                 row_cells[3].text = ""
+                if odds_ratio:
+                    row_cells[4].text = str(var_config[var]["odds_ratio"])
 
                 # row_cells[0].paragraphs[0].runs[0].font.underline = True
 
@@ -344,10 +409,11 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values ", ["No (Default)", "Yes"])),
+        ui.card(ui.input_radio_buttons("show_odds_ratio", "Show Odds Ratio", ["No (Default)", "Yes"])),
+        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values", ["No (Default)", "Yes"])),
         # ui.card(ui.input_radio_buttons("remove_blanks", ui.tags.span("Remove Unknown Values ",ui.tooltip(ui.icon("info-circle"),"Customize how each variable appears in the final table.")), ["No (Default)", "Yes"]),
         
-        col_widths= (2,2,2,6)
+        col_widths= (2,2,2,2,4)
         ),
 
     ui.h5("Step 4: Customize Table & Rows"),
@@ -413,9 +479,6 @@ def server(input, output, session):
         "subheading_3": reactive.Value("subheading_3"),
         "subheading_4": reactive.Value("subheading_4")
     } 
-
-    decimal_places = reactive.Value(None)
-    output_format = reactive.Value(None)
 
     @output
     @render.ui
@@ -575,6 +638,12 @@ def server(input, output, session):
                     "Position",
                     list(range(1,31)),
                     selected=var_config.get()[col]["position"],
+                ),
+                ui.input_select(
+                    f"ref_val_{col}",
+                    "Reference Values",
+                    [i for i in col.values()],
+                    selected=var_config.get()[col]["ref_val"],
                 ),
                 # col_widths=(3, 3, 3, 3),
                 class_="draggable-item",
@@ -781,7 +850,7 @@ def server(input, output, session):
             return None  # Return None if no data is available
         
         # Generate the Word table document
-        doc_filename = create_word_table(df, updated_config, group_var.get(), subheadings, subheading_names, input.table_name())
+        doc_filename = create_word_table(df, updated_config, group_var.get(), subheadings, subheading_names, input.table_name(), input.show_odds_ratio())
         
         return doc_filename  # Return the Word document file for download
 
