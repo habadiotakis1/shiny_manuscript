@@ -233,12 +233,12 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         table = doc.add_table(rows=1, cols=5)
     else:
         table = doc.add_table(rows=1, cols=4)
-    table.columns[0].width=Inches(3.5)
+    table.columns[0].width=Inches(3)
     table.columns[1].width=Inches(1.5)
     table.columns[2].width=Inches(1.5)
     table.columns[3].width=Inches(.5)
     if odds_ratio:
-        table.columns[4].width=Inches(.5)
+        table.columns[4].width=Inches(1.5)
 
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = 'Variable'
@@ -304,22 +304,26 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
                 row_cells[1].text = ""
                 row_cells[2].text = ""
                 row_cells[3].text = ""
-                if odds_ratio:
-                    row_cells[4].text = str(var_config[var]["odds_ratio"])
-
+                
                 # row_cells[0].paragraphs[0].runs[0].font.underline = True
 
                 var_options = df[var].dropna().unique()
-                print(var, var_options)        
+                ref_val = var_config[var]["ref_val"]
+                if ref_val in var_options:
+                    var_options.remove(ref_val)
+                    var_options.insert(0, ref_val)
+                
                 for i in range(len(var_options)):
                     row_cells = table.add_row().cells
                     row_cells[0].text = f"      {var_options[i]}"  
                     row_cells[1].text = str(var_config[var][f"group1_subgroup{i}"])
                     row_cells[2].text = str(var_config[var][f"group2_subgroup{i}"])
-                    if i == 0:
+                    if var_options[i] == var_config[var]["ref_val"]:
                         row_cells[3].text = str(var_config[var]["p_value"])
                     else:
                         row_cells[3].text = "-"
+                    if var_options[i] == var_config[var]["ref_val"] and odds_ratio:
+                        row_cells[4].text = str(var_config[var]["odds_ratio"])
 
                     row_cells[0].paragraphs[0].runs[0].font.italic = True
 
