@@ -642,8 +642,8 @@ def server(input, output, session):
                 ),
                 ui.input_select(
                     f"ref_val_{col}",
-                    "Reference Values",
-                    df[col].unique().tolist().sort(),
+                    "Reference Value (For Odds Ratio of Dichotomous Variables)",
+                    df[col].unique().tolist(),
                 ),
                 class_="draggable-item",
                 id=f"{subheading_key}_{col}"
@@ -830,7 +830,9 @@ def server(input, output, session):
 
                 var_config.set(updated_config)
 
-                ui.notification_show("✅ Calculation complete! File ready to download", duration=60, type="message")
+                print(var_config)
+
+                ui.notification_show("✅ Calculation complete! File ready to download", duration=5, type="message")
         except:
             return
 
