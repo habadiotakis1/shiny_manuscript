@@ -122,6 +122,10 @@ def compute_odds_ratio_between_groups(group1, group2, reference_value):
     d = (group2_binary == 0).sum()
 
     table = [[a, b], [c, d]]
+    
+    print(group1_binary, group2_binary)
+    print("Ref Value: ", reference_value )
+    print(table)
 
     # Ensure valid 2x2 table
     if any(v == 0 for row in table for v in row):
