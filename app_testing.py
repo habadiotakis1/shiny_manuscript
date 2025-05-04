@@ -307,7 +307,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
                 
                 # row_cells[0].paragraphs[0].runs[0].font.underline = True
 
-                var_options = df[var].dropna().unique()
+                var_options = df[var].dropna().unique().tolist()
                 ref_val = var_config[var]["ref_val"]
                 if ref_val in var_options:
                     var_options.remove(ref_val)
