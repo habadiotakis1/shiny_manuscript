@@ -542,6 +542,7 @@ def server(input, output, session):
                     "name": col, 
                     "subheading": "subheading_1",
                     "position": default_position,
+                    "ref_val": None,
                 } for col in df.columns})
 
             ui.update_selectize(  
