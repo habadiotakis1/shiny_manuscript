@@ -462,7 +462,7 @@ app_ui = ui.page_fluid(
     ui.layout_columns(    
         ui.card(ui.tags.strong("Categorical (Y/N): "), "Fisher's Exact Test", ui.tags.em("ex: Smoking, Diabetes")),
         ui.card(ui.tags.strong("Categorical (Dichotomous): "), "Fisher's Exact Test", ui.tags.em("ex: Sex")),
-        ui.card(ui.tags.strong("Categorical (Multinomial): "), "Chi2", ui.tags.em("ex: Race")),
+        ui.card(ui.tags.strong("Categorical (Multinomial): "), "\u03C72 test", ui.tags.em("ex: Race")),
         ui.card(ui.tags.strong("Ratio Continuous: "), "T-Test", ui.tags.em("ex: Age, GFR")),
         ui.card(ui.tags.strong("Ordinal Discrete: "), "Wilcoxon", ui.tags.em("ex: GCS, Tumor Grade")),
         ),
