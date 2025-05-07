@@ -8,10 +8,12 @@ from io import StringIO
 import re
 import numpy as np
 from scipy import stats
+from statsmodels.stats.contingency_tables import Table2x2
 from docx import Document
 from docx.shared import Pt, Cm, Inches
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+# from fisher import pvalue_nway
 import pickle
 import json
 
@@ -69,6 +71,7 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
     elif test_type == 'fisher-freeman-halton': # UPDATE
         contingency_table = pd.crosstab(df[var_name], df[group_var])
         _, p_value, _, _ = stats.chi2_contingency(contingency_table, lambda_="log-likelihood")        
+        # p_value = pvalue_nway(contingency_table.values).two_tail
     elif test_type == "chi2":
         contingency_table = pd.crosstab(df[var_name], df[group_var])
         _, p_value, _, _ = stats.chi2_contingency(contingency_table)
@@ -89,6 +92,53 @@ def run_statistical_test(df, group_var, var_type, var_name, decimal_places):
 
     return p_value
 
+def compute_odds_ratio_between_groups(group1, group2, reference_value):
+    """
+    Calculates odds ratio and 95% CI between two groups for a binary categorical variable.
+
+    Parameters:
+    - group1: pd.Series of exposure variable values for group 1 (e.g., var_name from df[group_var] == Group1)
+    - group2: pd.Series of exposure variable values for group 2
+    - reference_value: The reference value (default "No")
+
+    Returns:
+    - String in format "OR [low–high]" or "undefined" if the table is invalid
+    """
+    # Drop NA
+    group1 = group1.dropna().astype(str)
+    group2 = group2.dropna().astype(str)
+
+    # Convert to binary: 0 = reference, 1 = not reference
+    group1_binary = (group1 != reference_value).astype(int)
+    group2_binary = (group2 != reference_value).astype(int)
+
+    # Build 2x2 contingency table:
+    #         | not reference (1) | reference (0)
+    # group1 |        a          |      b
+    # group2 |        c          |      d
+    a = (group1_binary == 1).sum()
+    b = (group1_binary == 0).sum()
+    c = (group2_binary == 1).sum()
+    d = (group2_binary == 0).sum()
+
+    table = [[a, b], [c, d]]
+    
+    print(group1_binary, group2_binary)
+    print("Ref Value: ", reference_value )
+    print(table)
+
+    # Ensure valid 2x2 table
+    if any(v == 0 for row in table for v in row):
+        return "undefined"
+
+    try:
+        ct = Table2x2(table)
+        or_value = ct.oddsratio
+        ci_low, ci_high = ct.oddsratio_confint()
+        return f"{or_value:.2f} [{ci_low:.2f}–{ci_high:.2f}]"
+    except Exception as e:
+        return f"error: {str(e)}"
+
 # Function to perform aggregation analysis based on the variable type
 def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places, output_format, col_var_config):
     print("PERFORM AGG ANALYSIS", group_var, var_type, var_name, df[var_name].dropna().unique(), decimal_places, output_format, col_var_config)
@@ -105,9 +155,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     for val in yes_values:
         if val in var_options:
             yn_var=val
-    
-    print("HERE")
-    
+        
     group1 = df[df[group_var] == groups[0]][var_name].dropna()
     group2 = df[df[group_var] == groups[1]][var_name].dropna()
 
@@ -129,6 +177,8 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
         else:
             col_var_config['group1'] = str(round(group1_sum / group1_total * 100, decimal_places)) + "% (" + str(group1_sum) + ")"
             col_var_config['group2'] = str(round(group2_sum / group2_total * 100, decimal_places)) + "% (" + str(group2_sum) + ")"
+
+        col_var_config['odds_ratio'] = compute_odds_ratio_between_groups(group1, group2, reference_value=col_var_config['ref_val'])
         
     elif var_type == "Categorical (Dichotomous)" or var_type == "Categorical (Multinomial)":
         print(var_options)
@@ -142,6 +192,8 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
             else:
                 col_var_config[f'group1_subgroup{i}'] = str(round(group1_sum / group1_total * 100, decimal_places)) + "% (" + str(group1_sum) + ")"
                 col_var_config[f'group2_subgroup{i}'] = str(round(group2_sum / group2_total * 100, decimal_places)) + "% (" + str(group2_sum) + ")"
+            
+            col_var_config['odds_ratio'] = compute_odds_ratio_between_groups(group1, group2, reference_value=col_var_config['ref_val'])
 
     elif var_type == "Ratio Continuous":
         # Aggregate: Mean and Standard Deviation
@@ -167,22 +219,35 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     return col_var_config
 
 # Function to create Word table from var_config
-def create_word_table(df,var_config, group_var, subheadings, subheading_names, table_name):
+def create_word_table(df,var_config, group_var, subheadings, subheading_names, table_name, odds_ratio, output_format):
+    if odds_ratio == 'Yes':
+        odds_ratio = True
+    else:
+        odds_ratio = False
+
     # Create a new Word Document
     doc = Document()
 
     # Create the table with columns for Variable, Group 1, Group 2, P-Value
-    table = doc.add_table(rows=1, cols=4)
-    table.columns[0].width=Inches(3.5)
+    if odds_ratio:
+        table = doc.add_table(rows=1, cols=5)
+    else:
+        table = doc.add_table(rows=1, cols=4)
+    table.columns[0].width=Inches(3)
     table.columns[1].width=Inches(1.5)
     table.columns[2].width=Inches(1.5)
     table.columns[3].width=Inches(.5)
+    if odds_ratio:
+        table.columns[4].width=Inches(1.5)
 
     hdr_cells = table.rows[0].cells
     hdr_cells[0].text = 'Variable'
     hdr_cells[1].text = f'{df[group_var].unique()[0]}'
     hdr_cells[2].text = f'{df[group_var].unique()[1]}'
     hdr_cells[3].text = 'P-Value'
+    if odds_ratio:
+        hdr_cells[4].text='Odds Ratio'
+
     
     for row in hdr_cells:
         row.paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
@@ -194,6 +259,9 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
     grp_cells[1].text = '(n= ' + str(group1_size) + ")"
     grp_cells[2].text = '(n= ' + str(group2_size) + ")"
     grp_cells[3].text = ''
+    if odds_ratio:
+        grp_cells[4].text = ''
+
 
     # Loop through subheadings
     for sub in subheadings:
@@ -205,6 +273,8 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
         row_cells[1].text = ''  # Leave empty for Group 1
         row_cells[2].text = ''  # Leave empty for Group 2
         row_cells[3].text = ''  # Leave empty for P-Value
+        if odds_ratio:
+            row_cells[4].text = ''  # Leave empty for Odds Ratio
 
         row_cells[0].paragraphs[0].runs[0].font.bold = True  # Bold formatting for the subheading row
         
@@ -225,6 +295,8 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
                 row_cells[1].text = str(var_config[var]["group1"])
                 row_cells[2].text = str(var_config[var]["group2"])
                 row_cells[3].text = str(var_config[var]["p_value"])
+                if odds_ratio:
+                    row_cells[4].text = str(var_config[var]["odds_ratio"])
 
             elif var_type == "Categorical (Dichotomous)":
                 row_cells = table.add_row().cells
@@ -232,20 +304,26 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
                 row_cells[1].text = ""
                 row_cells[2].text = ""
                 row_cells[3].text = ""
-
+                
                 # row_cells[0].paragraphs[0].runs[0].font.underline = True
 
-                var_options = df[var].dropna().unique()
-                print(var, var_options)        
+                var_options = df[var].dropna().unique().tolist()
+                ref_val = var_config[var]["ref_val"]
+                if ref_val in var_options:
+                    var_options.remove(ref_val)
+                    var_options.insert(0, ref_val)
+                
                 for i in range(len(var_options)):
                     row_cells = table.add_row().cells
                     row_cells[0].text = f"      {var_options[i]}"  
                     row_cells[1].text = str(var_config[var][f"group1_subgroup{i}"])
                     row_cells[2].text = str(var_config[var][f"group2_subgroup{i}"])
-                    if i == 0:
+                    if var_options[i] == var_config[var]["ref_val"]:
                         row_cells[3].text = str(var_config[var]["p_value"])
                     else:
                         row_cells[3].text = "-"
+                    if var_options[i] == var_config[var]["ref_val"] and odds_ratio:
+                        row_cells[4].text = str(var_config[var]["odds_ratio"])
 
                     row_cells[0].paragraphs[0].runs[0].font.italic = True
 
@@ -277,7 +355,37 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
                 row_cells[1].text = str(var_config[var]["group1"])
                 row_cells[2].text = str(var_config[var]["group2"])
                 row_cells[3].text = str(var_config[var]["p_value"])
-                
+
+    doc.add_page_break()  # Add a page break after the table
+
+    # Add summary of statistical tests
+    present_types = set(config["type"] for config in var_config.values())
+    sentences = []
+
+    if any(t in present_types for t in ["Categorical (Y/N)", "Categorical (Dichotomous)"]):
+        test_name = "Fisher's exact test" #update when alternative stat test is added
+        sentences.append(
+            f"All dichotomous/binary variables were analyzed with {test_name} and are displayed as {output_format}."
+        )
+
+    if "Categorical (Multinomial)" in present_types:
+        test_name = "Fisher-Freeman-Halton test" #update when alternative stat test is added
+        sentences.append(
+            f"All multinomial variables were analyzed with {test_name} and are displayed as {output_format}."
+        )
+
+    if "Ordinal Discrete" in present_types:
+        sentences.append(
+            "Ordinal discrete variables were analyzed using a Wilcoxon rank sum test and are displayed as median [interquartile range]."
+        )
+
+    if "Ratio Continuous" in present_types:
+        sentences.append(
+            "For continuous variables, normality tests were applied using the Shapiro-Wilk test. If a variable failed the normality test (Shapiro-Wilk p < 0.05), then a non-parametric test (Mann-Whitney U test) was used for analysis. If a variable passed the normality test (Shapiro-Wilk p > 0.05), then a student's t-test was performed. All continuous variables are analyzed via student's t-test and are displayed as mean ± standard deviation."
+        )
+
+    var_config_summary = " ".join(sentences)
+    doc.add_paragraph(var_config_summary)  
 
     # Save the document to a file
     table_name = re.sub(r'\W+', '', table_name.strip())
@@ -342,10 +450,11 @@ app_ui = ui.page_fluid(
         ui.card(ui.input_numeric("decimals_table", "Table - # Decimals", 2, min=0, max=5)),
         ui.card(ui.input_numeric("decimals_pvalue", "P-Val - # Decimals", 3, min=0, max=5)),
         ui.card(ui.input_radio_buttons("output_format", "Output Format", ["n (%)", "% (n)"])),
-        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values ", ["No (Default)", "Yes"])),
+        ui.card(ui.input_radio_buttons("show_odds_ratio", "Show Odds Ratio", ["No (Default)", "Yes"])),
+        ui.card(ui.input_radio_buttons("remove_blanks", "Remove Unknown Values", ["No (Default)", "Yes"])),
         # ui.card(ui.input_radio_buttons("remove_blanks", ui.tags.span("Remove Unknown Values ",ui.tooltip(ui.icon("info-circle"),"Customize how each variable appears in the final table.")), ["No (Default)", "Yes"]),
         
-        col_widths= (2,2,2,6)
+        col_widths= (2,2,2,2,4)
         ),
 
     ui.h5("Step 4: Customize Table & Rows"),
@@ -390,6 +499,9 @@ app_ui = ui.page_fluid(
 ######################### Shiny App Server #####################################
 ################################################################################
 def server(input, output, session):
+    sheet_names = reactive.Value([])
+    excel_trigger = reactive.Value(False)
+
     data = reactive.Value({})  # Store uploaded data
     cleaned_data = reactive.Value({})  # Store cleaned data
     selected_columns = reactive.Value([])  # Store selected columns
@@ -409,9 +521,6 @@ def server(input, output, session):
         "subheading_4": reactive.Value("subheading_4")
     } 
 
-    decimal_places = reactive.Value(None)
-    output_format = reactive.Value(None)
-
     @output
     @render.ui
     def select_columns():
@@ -420,7 +529,19 @@ def server(input, output, session):
                 multiple=True,  
                 width="100%",
             )  
-    
+       
+    # def show_modal_on_excel():
+    #     if len(sheet_names.get()) > 1 and excel_trigger.get():
+    #         ui.modal_show(
+    #             ui.modal(
+    #                 ui.input_select("selected_sheet", "Select a Sheet", choices=sheet_names.get()),
+    #                 title="Choose a Sheet",
+    #                 easy_close=False,
+    #                 footer=ui.modal_button("Confirm"),
+    #             )
+    #         )
+    #         excel_trigger.set(False)  # Reset the trigger after showing the modal
+
     @reactive.effect
     def _():
         if input.data_file():
@@ -430,7 +551,16 @@ def server(input, output, session):
             if ext == ".csv":
                 df = pd.read_csv(file_info["datapath"])  # Reads header row by default
             elif ext == ".xlsx":
-                df = pd.read_excel(file_info["datapath"])
+                with open(file_info["datapath"], "rb") as f:
+                    xls = pd.ExcelFile(f)
+                    sheet_names.set(xls.sheet_names)
+                    print("Sheet Names", sheet_names.get)
+                
+                # excel_trigger.set(True)
+                # show_modal_on_excel()
+
+                selected = input.selected_sheet() or sheet_names.get()[0]  # Default to the first sheet if none selected
+                df = pd.read_excel(file_info["datapath"], sheet_name=selected)
 
             # Clean column names: strip and remove non-alphanumeric chars
             clean_columns = [re.sub(r'\W+', '', col.strip()) for col in df.columns]
@@ -453,6 +583,7 @@ def server(input, output, session):
                     "name": col, 
                     "subheading": "subheading_1",
                     "position": default_position,
+                    "ref_val": None,
                 } for col in df.columns})
 
             ui.update_selectize(  
@@ -550,7 +681,11 @@ def server(input, output, session):
                     list(range(1,31)),
                     selected=var_config.get()[col]["position"],
                 ),
-                # col_widths=(3, 3, 3, 3),
+                ui.input_select(
+                    f"ref_val_{col}",
+                    "Reference Value (For Odds Ratio of Dichotomous Variables)",
+                    df[col].unique().tolist(),
+                ),
                 class_="draggable-item",
                 id=f"{subheading_key}_{col}"
             )
@@ -653,6 +788,7 @@ def server(input, output, session):
             updated_config[col]["name"] = input[f"name_{col}"]() 
             updated_config[col]["position"] = int(input[f"position_{col}"]())
             updated_config[col]["subheading"] = input[f"subheading_{col}"]() 
+            updated_config[col]["ref_val"] = input[f"ref_val_{col}"]()
             print("-                           to...", updated_config[col])
             
             # If the subheading has changed, move the column to the new subheading
@@ -736,7 +872,9 @@ def server(input, output, session):
 
                 var_config.set(updated_config)
 
-                ui.notification_show("✅ Calculation complete! File ready to download", duration=60, type="message")
+                print(var_config)
+
+                ui.notification_show("✅ Calculation complete! File ready to download", duration=5, type="message")
         except:
             return
 
@@ -755,7 +893,7 @@ def server(input, output, session):
             return None  # Return None if no data is available
         
         # Generate the Word table document
-        doc_filename = create_word_table(df, updated_config, group_var.get(), subheadings, subheading_names, input.table_name())
+        doc_filename = create_word_table(df, updated_config, group_var.get(), subheadings, subheading_names, input.table_name(), input.show_odds_ratio(), input.output_format())  
         
         return doc_filename  # Return the Word document file for download
 
