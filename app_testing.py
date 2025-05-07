@@ -429,15 +429,13 @@ app_ui = ui.page_fluid(
             }
             .step-header {
                 font-weight: bold;
-                margin-top: 30px;
+                margin-top: 50px;
                 margin-bottom: 10px;
             }
         """),
 
-    ui.div("✨ Shiny Manuscript Table Generator ✨", class_="section-title"),
+    ui.panel_title("✨ Shiny Manuscript Table Generator ✨", class_="section-title"),
 
-    ui.panel_title("✨ Shiny Manuscript Table Generator ✨"),
-    
     ui.layout_columns(
         ui.h5("Step 1: Upload File", class_="step-header"),
         ui.layout_columns(
