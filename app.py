@@ -425,7 +425,7 @@ app_ui = ui.page_fluid(
                 text-align: center;
                 font-size: 36px;
                 margin-top: 20px;
-                margin-bottom: 20px;
+                margin-bottom: 30px;
             }
             .step-header {
                 font-weight: bold;
@@ -482,15 +482,19 @@ app_ui = ui.page_fluid(
 
     # Subheadings
     ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"), 
+    # ui.div("subheading_1", "Subheading 1"),
     ui.output_ui("var_settings_1"),
 
     ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name"), 
+    # ui.div("subheading_2", "Subheading 2"),
     ui.output_ui("var_settings_2"),
     
     ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name"), 
+    # ui.div("subheading_3", "Subheading 3"),
     ui.output_ui("var_settings_3"),
     
     ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"), 
+    # ui.div("subheading_4", "Subheading 4"),
     ui.output_ui("var_settings_4"),
     
     # Variable Selection UI (dynamically generated)
@@ -788,11 +792,7 @@ def server(input, output, session):
             old_subheading = var_config.get()[col]["subheading"]
             
             new_subheading_mapped = next((k for k, v in subheading_names.items() if v() == new_subheading), None)
-            old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), None)
-
-            # old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), None)
-            # subheading_names[old_subheading_mapped].set(new_subheading)
-            # new_subheading_mapped = next((k for k, v in subheading_names.items() if v() == new_subheading), None)
+            old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), "Subheading 1")
 
             print(new_subheading_mapped, old_subheading_mapped)
             
@@ -827,17 +827,19 @@ def server(input, output, session):
 
     @reactive.effect
     def update_subheading_names():
-        for key in subheadings.keys():  # subheadings = {"subheading_1": ..., etc.}
+        for key in subheadings.keys(): # subheadings = {"subheading_1": ..., etc.}
+            # input.get returns a Value instance; call .is_valid() and .__call__() to get safely
             try:
-                text_input = input[key]()
-                print("Subheading name:", key, "Text input:", text_input)
-                if text_input and text_input.strip() != "":
-                    subheading_names[key].set(text_input.strip())
-                    print("Subheading names updated:", key, text_input.strip())
-            except:
-                pass
-            
-        
+                input_val = input.get(key)
+                if input_val is not None and input_val.is_valid():
+                    text_input = input_val()
+                    print("Subheading name:", key, "Text input:", text_input)
+                    if text_input and text_input.strip() != "":
+                        subheading_names[key].set(text_input.strip())
+                        print("✅ Subheading name updated:", key, "→", text_input.strip())
+            except Exception as e:
+                print(f"⚠️ Failed to update subheading {key}: {e}")
+                continue        
 
 
     # Perform statistical analysis when the "Calculate" button is clicked
