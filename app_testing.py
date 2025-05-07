@@ -432,7 +432,7 @@ app_ui = ui.page_fluid(
                 margin-top: 50px;
                 margin-bottom: 10px;
             }
-            .card {
+            .variable-card {
                 border: 2px solid gray !important;
                 border-radius: 8px;
             }
@@ -708,8 +708,8 @@ def server(input, output, session):
                     "Reference Value (For Odds Ratio of Dichotomous Variables)",
                     df[col].unique().tolist(),
                 ),
-                class_="draggable-item",
-                id=f"{subheading_key}_{col}"
+                class_="variable-card",
+                id=f"{subheading_key}_{col}",
             )
             for col in columns
         ],
