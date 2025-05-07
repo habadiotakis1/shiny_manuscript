@@ -481,20 +481,20 @@ app_ui = ui.page_fluid(
         ),
 
     # Subheadings
-    # ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"), 
-    ui.div("subheading_1", "Subheading 1"),
+    ui.input_text("subheading_1", "Subheading 1", placeholder="Enter subheading 1 name"), 
+    # ui.div("subheading_1", "Subheading 1"),
     ui.output_ui("var_settings_1"),
 
-    # ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name"), 
-    ui.div("subheading_2", "Subheading 2"),
+    ui.input_text("subheading_2", "Subheading 2", placeholder="Enter subheading 2 name"), 
+    # ui.div("subheading_2", "Subheading 2"),
     ui.output_ui("var_settings_2"),
     
-    # ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name"), 
-    ui.div("subheading_3", "Subheading 3"),
+    ui.input_text("subheading_3", "Subheading 3", placeholder="Enter subheading 3 name"), 
+    # ui.div("subheading_3", "Subheading 3"),
     ui.output_ui("var_settings_3"),
     
-    # ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"), 
-    ui.div("subheading_4", "Subheading 4"),
+    ui.input_text("subheading_4", "Subheading 4", placeholder="Enter subheading 4 name"), 
+    # ui.div("subheading_4", "Subheading 4"),
     ui.output_ui("var_settings_4"),
     
     # Variable Selection UI (dynamically generated)
