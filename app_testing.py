@@ -219,7 +219,7 @@ def perform_aggregate_analysis(df, group_var, var_type, var_name, decimal_places
     return col_var_config
 
 # Function to create Word table from var_config
-def create_word_table(df,var_config, group_var, subheadings, subheading_names, table_name, odds_ratio):
+def create_word_table(df,var_config, group_var, subheadings, subheading_names, table_name, odds_ratio, output_format):
     if odds_ratio == 'Yes':
         odds_ratio = True
     else:
@@ -355,7 +355,37 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
                 row_cells[1].text = str(var_config[var]["group1"])
                 row_cells[2].text = str(var_config[var]["group2"])
                 row_cells[3].text = str(var_config[var]["p_value"])
-                
+
+    doc.add_page_break()  # Add a page break after the table
+
+    # Add summary of statistical tests
+    present_types = set(config["var_type"] for config in var_config.values())
+    sentences = []
+
+    if any(t in present_types for t in ["Categorical (Y/N)", "Categorical (Dichotomous)"]):
+        test_name = "Fisher's exact test" #update when alternative stat test is added
+        sentences.append(
+            f"All dichotomous/binary variables were analyzed with {test_name} and are displayed as {output_format}."
+        )
+
+    if "Categorical (Multinomial)" in present_types:
+        test_name = "Fisher-Freeman-Halton test" #update when alternative stat test is added
+        sentences.append(
+            f"All multinomial variables were analyzed with {test_name} and are displayed as {output_format}."
+        )
+
+    if "Ordinal Discrete" in present_types:
+        sentences.append(
+            "Ordinal discrete variables were analyzed using a Wilcoxon rank sum test and are displayed as median [interquartile range]."
+        )
+
+    if "Ratio Continuous" in present_types:
+        sentences.append(
+            "For continuous variables, normality tests were applied using the Shapiro-Wilk test. If a variable failed the normality test (Shapiro-Wilk p < 0.05), then a non-parametric test (Mann-Whitney U test) was used for analysis. If a variable passed the normality test (Shapiro-Wilk p > 0.05), then a student's t-test was performed. All continuous variables are analyzed via student's t-test and are displayed as mean ± standard deviation."
+        )
+
+    var_config_summary = " ".join(sentences)
+    doc.add_paragraph(var_config_summary)  
 
     # Save the document to a file
     table_name = re.sub(r'\W+', '', table_name.strip())
@@ -863,7 +893,7 @@ def server(input, output, session):
             return None  # Return None if no data is available
         
         # Generate the Word table document
-        doc_filename = create_word_table(df, updated_config, group_var.get(), subheadings, subheading_names, input.table_name(), input.show_odds_ratio())
+        doc_filename = create_word_table(df, updated_config, group_var.get(), subheadings, subheading_names, input.table_name(), input.show_odds_ratio(), input.output_format())  
         
         return doc_filename  # Return the Word document file for download
 
