@@ -418,22 +418,35 @@ def load_config(filename="config.pkl"):
 ######################### Shiny App Layout #####################################
 ################################################################################
 app_ui = ui.page_fluid(
-    ui.panel_title("✨ Shiny Manuscript Table Generator ✨"),
-    
+    # Custom CSS for styling
+    ui.tags.style("""
+            .section-title {
+                font-weight: bold;
+                text-align: center;
+                font-size: 36px;
+                margin-top: 20px;
+                margin-bottom: 20px;
+            }
+            .step-header {
+                font-weight: bold;
+                margin-top: 50px;
+                margin-bottom: 10px;
+            }
+        """),
+
+    ui.div("✨ TernTables ✨", class_="section-title"),
+
+    ui.h5("Step 1: Upload File", class_="step-header"),
     ui.layout_columns(
-        ui.h5("Step 1: Upload File"),
-        ui.layout_columns(
-            ui.card(".csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file", ui.input_file("data_file", "", accept=[".csv", ".xlsx"]), width="100%"),
-            ui.card("Example Output File", ui.download_button("download_example", "NOT IMPLEMENTED")),
-            col_widths=(8, 4),
-            ),
-        col_widths= 12,
+        ui.card(".csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file", ui.input_file("data_file", "", accept=[".csv", ".xlsx"]), width="100%"),
+        ui.card("Example Output File", ui.download_button("download_example", "NOT IMPLEMENTED")),
+        col_widths=(8, 4),
         ),
-    
-    ui.h5("Step 2: Select Variables"),
+        
+    ui.h5("Step 2: Select Variables", class_="step-header"),
     ui.output_ui('select_columns'),
     
-    ui.h5("Step 3: Table Options"),
+    ui.h5("Step 3: Table Options", class_="step-header"),
 
     ui.layout_columns(    
         # Table Name
@@ -457,12 +470,12 @@ app_ui = ui.page_fluid(
         col_widths= (2,2,2,2,4)
         ),
 
-    ui.h5("Step 4: Customize Table & Rows"),
+    ui.h5("Step 4: Customize Table & Rows", class_="step-header"),
     ui.p("Update variable names, type, subheading and position. Variables that have the same position value will be ordered alphabetically. Variable types include:"),
     ui.layout_columns(    
         ui.card(ui.tags.strong("Categorical (Y/N): "), "Fisher's Exact Test", ui.tags.em("ex: Smoking, Diabetes")),
         ui.card(ui.tags.strong("Categorical (Dichotomous): "), "Fisher's Exact Test", ui.tags.em("ex: Sex")),
-        ui.card(ui.tags.strong("Categorical (Multinomial): "), "Chi2", ui.tags.em("ex: Race")),
+        ui.card(ui.tags.strong("Categorical (Multinomial): "), "\u03C72 test", ui.tags.em("ex: Race")),
         ui.card(ui.tags.strong("Ratio Continuous: "), "T-Test", ui.tags.em("ex: Age, GFR")),
         ui.card(ui.tags.strong("Ordinal Discrete: "), "Wilcoxon", ui.tags.em("ex: GCS, Tumor Grade")),
         ),
