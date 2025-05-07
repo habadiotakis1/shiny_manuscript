@@ -437,15 +437,12 @@ app_ui = ui.page_fluid(
     ui.div("✨ Shiny Manuscript Table Generator ✨", class_="section-title"),
 
     ui.h5("Step 1: Upload File", class_="step-header"),
-    # ui.layout_columns(
-        ui.layout_columns(
-            ui.card(".csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file", ui.input_file("data_file", "", accept=[".csv", ".xlsx"]), width="100%"),
-            ui.card("Example Output File", ui.download_button("download_example", "NOT IMPLEMENTED")),
-            col_widths=(8, 4),
-            ),
-        # col_widths= 12,
-        # ),
-    
+    ui.layout_columns(
+        ui.card(".csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file", ui.input_file("data_file", "", accept=[".csv", ".xlsx"]), width="100%"),
+        ui.card("Example Output File", ui.download_button("download_example", "NOT IMPLEMENTED")),
+        col_widths=(8, 4),
+        ),
+        
     ui.h5("Step 2: Select Variables", class_="step-header"),
     ui.output_ui('select_columns'),
     
