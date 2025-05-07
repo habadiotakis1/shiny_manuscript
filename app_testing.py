@@ -794,10 +794,6 @@ def server(input, output, session):
             new_subheading_mapped = next((k for k, v in subheading_names.items() if v() == new_subheading), None)
             old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), "Subheading 1")
 
-            # old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), None)
-            # subheading_names[old_subheading_mapped].set(new_subheading)
-            # new_subheading_mapped = next((k for k, v in subheading_names.items() if v() == new_subheading), None)
-
             print(new_subheading_mapped, old_subheading_mapped)
             
             print("❗️ Updating configuration from...", updated_config[col])
@@ -831,17 +827,19 @@ def server(input, output, session):
 
     @reactive.effect
     def update_subheading_names():
-        for key in subheadings.keys():  # subheadings = {"subheading_1": ..., etc.}
+        for key in subheadings.keys(): # subheadings = {"subheading_1": ..., etc.}
+            # input.get returns a Value instance; call .is_valid() and .__call__() to get safely
             try:
-                text_input = input[key]()
-                print("Subheading name:", key, "Text input:", text_input)
-                if text_input and text_input.strip() != "":
-                    subheading_names[key].set(text_input.strip())
-                    print("Subheading names updated:", key, text_input.strip())
-            except:
-                pass
-            
-        
+                input_val = input.get(key)
+                if input_val is not None and input_val.is_valid():
+                    text_input = input_val()
+                    print("Subheading name:", key, "Text input:", text_input)
+                    if text_input and text_input.strip() != "":
+                        subheading_names[key].set(text_input.strip())
+                        print("✅ Subheading name updated:", key, "→", text_input.strip())
+            except Exception as e:
+                print(f"⚠️ Failed to update subheading {key}: {e}")
+                continue        
 
 
     # Perform statistical analysis when the "Calculate" button is clicked
