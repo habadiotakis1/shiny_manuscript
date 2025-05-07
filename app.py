@@ -432,6 +432,11 @@ app_ui = ui.page_fluid(
                 margin-top: 50px;
                 margin-bottom: 10px;
             }
+            .variable-card {
+                border: 2px solid gray !important;
+                border-radius: 8px;
+            }
+            input[type = 'text'] { font-weight: bold; }
         """),
 
     ui.div("✨ TernTables ✨", class_="section-title"),
@@ -678,7 +683,7 @@ def server(input, output, session):
                 ui.input_text(
                     f"name_{col}",
                     "Variable Name",
-                    value=var_config.get()[col]["name"],
+                    value=var_config.get()[col]["name"]
                 ),
                 ui.input_select(
                     f"var_type_{col}",
@@ -703,8 +708,8 @@ def server(input, output, session):
                     "Reference Value (For Odds Ratio of Dichotomous Variables)",
                     df[col].unique().tolist(),
                 ),
-                class_="draggable-item",
-                id=f"{subheading_key}_{col}"
+                class_="variable-card",
+                id=f"{subheading_key}_{col}",
             )
             for col in columns
         ],
