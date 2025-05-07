@@ -432,6 +432,12 @@ app_ui = ui.page_fluid(
                 margin-top: 50px;
                 margin-bottom: 10px;
             }
+            .card {
+                border: 2px solid black !important;
+                border-radius: 8px;
+                box-shadow: none; /* optional: remove default shadow */
+            }
+            input[type = 'text'] { font-weight: bold; }
         """),
 
     ui.div("✨ TernTables ✨", class_="section-title"),
@@ -678,7 +684,7 @@ def server(input, output, session):
                 ui.input_text(
                     f"name_{col}",
                     "Variable Name",
-                    value=var_config.get()[col]["name"],
+                    value=var_config.get()[col]["name"]
                 ),
                 ui.input_select(
                     f"var_type_{col}",
