@@ -418,10 +418,28 @@ def load_config(filename="config.pkl"):
 ######################### Shiny App Layout #####################################
 ################################################################################
 app_ui = ui.page_fluid(
+    # Custom CSS for styling
+    ui.tags.style("""
+            .section-title {
+                font-weight: bold;
+                text-align: center;
+                font-size: 24px;
+                margin-top: 20px;
+                margin-bottom: 30px;
+            }
+            .step-header {
+                font-weight: bold;
+                margin-top: 30px;
+                margin-bottom: 10px;
+            }
+        """),
+
+    ui.div("✨ Shiny Manuscript Table Generator ✨", class_="section-title"),
+
     ui.panel_title("✨ Shiny Manuscript Table Generator ✨"),
     
     ui.layout_columns(
-        ui.h5("Step 1: Upload File"),
+        ui.h5("Step 1: Upload File", class_="step-header"),
         ui.layout_columns(
             ui.card(".csv & .xlsx files are accepted. Please refresh page upon re-uploading a new file", ui.input_file("data_file", "", accept=[".csv", ".xlsx"]), width="100%"),
             ui.card("Example Output File", ui.download_button("download_example", "NOT IMPLEMENTED")),
@@ -430,10 +448,10 @@ app_ui = ui.page_fluid(
         col_widths= 12,
         ),
     
-    ui.h5("Step 2: Select Variables"),
+    ui.h5("Step 2: Select Variables", class_="step-header"),
     ui.output_ui('select_columns'),
     
-    ui.h5("Step 3: Table Options"),
+    ui.h5("Step 3: Table Options", class_="step-header"),
 
     ui.layout_columns(    
         # Table Name
@@ -457,7 +475,7 @@ app_ui = ui.page_fluid(
         col_widths= (2,2,2,2,4)
         ),
 
-    ui.h5("Step 4: Customize Table & Rows"),
+    ui.h5("Step 4: Customize Table & Rows", class_="step-header"),
     ui.p("Update variable names, type, subheading and position. Variables that have the same position value will be ordered alphabetically. Variable types include:"),
     ui.layout_columns(    
         ui.card(ui.tags.strong("Categorical (Y/N): "), "Fisher's Exact Test", ui.tags.em("ex: Smoking, Diabetes")),
