@@ -359,7 +359,7 @@ def create_word_table(df,var_config, group_var, subheadings, subheading_names, t
     doc.add_page_break()  # Add a page break after the table
 
     # Add summary of statistical tests
-    present_types = set(config["var_type"] for config in var_config.values())
+    present_types = set(config["type"] for config in var_config.values())
     sentences = []
 
     if any(t in present_types for t in ["Categorical (Y/N)", "Categorical (Dichotomous)"]):
