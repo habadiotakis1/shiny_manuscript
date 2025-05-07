@@ -792,7 +792,7 @@ def server(input, output, session):
             old_subheading = var_config.get()[col]["subheading"]
             
             new_subheading_mapped = next((k for k, v in subheading_names.items() if v() == new_subheading), None)
-            old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), None)
+            old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), "Subheading 1")
 
             # old_subheading_mapped = next((k for k, v in subheading_names.items() if v() == old_subheading), None)
             # subheading_names[old_subheading_mapped].set(new_subheading)
