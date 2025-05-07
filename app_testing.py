@@ -433,9 +433,8 @@ app_ui = ui.page_fluid(
                 margin-bottom: 10px;
             }
             .card {
-                border: 2px solid black !important;
+                border: 2px solid gray !important;
                 border-radius: 8px;
-                box-shadow: none; /* optional: remove default shadow */
             }
             input[type = 'text'] { font-weight: bold; }
         """),
