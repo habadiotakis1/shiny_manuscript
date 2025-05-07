@@ -677,7 +677,7 @@ def server(input, output, session):
                 ui.p(", ".join(map(str, df[col].dropna().unique()[:5]))),
                 ui.input_text(
                     f"name_{col}",
-                    "Column Name",
+                    "Variable Name",
                     value=var_config.get()[col]["name"],
                 ),
                 ui.input_select(
